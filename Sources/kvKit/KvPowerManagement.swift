@@ -56,6 +56,7 @@ extension KvPowerManagement {
 
 
 
+        // TODO: Rename to init(reason:)
         fileprivate init?(with reason: String) {
             var assertionID: IOPMAssertionID = 0
 
@@ -118,6 +119,7 @@ extension KvPowerManagement {
 
 
 
+        // TODO: Rename to init(reason:)
         fileprivate init?(with reason: String) {
             self.reason = reason
 
