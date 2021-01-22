@@ -56,6 +56,7 @@ extension KvPowerManagement {
 
 
 
+        // TODO: Rename to init(reason:)
         fileprivate init?(with reason: String) {
             var assertionID: IOPMAssertionID = 0
 
@@ -110,28 +111,33 @@ extension KvPowerManagement {
                 }
             }
             didSet {
-                DispatchQueue.main.async {
-                    UIApplication.shared.isIdleTimerDisabled = count > 0
-                }
+                KvDebug.mainThreadCheck()
+
+                UIApplication.shared.isIdleTimerDisabled = count > 0
             }
         }
 
 
 
+        // TODO: Rename to init(reason:)
         fileprivate init?(with reason: String) {
-            SystemSleepPreventionToken.count += 1
-
             self.reason = reason
 
-            //print("\(self) was activated")
+            KvDispatchQueueKit.mainAsyncIfNeeded {
+                SystemSleepPreventionToken.count += 1
+
+                //print("\(self) was activated")
+            }
         }
 
 
 
         deinit {
-            SystemSleepPreventionToken.count -= 1
+            KvDispatchQueueKit.mainAsyncIfNeeded {
+                SystemSleepPreventionToken.count -= 1
 
-            //print("\(self) was deactivated")
+                //print("\(self) was deactivated")
+            }
         }
 
 
