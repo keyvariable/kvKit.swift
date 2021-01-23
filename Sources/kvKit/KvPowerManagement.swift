@@ -41,8 +41,16 @@ extension KvPowerManagement {
 
     #if os(macOS)
     /// - returns: A RAII token if succeeded or `nil` if error occurs.
+    public static func preventSystemSleep(reason: String) -> SystemSleepPreventionToken? {
+        SystemSleepPreventionToken(reason: reason)
+    }
+
+
+
+    /// - returns: A RAII token if succeeded or `nil` if error occurs.
+    @available(*, deprecated, renamed: "preventSystemSleep(reason:)")
     public static func preventSystemSleep(with reason: String) -> SystemSleepPreventionToken? {
-        SystemSleepPreventionToken(with: reason)
+        SystemSleepPreventionToken(reason: reason)
     }
 
 
@@ -56,8 +64,7 @@ extension KvPowerManagement {
 
 
 
-        // TODO: Rename to init(reason:)
-        fileprivate init?(with reason: String) {
+        fileprivate init?(reason: String) {
             var assertionID: IOPMAssertionID = 0
 
             let resultCode = IOPMAssertionCreateWithName(kIOPMAssertPreventUserIdleSystemSleep as CFString,
@@ -93,8 +100,16 @@ extension KvPowerManagement {
 
     #elseif os(iOS)
     /// - returns: A RAII token if succeeded or `nil` if error occurs.
+    public static func preventSystemSleep(reason: String) -> SystemSleepPreventionToken? {
+        SystemSleepPreventionToken(reason: reason)
+    }
+
+
+
+    /// - returns: A RAII token if succeeded or `nil` if error occurs.
+    @available(*, deprecated, renamed: "preventSystemSleep(reason:)")
     public static func preventSystemSleep(with reason: String) -> SystemSleepPreventionToken? {
-        SystemSleepPreventionToken(with: reason)
+        SystemSleepPreventionToken(reason: reason)
     }
 
 
@@ -119,8 +134,7 @@ extension KvPowerManagement {
 
 
 
-        // TODO: Rename to init(reason:)
-        fileprivate init?(with reason: String) {
+        fileprivate init?(reason: String) {
             self.reason = reason
 
             KvDispatchQueueKit.mainAsyncIfNeeded {

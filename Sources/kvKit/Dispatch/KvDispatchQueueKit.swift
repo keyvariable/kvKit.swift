@@ -29,14 +29,9 @@ public class KvDispatchQueueKit {
 
     /// Invokes *block* on the main thread synchronously if method is invoked on the main thread. Otherwise *block* is invoked on the main thread asynchronously.
     public static func mainAsyncIfNeeded(_ block: @escaping () -> Void) {
-        if Thread.isMainThread {
-            block()
-
-        } else {
-            DispatchQueue.main.async {
-                block()
-            }
-        }
+        Thread.isMainThread
+            ? block()
+            : DispatchQueue.main.async(execute: block)
     }
 
 
@@ -45,14 +40,9 @@ public class KvDispatchQueueKit {
     public static func globalAsyncIfNeeded(qos: DispatchQoS.QoSClass = .default, _ block: @escaping () -> Void) {
         let globalQueue = DispatchQueue.global(qos: qos)
 
-        if OperationQueue.current?.underlyingQueue === globalQueue {
-            block()
-
-        } else {
-            globalQueue.async {
-                block()
-            }
-        }
+        OperationQueue.current?.underlyingQueue === globalQueue
+            ? block()
+            : globalQueue.async(execute: block)
     }
 
 }
