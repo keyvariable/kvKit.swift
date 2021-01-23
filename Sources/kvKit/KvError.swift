@@ -65,7 +65,7 @@ extension KvError : Error {
 
 extension KvError {
 
-    /// - Returns: `self` for cascading.
+    /// - Returns: *self* for cascading.
     @discardableResult
     public func log() -> KvError {
         print("\(localizedDescription)")
@@ -81,7 +81,9 @@ extension KvError {
 
 extension KvError {
 
-    /// - Returns: `self` for cascading.
+    /// Executes *KvDebug.pause()* passing the receiver as first argument.
+    ///
+    /// - Returns: *self* for cascading.
     @discardableResult @inlinable
     public func debugPause() -> KvError {
         return KvDebug.pause(self, file, line)

@@ -106,7 +106,7 @@ public final class KvConsoleApplication {
 extension KvConsoleApplication {
 
     public static func main(with delegate: KvConsoleApplicationDelegate) {
-        KvDebug.mainThreadCheck()
+        KvDebug.mainThreadCheck("⚠️ KvConsoleApplication.main() must be invoked on main thread")
 
 
         KvThreadKit.locking(mutationLock) { () -> Void in
