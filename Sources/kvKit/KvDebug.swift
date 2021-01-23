@@ -184,12 +184,12 @@ extension KvDebug {
 
         public var wrappedValue: Value {
             get {
-                mainThreadCheck("⚠️ attempt to get property", file, line)
+                mainThreadCheck("⚠️ attempt to get value of property defined at \(file):\(line)", file, line)
 
                 return value
             }
             set {
-                mainThreadCheck("⚠️ Attempt to set property", file, line)
+                mainThreadCheck("⚠️ Attempt to set property defined at \(file):\(line)", file, line)
 
                 value = newValue
             }
