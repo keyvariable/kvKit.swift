@@ -33,6 +33,9 @@ import UIKit
 
 public class KvDebug {
 
+    /// Analog for *assert* providing ability to continue execution.
+    ///
+    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @inlinable
     public static func pause(_ reason: String, _ file: String = #file, _ line: Int = #line) {
         let message = "\(reason) | \(file):\(line)"
@@ -46,6 +49,15 @@ public class KvDebug {
 
 
 
+    /// Analog for *assert* providing ability to continue execution.
+    ///
+    /// - Returns: *code* passed an argument.
+    ///
+    /// - Note: It's a shortcut designed to be used like this:
+    ///
+    ///     `return KvDebug.pause(code: -1, "Unexpected input")`
+    ///
+    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @inlinable
     public static func pause<T>(code: T, _ reason: String, _ file: String = #file, _ line: Int = #line) -> T {
         pause(reason, file, line)
@@ -54,16 +66,17 @@ public class KvDebug {
 
 
 
+    /// Analog for *assert* providing ability to continue execution.
+    ///
+    /// - Returns: *error* passed an argument.
+    ///
+    /// - Note: It's a shortcut designed to be used like this:
+    ///
+    ///     `throw KvDebug.pause(KvError("Unexpected input"))`
+    ///
+    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @discardableResult @inlinable
     public static func pause<E: Error>(_ error: E, _ file: String = #file, _ line: Int = #line) -> E {
-        pause((error as? KvError)?.message ?? error.localizedDescription, file, line)
-        return error
-    }
-
-
-
-    @discardableResult @inlinable
-    public static func pause(_ error: Error, _ file: String = #file, _ line: Int = #line) -> Error {
         pause((error as? KvError)?.message ?? error.localizedDescription, file, line)
         return error
     }
@@ -123,13 +136,65 @@ extension KvDebug {
 
 extension KvDebug {
 
+    /// Executes *KvDebug.pause()* when invoked when *Thread.isMainThread* returns *false*.
     @inlinable
-    public static func mainThreadCheck() {
+    public static func mainThreadCheck(_ description: @autoclosure () -> String, _ file: String = #file, _ line: Int = #line) {
         #if DEBUG
         guard !Thread.isMainThread else { return }
 
-        KvDebug.pause("Main thread check has failed")
+        pause("Main thread check has failed on \(Thread.current): \(description())", file, line)
         #endif // DEBUG
+    }
+
+
+
+    /// Executes *KvDebug.pause(_)* when invoked when *Thread.isMainThread* returns *false*.
+    @available(*, deprecated, message: "mainThreadCheck(_:_:_:)") @inlinable
+    public static func mainThreadCheck(in file: String = #file, at line: Int = #line) {
+        mainThreadCheck("Main thread check has failed", file, line)
+    }
+
+
+
+    // MARK: .MainThreadCheck
+
+    /// A property wrapper executing *KvDebug.mainThreadCheck()* on any access to *.wrappedValue*.
+    ///
+    /// Sometimes Xcode's Thread Sanitizer is not available.
+    @propertyWrapper
+    public struct MainThreadCheck<Value> {
+
+        public init(wrappedValue: Value, _ file: String = #file, _ line: Int = #line) {
+            value = wrappedValue
+
+            self.file = file
+            self.line = line
+        }
+
+
+
+        private var value: Value
+
+        private let file: String
+        private let line: Int
+
+
+
+        // MARK: .wrappedValue
+
+        public var wrappedValue: Value {
+            get {
+                mainThreadCheck("⚠️ attempt to get value of property defined at \(file):\(line)", file, line)
+
+                return value
+            }
+            set {
+                mainThreadCheck("⚠️ Attempt to set property defined at \(file):\(line)", file, line)
+
+                value = newValue
+            }
+        }
+
     }
 
 }

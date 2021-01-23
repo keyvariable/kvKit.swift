@@ -99,7 +99,7 @@ extension KvUI {
 
         /// Presents *alert* as a modal sheet or as a modal message box whether *window* is provided.
         public static func present(_ alert: NSAlert, in window: NSWindow? = nil, completion: ((NSApplication.ModalResponse) -> Void)? = nil) {
-            KvDebug.mainThreadCheck()
+            KvDebug.mainThreadCheck("⚠️ Attempt to present an alert on a nonmain thread")
 
             if window != nil {
                 alert.beginSheetModal(for: window!, completionHandler: { modalResponse in
@@ -151,7 +151,7 @@ extension KvUI {
 
         @available (iOS 13.0, *)
         public static func present(_ alertController: UIAlertController, in viewController: UIViewController? = nil) throws {
-            KvDebug.mainThreadCheck()
+            KvDebug.mainThreadCheck("⚠️ Attempt to present an alert controller on a nonmain thread")
 
             guard let viewController = viewController
                     ?? UIApplication.shared.connectedScenes.lazy.compactMap({ $0.delegate as? UIWindowSceneDelegate }).first?.window??.rootViewController
