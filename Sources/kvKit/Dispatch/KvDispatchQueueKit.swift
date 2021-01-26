@@ -27,11 +27,29 @@ import Foundation
 
 public class KvDispatchQueueKit {
 
-    /// Invokes *block* on the main thread synchronously if method is invoked on the main thread. Otherwise *block* is invoked on the main thread asynchronously.
+    /// Invokes *block* immediately when method is invoked on the main thread. Otherwise *block* is invoked on the main thread synchronously.
+    public static func mainSyncIfNeeded(_ block: @escaping () -> Void) {
+        Thread.isMainThread
+            ? block()
+            : DispatchQueue.main.sync(execute: block)
+    }
+
+
+
+    /// Invokes *block* immediately when method is invoked on the main thread. Otherwise *block* is invoked on the main thread asynchronously.
     public static func mainAsyncIfNeeded(_ block: @escaping () -> Void) {
         Thread.isMainThread
             ? block()
             : DispatchQueue.main.async(execute: block)
+    }
+
+
+
+    /// Invokes *block* immediately when method is invoked on a non-main thread. Otherwise *block* is invoked on the global dispatch queue with *qos* quality of service asynchronously.
+    public static func nonMainAsyncIfNeeded(qos: DispatchQoS.QoSClass = .default, _ block: @escaping () -> Void) {
+        Thread.isMainThread
+            ? DispatchQueue.global(qos: .default).async(execute: block)
+            : block()
     }
 
 
