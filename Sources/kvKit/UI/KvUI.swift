@@ -58,7 +58,9 @@ extension KvUI {
     public struct Alert {
 
         #if canImport(Cocoa)
-        public static func present(message: String, details: String? = nil, _ alertStyle: NSAlert.Style = .informational, in window: NSWindow? = nil, action: String = "Close", completion: (() -> Void)? = nil) {
+        public static func present(message: String, details: String? = nil, _ alertStyle: NSAlert.Style = .informational,
+                                   in window: NSWindow? = nil, action: String = "Close", completion: (() -> Void)? = nil)
+        {
             let alert = NSAlert()
 
             alert.alertStyle = alertStyle
@@ -82,7 +84,9 @@ extension KvUI {
 
 
 
-        public static func present(confirmation message: String, in window: NSWindow? = nil, yes yesTitle: String = "Yes", no noTitle: String = "No", completion: @escaping (Bool) -> Void) {
+        public static func present(confirmation message: String, in window: NSWindow? = nil,
+                                   yes yesTitle: String = "Yes", no noTitle: String = "No", completion: @escaping (Bool) -> Void)
+        {
             let alert = NSAlert()
 
             alert.messageText = message
@@ -116,7 +120,9 @@ extension KvUI {
 
         #if canImport(UIKit)
         @available (iOS 13.0, *)
-        public static func present(message: String, title: String? = nil, in viewController: UIViewController? = nil, action: String = "Close", completion: (() -> Void)? = nil) {
+        public static func present(message: String, title: String? = nil, in viewController: UIViewController? = nil,
+                                   action: String = "Close", completion: (() -> Void)? = nil)
+        {
             let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
             alertController.addAction(.init(title: action, style: .default, handler: { _ in completion?() }))
 
@@ -127,16 +133,26 @@ extension KvUI {
 
 
         @available (iOS 13.0, *) @inlinable
-        public static func present(message error: Error, in viewController: UIViewController? = nil, completion: (() -> Void)? = nil) {
-            present(message: "Error:\n\n\(error.localizedDescription)", in: viewController, completion: completion)
+        public static func present(message error: Error, title: String = "Error", in viewController: UIViewController? = nil, completion: (() -> Void)? = nil) {
+            let message: String = {
+                switch error {
+                case let nsError as NSError:
+                    return [ nsError.localizedDescription, nsError.localizedFailureReason, nsError.localizedRecoverySuggestion ].lazy
+                        .compactMap({ $0 }).joined(separator: "\n")
+                default:
+                    return error.localizedDescription
+                }
+            }()
+
+            present(message: message, title: title, in: viewController, completion: completion)
         }
 
 
 
         @available (iOS 13.0, *)
         public static func present(confirmation message: String, title: String? = "Confirmation", in viewController: UIViewController? = nil,
-                                        action: String = "Yes", actionStyle: UIAlertAction.Style = .default, cancel: String = "Cancel",
-                                        completion: @escaping (Bool) -> Void)
+                                   action: String = "Yes", actionStyle: UIAlertAction.Style = .default, cancel: String = "Cancel",
+                                   completion: @escaping (Bool) -> Void)
         {
             let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
