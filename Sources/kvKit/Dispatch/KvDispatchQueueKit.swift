@@ -55,6 +55,7 @@ public class KvDispatchQueueKit {
 
 
     /// Invokes *block* on the main thread synchronously if method is invoked on the main thread. Otherwise *block* is invoked on the main thread asynchronously.
+    @available(*, deprecated, message: "Use DispatchQueue.global(qos:).async(execute:) instead")
     public static func globalAsyncIfNeeded(qos: DispatchQoS.QoSClass = .default, _ block: @escaping () -> Void) {
         let globalQueue = DispatchQueue.global(qos: qos)
 
