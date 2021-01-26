@@ -126,7 +126,7 @@ extension KvPowerManagement {
                 }
             }
             didSet {
-                KvDebug.mainThreadCheck("⚠️ Attempt to modify SystemSleepPreventionToken.count on a nonmain thread")
+                KvDebug.mainThreadCheck("⚠️ Attempt to modify SystemSleepPreventionToken.count on a non-main thread")
 
                 UIApplication.shared.isIdleTimerDisabled = count > 0
             }
