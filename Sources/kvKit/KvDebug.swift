@@ -161,6 +161,8 @@ extension KvDebug {
     /// A property wrapper executing *KvDebug.mainThreadCheck()* on any access to *.wrappedValue*.
     ///
     /// Sometimes Xcode's Thread Sanitizer is not available.
+    ///
+    /// - Warning: Don't assign wrapped value in the change observers *willSet* or *didSet* to prevent recursion cycle.
     @propertyWrapper
     public struct MainThreadCheck<Value> {
 
