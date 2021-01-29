@@ -33,7 +33,7 @@ public protocol KvParserProcessing {
     var input: String? { get }
 
 
-    mutating func process<S>(_ string: S) where S: Sequence, S.Element == Character
+    mutating func process<S>(_ string: S) where S: StringProtocol
 
 }
 
@@ -49,7 +49,7 @@ public protocol KvParser : KvParserProcessing {
     var value: Value { get }
 
 
-    init(with initialInput: String?, options: KvParserOptions?)
+    init<S>(with initialInput: S?, options: KvParserOptions?) where S: StringProtocol
 
 }
 
@@ -121,10 +121,8 @@ public struct KvIntParser<T: BinaryInteger> : KvParser {
 
 
 
-    public init(with initialInput: String? = nil, options: KvParserOptions? = nil) {
-        if options?.contains(.noInputAccumulation) != true {
-            input = ""
-        }
+    public init<S>(with initialInput: S? = nil, options: KvParserOptions? = nil) where S: StringProtocol {
+        input = options?.contains(.noInputAccumulation) != true ? "" : nil
 
         if let initialInput = initialInput {
             process(initialInput)
@@ -383,10 +381,8 @@ public struct KvFloatParser<T: BinaryFloatingPoint> : KvParser {
 
 
 
-    public init(with initialInput: String? = nil, options: KvParserOptions? = nil) {
-        if options?.contains(.noInputAccumulation) != true {
-            input = ""
-        }
+    public init<S>(with initialInput: S? = nil, options: KvParserOptions? = nil) where S: StringProtocol {
+        input = options?.contains(.noInputAccumulation) != true ? "" : nil
 
         if let initialInput = initialInput {
             process(initialInput)
@@ -695,10 +691,8 @@ public struct KvStringParser : KvParser {
 
 
 
-    public init(with initialInput: String? = nil, options: KvParserOptions? = nil) {
-        if options?.contains(.noInputAccumulation) != true {
-            input = ""
-        }
+    public init<S>(with initialInput: S? = nil, options: KvParserOptions? = nil) where S: StringProtocol {
+        input = options?.contains(.noInputAccumulation) != true ? "" : nil
 
         if let initialInput = initialInput {
             process(initialInput)
@@ -762,7 +756,7 @@ public struct KvBoolParser : KvParser {
 
 
 
-    public init(with initialInput: String? = nil, options: KvParserOptions? = nil) {
+    public init<S>(with initialInput: S? = nil, options: KvParserOptions? = nil) where S: StringProtocol {
         if let initialInput = initialInput {
             process(initialInput)
         }
