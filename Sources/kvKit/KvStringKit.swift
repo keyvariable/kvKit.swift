@@ -375,6 +375,33 @@ extension KvStringKit {
 
 
 
+// MARK: Bundle Info Dictionary
+
+extension KvStringKit {
+
+    /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleName* key from the info dictionary of given *bundle*.
+    public static func withApplicationName(_ bundle: Bundle = .main) -> String {
+        with(KvBundleKit.applicationName(bundle))
+    }
+
+
+
+    /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleShortVersionString* key from the info dictionary of given *bundle*.
+    public static func withShortVersion(_ bundle: Bundle = .main) -> String? {
+        with(KvBundleKit.shortVersion(bundle))
+    }
+
+
+
+    /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleVersion* key from the info dictionary of given *bundle*.
+    public static func withBundleVection(_ bundle: Bundle = .main) -> String? {
+        with(KvBundleKit.bundleVection(bundle))
+    }
+
+}
+
+
+
 // MARK: NSRange Auxiliaries
 
 extension KvStringKit {

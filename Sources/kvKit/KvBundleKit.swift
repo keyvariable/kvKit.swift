@@ -39,6 +39,8 @@ public class KvBundleKit { }
 extension KvBundleKit {
 
     /// - Returns: Value for *CFBundleName* key from the info dictionary of given *bundle*.
+    ///
+    /// - Note: See shortcut *KvStringKit.applicationName(_:)*.
     public static func applicationName(_ bundle: Bundle = .main) -> String? {
         bundle.object(forInfoDictionaryKey: "CFBundleName") as? String
     }
@@ -46,6 +48,8 @@ extension KvBundleKit {
 
 
     /// - Returns: Value for *CFBundleShortVersionString* key from the info dictionary of given *bundle*.
+    ///
+    /// - Note: See shortcut *KvStringKit.shortVersion(_:)*.
     public static func shortVersion(_ bundle: Bundle = .main) -> String? {
         bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     }
@@ -53,6 +57,8 @@ extension KvBundleKit {
 
 
     /// - Returns: Value for *CFBundleVersion* key from the info dictionary of given *bundle*.
+    ///
+    /// - Note: See shortcut *KvStringKit.bundleVection(_:)*.
     public static func bundleVection(_ bundle: Bundle = .main) -> String? {
         bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
     }
