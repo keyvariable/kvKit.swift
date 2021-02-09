@@ -43,6 +43,7 @@ open class KvCachedAssets {
 extension KvCachedAssets {
 
     @available (iOS 13.0, macOS 10.15, *)
+    @discardableResult
     public func withData(for url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
         let task = dataTask(with: .init(url: url), completion: completion)
         defer { task.resume() }
@@ -58,6 +59,7 @@ extension KvCachedAssets {
     ///
     /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
     @available (iOS 13.0, macOS 10.15, *)
+    @discardableResult
     public func withData(for urls: [URL], completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable {
         let taskSet = URLSessionTaskSet<Data>(urls: urls)
         defer {
