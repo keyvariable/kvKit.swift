@@ -13,7 +13,7 @@ A collection of general purpose auxiliaries on Swift. For example:
 - UI.
 - Bonjour.
 - Compression.
-- WebKit taks.
+- WebKit tasks.
 
 
 ## Supported Platforms
