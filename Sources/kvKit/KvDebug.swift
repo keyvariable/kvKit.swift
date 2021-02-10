@@ -138,20 +138,12 @@ extension KvDebug {
 
     /// Executes *KvDebug.pause()* when invoked when *Thread.isMainThread* returns *false*.
     @inlinable
-    public static func mainThreadCheck(_ description: @autoclosure () -> String, _ file: String = #file, _ line: Int = #line) {
+    public static func mainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #file, _ line: Int = #line) {
         #if DEBUG
         guard !Thread.isMainThread else { return }
 
         pause("Main thread check has failed on \(Thread.current): \(description())", file, line)
         #endif // DEBUG
-    }
-
-
-
-    /// Executes *KvDebug.pause(_)* when invoked when *Thread.isMainThread* returns *false*.
-    @available(*, deprecated, message: "mainThreadCheck(_:_:_:)") @inlinable
-    public static func mainThreadCheck(in file: String = #file, at line: Int = #line) {
-        mainThreadCheck("Main thread check has failed", file, line)
     }
 
 
