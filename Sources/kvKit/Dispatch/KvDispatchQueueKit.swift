@@ -28,8 +28,8 @@ import Foundation
 public class KvDispatchQueueKit {
 
     /// Invokes *block* immediately when method is invoked on the main thread. Otherwise *block* is invoked on the main thread synchronously.
-    public static func mainSyncIfNeeded(_ block: @escaping () -> Void) {
-        Thread.isMainThread
+    public static func mainSyncIfNeeded<T>(_ block: @escaping () throws -> T) rethrows -> T {
+        try Thread.isMainThread
             ? block()
             : DispatchQueue.main.sync(execute: block)
     }
