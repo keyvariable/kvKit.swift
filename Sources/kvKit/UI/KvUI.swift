@@ -119,7 +119,7 @@ extension KvUI {
 
 
         #if canImport(UIKit)
-        @available (iOS 13.0, *)
+        @available(iOS 13.0, *)
         public static func present(message: String, title: String? = nil, in viewController: UIViewController? = nil,
                                    action: String = "Close", completion: (() -> Void)? = nil)
         {
@@ -132,7 +132,7 @@ extension KvUI {
 
 
 
-        @available (iOS 13.0, *) @inlinable
+        @available(iOS 13.0, *) @inlinable
         public static func present(message error: Error, title: String = "Error", in viewController: UIViewController? = nil, completion: (() -> Void)? = nil) {
             let message: String = {
                 switch error {
@@ -149,7 +149,7 @@ extension KvUI {
 
 
 
-        @available (iOS 13.0, *)
+        @available(iOS 13.0, *)
         public static func present(confirmation message: String, title: String? = "Confirmation", in viewController: UIViewController? = nil,
                                    action: String = "Yes", actionStyle: UIAlertAction.Style = .default, cancel: String = "Cancel",
                                    completion: @escaping (Bool) -> Void)
@@ -165,7 +165,7 @@ extension KvUI {
 
 
 
-        @available (iOS 13.0, *)
+        @available(iOS 13.0, *)
         public static func present(_ alertController: UIAlertController, in viewController: UIViewController? = nil) throws {
             KvDebug.mainThreadCheck("⚠️ Attempt to present an alert controller on a non-main thread")
 

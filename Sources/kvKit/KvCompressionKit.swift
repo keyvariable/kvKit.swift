@@ -51,7 +51,7 @@ extension KvCompressionKit {
 extension KvCompressionKit {
 
     /// Performs *operation* using *algorithm* reading data from *input* and writting the result to *output*.
-    @available (iOS 13.0, macOS 10.15, *)
+    @available(iOS 13.0, macOS 10.15, *)
     public static func run(_ operation: FilterOperation, using algorithm: Algorithm, input: Input, output: Output) throws {
 
         /// - Returns: Opens given *stream* when it's status is `.notOpen` and returns a RAII token closing the stream. Otherwise `nil` is returned.
@@ -165,7 +165,7 @@ extension KvCompressionKit {
 
 
     /// - Returns: Data object containing the result of *operation* using *algorithm*.
-    @available (iOS 13.0, macOS 10.15, *) @inlinable
+    @available(iOS 13.0, macOS 10.15, *) @inlinable
     public static func data(from input: Input, filter operation: FilterOperation, using algorithm: Algorithm) throws -> Data {
         let memoryStream = OutputStream(toMemory: ())
 
@@ -185,7 +185,7 @@ extension KvCompressionKit {
     public enum Input {
 
         /// This block is invoked at appropriate moment. This block should pass all the data to given interface.
-        @available (iOS 13.0, macOS 10.15, *)
+        @available(iOS 13.0, macOS 10.15, *)
         case block((Interface) throws -> Void)
 
         /// All data currently available in the stream will be processed.
@@ -195,7 +195,7 @@ extension KvCompressionKit {
 
         // MARK: .Interface
 
-        @available (iOS 13.0, macOS 10.15, *)
+        @available(iOS 13.0, macOS 10.15, *)
         public struct Interface {
 
             fileprivate init(for outputFilter: OutputFilter) {

@@ -14,7 +14,7 @@ import UIKit
 
 
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 public class KvScreenKeyboardController : NSObject {
 
     public private(set) var keyboardFrame: CGRect? {
@@ -52,7 +52,7 @@ public class KvScreenKeyboardController : NSObject {
 
 // MARK: Auxiliary Methods
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 extension KvScreenKeyboardController {
 
     public func insertScrollView(_ scrollView: UIScrollView) {
@@ -95,7 +95,7 @@ extension KvScreenKeyboardController {
 
 // MARK: Scroll View Management
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 extension KvScreenKeyboardController {
 
     private func adjustScrollView(_ scrollView: UIScrollView) {
@@ -124,7 +124,7 @@ extension KvScreenKeyboardController {
 
 // MARK: Screen Keyboard Handling
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 extension KvScreenKeyboardController {
 
     private func startObservationForScreenKeyboardEvents() {
