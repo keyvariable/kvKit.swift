@@ -15,15 +15,78 @@ public class KvSwiftUiKit { }
 
 
 
-// MARK: .NSWindowProvider
+// MARK: Alerts
+
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+extension KvSwiftUiKit {
+
+    public static func alert(error: Error, dismissButton: Alert.Button? = nil) -> Alert {
+        let (title, message) = alertContent(for: error)
+
+        return Alert(title: title, message: message, dismissButton: dismissButton)
+    }
+
+
+
+    public static func alert(error: Error, primaryButton: Alert.Button, secondaryButton: Alert.Button) -> Alert {
+        let (title, message) = alertContent(for: error)
+
+        return Alert(title: title, message: message, primaryButton: primaryButton, secondaryButton: secondaryButton)
+    }
+
+
+
+    private static func alertContent(for error: Error) -> (title: Text, message: Text?) {
+
+        func Message(from error: Error) -> Text? {
+
+            func Append(_ dest: inout [String], from error: Error) {
+
+                func AppendIfPresent(_ item: String?) {
+                    guard let item = item else { return }
+
+                    dest.append(item)
+                }
+
+
+                switch error {
+                case let nsError as NSError:
+                    AppendIfPresent(nsError.localizedFailureReason)
+                    AppendIfPresent(nsError.localizedRecoverySuggestion)
+
+                default:
+                    dest.append(error.localizedDescription)
+                }
+            }
+
+
+            var components: [String] = .init()
+
+            Append(&components, from: error)
+
+            return !components.isEmpty ? Text(components.joined(separator: "\n")) : nil
+        }
+
+
+        return (title: Text((error as? KvError)?.message ?? error.localizedDescription),
+                message: Message(from: error))
+    }
+
+}
+
+
+
+// MARK: AppKit Intergration
 
 #if os(macOS)
 
 extension KvSwiftUiKit {
 
+    // MARK: .NSWindowProvider
+
     /// A view populating given binding with value of NSView's window property.
     ///
-    /// Sometimes (Feb 2021) *NSWindow* is still required in SwiftUI macOS applications. E.g. presentation of *NSOpenPanel* as a window modal sheet.
+    /// Sometimes (Feb 2021) *NSWindow* is still required in SwiftUI macOS applications. E.g. presentation of *NSOpenPanel* as a window modal sheet or closing a window programmatically.
     ///
     /// Example:
     ///
