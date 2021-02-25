@@ -199,4 +199,53 @@ extension KvUI {
 
 
 
+// MARK: Open and Save Panels
+
+#if canImport(AppKit)
+
+extension KvUI {
+
+    // MARK: .SavePanel
+
+    public struct SavePanel {
+
+        public static func begin<P>(_ panel: P, in window: NSWindow? = nil,
+                                    customization customizationCallback: ((P) throws -> Void)? = nil,
+                                    completion completionHandler: @escaping (P, NSApplication.ModalResponse) -> Void) rethrows
+        where P : NSSavePanel
+        {
+            try customizationCallback?(panel)
+
+            switch window {
+            case .some(let window):
+                panel.beginSheetModal(for: window, completionHandler: { response in completionHandler(panel, response) })
+            case .none:
+                panel.begin(completionHandler: { response in completionHandler(panel, response) })
+            }
+        }
+
+    }
+
+
+
+    // MARK: .OpenPanel
+
+    public struct OpenPanel {
+
+        public static func begin<P>(_ panel: P, in window: NSWindow? = nil,
+                                    customization customizationCallback: ((P) throws -> Void)? = nil,
+                                    completion completionHandler: @escaping (P, NSApplication.ModalResponse) -> Void) rethrows
+        where P : NSOpenPanel
+        {
+            try SavePanel.begin(panel, in: window, customization: customizationCallback, completion: completionHandler)
+        }
+
+    }
+
+}
+
+#endif // canImport(AppKit)
+
+
+
 #endif // canImport(Cocoa) || canImport(UIKit)
