@@ -76,7 +76,9 @@ extension KvCachedAssets {
     /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData(for urls: [URL], completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable {
+    public func withData<URLs>(for urls: URLs, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    where URLs : Sequence, URLs.Element == URL
+    {
         let taskSet = URLSessionTaskSet<Data>(urls: urls)
         defer {
             taskSet.run(taskFabric: { (url, taskHandler) in dataTask(with: .init(url: url), completion: taskHandler) },
@@ -148,7 +150,9 @@ extension KvCachedAssets {
 
 
 
-        init(urls: [URL]) {
+        init<URLs>(urls: URLs)
+        where URLs : Sequence, URLs.Element == URL
+        {
             items = urls.map { .init(url: $0) }
         }
 
