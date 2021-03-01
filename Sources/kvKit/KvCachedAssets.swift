@@ -1,3 +1,19 @@
+//===----------------------------------------------------------------------===//
+//
+//  Copyright (c) 2021 Svyatoslav Popov.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+//  the License. You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+//  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+//  specific language governing permissions and limitations under the License.
+//
+//  SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
 //
 //  KvCachedAssets.swift
 //  kvKit
@@ -42,7 +58,7 @@ open class KvCachedAssets {
 
 extension KvCachedAssets {
 
-    @available (iOS 13.0, macOS 10.15, *)
+    @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
     public func withData(for url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
         let task = dataTask(with: .init(url: url), completion: completion)
@@ -58,9 +74,11 @@ extension KvCachedAssets {
     /// - Note: Data objects passed to *completion* match order of *urls*. First data object is for first URL etc.
     ///
     /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
-    @available (iOS 13.0, macOS 10.15, *)
+    @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData(for urls: [URL], completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable {
+    public func withData<URLs>(for urls: URLs, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    where URLs : Sequence, URLs.Element == URL
+    {
         let taskSet = URLSessionTaskSet<Data>(urls: urls)
         defer {
             taskSet.run(taskFabric: { (url, taskHandler) in dataTask(with: .init(url: url), completion: taskHandler) },
@@ -132,7 +150,9 @@ extension KvCachedAssets {
 
 
 
-        init(urls: [URL]) {
+        init<URLs>(urls: URLs)
+        where URLs : Sequence, URLs.Element == URL
+        {
             items = urls.map { .init(url: $0) }
         }
 

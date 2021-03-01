@@ -37,6 +37,7 @@ extension KvThreadKit {
     /// A shortcut to execute *body* while *lock* is being locked.
     ///
     /// - Returns: The result of *body* invocation.
+    @inlinable
     public static func locking<R>(_ lock: NSLocking, body: () throws -> R) rethrows -> R {
         lock.lock()
         defer { lock.unlock() }
@@ -46,9 +47,24 @@ extension KvThreadKit {
 
 
 
+    /// A shortcut to execute *body* while optional *lock* is being locked.
+    ///
+    /// - Returns: The result of *body* invocation or `nil`.
+    ///
+    /// - Note: *body* is invoked even if *lock* is `nil`.
+    @inlinable
+    public static func locking<T, R>(_ lock: T?, body: () throws -> R) rethrows -> R
+    where T : NSLocking
+    {
+        lock != nil ? try locking(lock!, body: body) : try body()
+    }
+
+
+
     /// A shortcut to execute *body* while *lock* is being locked. If *lock* is `nil` then nothing execued and `nil` is returned.
     ///
     /// - Returns: The result of *body* invocation or `nil`.
+    @available(*, deprecated, message: "Use other version of this method")
     public static func locking<T, R>(_ lock: T?, body: (T) throws -> R) rethrows -> R?
     where T : NSLocking
     {
@@ -65,6 +81,7 @@ extension KvThreadKit {
     /// A shortcut to execute *body* while *lock* is being locked. If *lock* is `nil` then nothing execued and `nil` is returned.
     ///
     /// - Returns: The result of *body* invocation or `nil`.
+    @available(*, deprecated, message: "Use other version of this method")
     public static func locking<T>(_ lock: T?, body: (T) throws -> Void) rethrows -> Void
     where T : NSLocking
     {

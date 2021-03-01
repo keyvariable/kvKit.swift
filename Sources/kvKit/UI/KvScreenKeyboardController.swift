@@ -1,3 +1,19 @@
+//===----------------------------------------------------------------------===//
+//
+//  Copyright (c) 2021 Svyatoslav Popov.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+//  the License. You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+//  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+//  specific language governing permissions and limitations under the License.
+//
+//  SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
 //
 //  KvScreenKeyboardController.swift
 //  kvKit
@@ -14,7 +30,7 @@ import UIKit
 
 
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 public class KvScreenKeyboardController : NSObject {
 
     public private(set) var keyboardFrame: CGRect? {
@@ -52,7 +68,7 @@ public class KvScreenKeyboardController : NSObject {
 
 // MARK: Auxiliary Methods
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 extension KvScreenKeyboardController {
 
     public func insertScrollView(_ scrollView: UIScrollView) {
@@ -95,7 +111,7 @@ extension KvScreenKeyboardController {
 
 // MARK: Scroll View Management
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 extension KvScreenKeyboardController {
 
     private func adjustScrollView(_ scrollView: UIScrollView) {
@@ -124,7 +140,7 @@ extension KvScreenKeyboardController {
 
 // MARK: Screen Keyboard Handling
 
-@available (iOS 11.0, *)
+@available(iOS 11.0, *)
 extension KvScreenKeyboardController {
 
     private func startObservationForScreenKeyboardEvents() {

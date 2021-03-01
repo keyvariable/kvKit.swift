@@ -50,7 +50,7 @@ public class KvDateKit {
 
 
 
-    @available (iOS 10.0, macOS 10.12, *)
+    @available(iOS 10.0, macOS 10.12, *)
     public static func distance<T: BinaryFloatingPoint>(in unit: Calendar.Component,
                                                         scale: Calendar.Component,
                                                         from startDate: Date,

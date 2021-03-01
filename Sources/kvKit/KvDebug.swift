@@ -111,7 +111,7 @@ extension KvDebug {
 // MARK: iOS Alerts
 
 #if os(iOS)
-@available (iOS 13.0, *)
+@available(iOS 13.0, *)
 extension KvDebug {
 
     @inlinable
