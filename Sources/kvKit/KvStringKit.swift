@@ -260,7 +260,7 @@ extension KvStringKit {
 
 
 
-    /// - Returns: A string with hexademical representation of given data.
+    /// - Returns: A string with hexadecimal representation of given data.
     @inlinable
     public static func base16(with data: Data) -> String {
         data.reduce(into: "") { (dest, byte) in

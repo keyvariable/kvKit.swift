@@ -111,7 +111,7 @@ public struct KvParserOptions : OptionSet {
 ///
 /// where
 /// * dec — decimal character
-/// * hex — hexademical character
+/// * hex — hexadecimal character
 ///
 public struct KvIntParser<T: BinaryInteger> : KvParser {
 
@@ -369,7 +369,7 @@ public struct KvIntParser<T: BinaryInteger> : KvParser {
 ///
 /// where
 /// * dec — decimal character
-/// * hex — hexademical character
+/// * hex — hexadecimal character
 /// * dot — dot character, integer-fractional delimiter
 /// * e   — exponential delimiter - ‘e’
 ///
