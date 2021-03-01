@@ -219,7 +219,7 @@ extension KvStringKit {
 
 
     @inlinable
-    public static func charater<T: BinaryInteger>(forHexDigit hexDigit: T) -> Character? {
+    public static func charater<T: BinaryInteger>(forHexDigit hexDigit: T, uppercase: Bool = false) -> Character? {
         switch hexDigit {
         case 0:
             return "0"
@@ -242,17 +242,17 @@ extension KvStringKit {
         case 9:
             return "9"
         case 10:
-            return "a"
+            return uppercase ? "A" : "a"
         case 11:
-            return "b"
+            return uppercase ? "B" : "b"
         case 12:
-            return "c"
+            return uppercase ? "C" : "c"
         case 13:
-            return "d"
+            return uppercase ? "D" : "d"
         case 14:
-            return "e"
+            return uppercase ? "E" : "e"
         case 15:
-            return "f"
+            return uppercase ? "F" : "f"
         default:
             return nil
         }
