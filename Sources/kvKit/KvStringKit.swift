@@ -343,6 +343,16 @@ extension KvStringKit {
 
 
 
+    /// - Returns: Hexadecimal representation of given sequence.
+    @inlinable
+    public static func with<Bytes>(hex bytes: Bytes, separator: String = " ", limit: Int = 256) -> String
+    where Bytes : Sequence, Bytes.Element == UInt8
+    {
+        base16(with: bytes, separator: separator, limit: limit)
+    }
+
+
+
     /// - Returns: String containig `type(of: x)` if it isn't `nil` or  "T?".
     @inlinable
     public static func withType<T>(of x: T?) -> String {
