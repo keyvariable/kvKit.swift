@@ -262,11 +262,13 @@ extension KvStringKit {
 
     /// - Returns: A string with hexadecimal representation of given data.
     @inlinable
-    public static func base16(with data: Data) -> String {
-        data.reduce(into: "") { (dest, byte) in
-            dest.append(KvStringKit.charater(forHexDigit: (byte >> 4) & 0x0F)!)
-            dest.append(KvStringKit.charater(forHexDigit: byte & 0x0F)!)
-        }
+    public static func base16<Bytes>(with bytes: Bytes, separator: String = " ", limit: Int = .max) -> String
+    where Bytes : Sequence, Bytes.Element == UInt8
+    {
+        bytes.lazy
+            .prefix(limit)
+            .map({ String(format: "%02X", $0) })
+            .joined(separator: separator)
     }
 
 }
