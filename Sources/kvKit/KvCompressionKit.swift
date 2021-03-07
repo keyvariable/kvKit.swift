@@ -144,6 +144,14 @@ extension KvCompressionKit {
         case .block(let block):
             try block(.init(for: outputFilter))
 
+        case .data(let data):
+            try outputFilter.write(data)
+
+        case .dataSequence(let chunks):
+            try chunks.forEach { data in
+                try outputFilter.write(data)
+            }
+
         case .stream(let inputStream):
             tokens.input = try OpenOfNotOpen(inputStream)
 
@@ -187,6 +195,12 @@ extension KvCompressionKit {
         /// This block is invoked at appropriate moment. This block should pass all the data to given interface.
         @available(iOS 13.0, macOS 10.15, *)
         case block((Interface) throws -> Void)
+
+        /// Data to be proceeded.
+        case data(Data)
+
+        /// Joined data will be preceeded.
+        case dataSequence(AnySequence<Data>)
 
         /// All data currently available in the stream will be processed.
         case stream(InputStream)
