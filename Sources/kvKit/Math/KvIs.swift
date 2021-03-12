@@ -393,6 +393,23 @@ public func KvIs<T: FloatingPoint>(_ value: T, outOf range: PartialRangeThrough<
 
 
 
+// MARK: Power of 2
+
+@inlinable
+public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : FixedWidthInteger {
+    value > 0 && value.nonzeroBitCount == 1
+}
+
+
+
+/// - Note: Works for negative powers of two.
+@inlinable
+public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : BinaryFloatingPoint {
+    value > 0 && value.significandWidth == 0
+}
+
+
+
 // MARK: Legacy
 
 @available(*, deprecated, renamed: "KvIs(_:equalTo:alsoIsGreaterThan:)")
