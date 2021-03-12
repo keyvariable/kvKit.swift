@@ -30,6 +30,7 @@ import XCTest
 final class KvKitTests: XCTestCase {
 
     static var allTests = [
+        ("testKvIs", testKvIs),
         ("testStringKit", testStringKit),
     ]
 
@@ -115,6 +116,44 @@ final class KvKitTests: XCTestCase {
 
 
 
+    func testKvIs() {
+        do {
+            let cases: [(value: Int, result: Bool)] = [ (-2, false),
+                                                        (-1, false),
+                                                        ( 0, false),
+                                                        ( 1, true ),
+                                                        ( 2, true ),
+                                                        ( 3, false),
+                                                        ( 4, true ), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIsPowerOf2($0.value), $0.result, "KvIsPowerOf2(\($0.value)) != \($0.result)")
+            }
+        }
+
+        do {
+            let cases: [(value: Double, result: Bool)] = [ (-2.0    , false),
+                                                           (-1.0    , false),
+                                                           (-0.1    , false),
+                                                           ( 0.0    , false),
+                                                           ( 0.1    , false),
+                                                           ( 0.25   , true ),
+                                                           ( 0.25001, false),
+                                                           ( 0.5    , true ),
+                                                           ( 1.0    , true ),
+                                                           ( 2.0    , true ),
+                                                           ( 3.0    , false),
+                                                           ( 4.0    , true ),
+                                                           ( 4.5    , false), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIsPowerOf2($0.value), $0.result, "KvIsPowerOf2(\($0.value)) != \($0.result)")
+            }
+        }
+    }
+
+
+
     func testStringKit() {
         // Whitespace.
         XCTAssertEqual(
@@ -127,4 +166,5 @@ final class KvKitTests: XCTestCase {
             "Dianne's horse.\nIs it Dianne's MBPro 16''!?Yes\n\n"
         )
     }
+
 }
