@@ -55,7 +55,7 @@ public struct KvError {
 
 extension KvError : Error {
 
-    var localizedDescription: String { return "\(message) | \(file):\(line)" }
+    public var localizedDescription: String { return "\(message) | \(file):\(line)" }
 
 }
 
