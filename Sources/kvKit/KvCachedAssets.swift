@@ -61,11 +61,20 @@ extension KvCachedAssets {
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
     public func withData(for url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
-        let task = dataTask(with: .init(url: url), completion: completion)
-        defer { task.resume() }
+        switch url.isFileURL {
+        case true:
+            completion(.init { try .init(contentsOf: url) })
 
-        return AnyCancellable {
-            task.cancel()
+            // TODO: Return nil.
+            return AnyCancellable { }
+
+        case false:
+            let task = dataTask(with: .init(url: url), completion: completion)
+            defer { task.resume() }
+
+            return AnyCancellable {
+                task.cancel()
+            }
         }
     }
 
@@ -81,8 +90,18 @@ extension KvCachedAssets {
     {
         let taskSet = URLSessionTaskSet<Data>(urls: urls)
         defer {
-            taskSet.run(taskFabric: { (url, taskHandler) in dataTask(with: .init(url: url), completion: taskHandler) },
-                        completion: completion)
+            taskSet.run(
+                taskFabric: { (url, taskHandler) in
+                    switch url.isFileURL {
+                    case true:
+                        taskHandler(.init { try .init(contentsOf: url) })
+                        return nil
+
+                    case false:
+                        return dataTask(with: .init(url: url), completion: taskHandler)
+                    }
+                },
+                completion: completion)
         }
 
         return taskSet
@@ -146,7 +165,7 @@ extension KvCachedAssets {
 
         typealias TaskResult = Result<T, Error>
         typealias TaskHandler = (TaskResult) -> Void
-        typealias TaskFabric = (URL, @escaping TaskHandler) -> URLSessionTask
+        typealias TaskFabric = (URL, @escaping TaskHandler) -> URLSessionTask?
 
 
 
