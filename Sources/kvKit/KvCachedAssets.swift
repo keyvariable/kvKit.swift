@@ -291,6 +291,12 @@ extension KvCachedAssets {
 
     public func resetCache() { urlSession.configuration.urlCache?.removeAllCachedResponses() }
 
+
+
+    public func removeCachedResponse(for urlRequest: URLRequest) {
+        urlSession.configuration.urlCache?.removeCachedResponse(for: urlRequest)
+    }
+
 }
 
 
