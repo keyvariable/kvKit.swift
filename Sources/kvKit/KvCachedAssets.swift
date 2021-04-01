@@ -59,9 +59,22 @@ open class KvCachedAssets {
 extension KvCachedAssets {
 
     @available(iOS 13.0, macOS 10.15, *)
-    @discardableResult
+    @discardableResult @inlinable
     public func withData(for url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
-        let task = dataTask(with: .init(url: url), completion: completion)
+        withData(for: .init(url: url), completion: completion)
+    }
+
+
+
+    @available(iOS 13.0, macOS 10.15, *)
+    @discardableResult
+    public func withData(for urlRequest: URLRequest, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
+        guard let task = dataTask(with: urlRequest, completion: completion)
+        else {
+            // TODO: Return nil.
+            return AnyCancellable { }
+        }
+
         defer { task.resume() }
 
         return AnyCancellable {
@@ -75,14 +88,28 @@ extension KvCachedAssets {
     ///
     /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
-    @discardableResult
+    @discardableResult @inlinable
     public func withData<URLs>(for urls: URLs, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
     where URLs : Sequence, URLs.Element == URL
     {
-        let taskSet = URLSessionTaskSet<Data>(urls: urls)
+        withData(for: urls.lazy.map { .init(url: $0) }, completion: completion)
+    }
+
+
+
+    /// - Note: Data objects passed to *completion* match order of *urls*. First data object is for first URL etc.
+    ///
+    /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
+    @available(iOS 13.0, macOS 10.15, *)
+    @discardableResult
+    public func withData<URLRequests>(for urlRequests: URLRequests, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    where URLRequests : Sequence, URLRequests.Element == URLRequest
+    {
+        let taskSet = URLSessionTaskSet<Data>(urlRequests: urlRequests)
         defer {
-            taskSet.run(taskFabric: { (url, taskHandler) in dataTask(with: .init(url: url), completion: taskHandler) },
-                        completion: completion)
+            taskSet.run(
+                taskFabric: { (urlRequest, taskHandler) in dataTask(with: urlRequest, completion: taskHandler) },
+                completion: completion)
         }
 
         return taskSet
@@ -104,37 +131,27 @@ extension KvCachedAssets {
 
 
 
-    private func dataTask(with urlRequest: URLRequest, completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionDataTask {
-        let urlSession = self.urlSession
+    private func dataTask(with urlRequest: URLRequest, completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionDataTask? {
+        switch urlRequest.url {
+        case let .some(url) where url.isFileURL:
+            completion(.init { try .init(contentsOf: url) })
 
-        return urlSession.dataTask(with: urlRequest) { (data, response, error) in
-            completion(.init {
-                try Self.processTaskCompletion(urlRequest, response, error)
+            return nil
 
-                guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
+        default:
+            let urlSession = self.urlSession
 
-                urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
+            return urlSession.dataTask(with: urlRequest) { (data, response, error) in
+                completion(.init {
+                    try Self.processTaskCompletion(urlRequest, response, error)
 
-                return data
-            })
-        }
-    }
+                    guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
 
+                    urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
 
-
-    private func downloadTask(with urlRequest: URLRequest, completion: @escaping (Result<KvFileKit.TemporaryUrlToken, Error>) -> Void) -> URLSessionDownloadTask {
-        let urlSession = self.urlSession
-
-        return urlSession.downloadTask(with: urlRequest) { (url, response, error) in
-            completion(.init {
-                try Self.processTaskCompletion(urlRequest, response, error)
-
-                guard let url = url else { throw KvError("There is no url downloaded with \(urlRequest)") }
-
-                urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: try .init(contentsOf: url)), for: urlRequest)
-
-                return .init(with: url)
-            })
+                    return data
+                })
+            }
         }
     }
 
@@ -146,14 +163,14 @@ extension KvCachedAssets {
 
         typealias TaskResult = Result<T, Error>
         typealias TaskHandler = (TaskResult) -> Void
-        typealias TaskFabric = (URL, @escaping TaskHandler) -> URLSessionTask
+        typealias TaskFabric = (URLRequest, @escaping TaskHandler) -> URLSessionTask?
 
 
 
-        init<URLs>(urls: URLs)
-        where URLs : Sequence, URLs.Element == URL
+        init<URLRequests>(urlRequests: URLRequests)
+        where URLRequests : Sequence, URLRequests.Element == URLRequest
         {
-            items = urls.map { .init(url: $0) }
+            items = urlRequests.map { .init(for: $0) }
         }
 
 
@@ -211,7 +228,7 @@ extension KvCachedAssets {
 
         class Item {
 
-            let url: URL
+            let urlRequest: URLRequest
 
             var result: TaskResult? {
                 get { KvThreadKit.locking(mutationLock) { _result } }
@@ -219,8 +236,8 @@ extension KvCachedAssets {
             }
 
 
-            init(url: URL) {
-                self.url = url
+            init(for urlRequest: URLRequest) {
+                self.urlRequest = urlRequest
             }
 
 
@@ -246,7 +263,7 @@ extension KvCachedAssets {
                     guard _result == nil else { return completion(_result!) }
                 }
 
-                task = taskFabric(url) { [weak self] (result) in
+                task = taskFabric(urlRequest) { [weak self] (result) in
                     defer { completion(result) }
 
                     self?.result = result
@@ -273,6 +290,12 @@ extension KvCachedAssets {
 extension KvCachedAssets {
 
     public func resetCache() { urlSession.configuration.urlCache?.removeAllCachedResponses() }
+
+
+
+    public func removeCachedResponse(for urlRequest: URLRequest) {
+        urlSession.configuration.urlCache?.removeCachedResponse(for: urlRequest)
+    }
 
 }
 
