@@ -150,6 +150,67 @@ final class KvKitTests: XCTestCase {
                 XCTAssertEqual(KvIsPowerOf2($0.value), $0.result, "KvIsPowerOf2(\($0.value)) != \($0.result)")
             }
         }
+
+        do {
+            let cases: [(value: Double, range: Range<Double>, result: Bool)] = [ (2, 0 ..< 0, false),
+                                                                                 (2, 0 ..< 1, false),
+                                                                                 (2, 0 ..< 2, false),
+                                                                                 (2, 1 ..< 4, true),
+                                                                                 (2, 2 ..< 4, true),
+                                                                                 (2, 3 ..< 4, false), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIs($0.value, in: $0.range), $0.result, "KvIs(\($0.value), in: \($0.range) != \($0.result)")
+                XCTAssertEqual(KvIs($0.value, outOf: $0.range), !$0.result, "KvIs(\($0.value), outOf: \($0.range) != \(!$0.result)")
+            }
+        }
+
+        do {
+            let cases: [(value: Double, range: ClosedRange<Double>, result: Bool)] = [ (2, 0 ... 0, false),
+                                                                                       (2, 0 ... 1, false),
+                                                                                       (2, 0 ... 2, true),
+                                                                                       (2, 1 ... 4, true),
+                                                                                       (2, 2 ... 4, true),
+                                                                                       (2, 3 ... 4, false), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIs($0.value, in: $0.range), $0.result, "KvIs(\($0.value), in: \($0.range) != \($0.result)")
+                XCTAssertEqual(KvIs($0.value, outOf: $0.range), !$0.result, "KvIs(\($0.value), outOf: \($0.range) != \(!$0.result)")
+            }
+        }
+
+        do {
+            let cases: [(value: Double, range: PartialRangeFrom<Double>, result: Bool)] = [ (2, 1..., true),
+                                                                                            (2, 2..., true),
+                                                                                            (2, 3..., false), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIs($0.value, in: $0.range), $0.result, "KvIs(\($0.value), in: \($0.range) != \($0.result)")
+                XCTAssertEqual(KvIs($0.value, outOf: $0.range), !$0.result, "KvIs(\($0.value), outOf: \($0.range) != \(!$0.result)")
+            }
+        }
+
+        do {
+            let cases: [(value: Double, range: PartialRangeUpTo<Double>, result: Bool)] = [ (2, ..<1, false),
+                                                                                            (2, ..<2, false),
+                                                                                            (2, ..<3, true), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIs($0.value, in: $0.range), $0.result, "KvIs(\($0.value), in: \($0.range) != \($0.result)")
+                XCTAssertEqual(KvIs($0.value, outOf: $0.range), !$0.result, "KvIs(\($0.value), outOf: \($0.range) != \(!$0.result)")
+            }
+        }
+
+        do {
+            let cases: [(value: Double, range: PartialRangeThrough<Double>, result: Bool)] = [ (2, ...1, false),
+                                                                                               (2, ...2, true),
+                                                                                               (2, ...3, true), ]
+
+            cases.forEach {
+                XCTAssertEqual(KvIs($0.value, in: $0.range), $0.result, "KvIs(\($0.value), in: \($0.range) != \($0.result)")
+                XCTAssertEqual(KvIs($0.value, outOf: $0.range), !$0.result, "KvIs(\($0.value), outOf: \($0.range) != \(!$0.result)")
+            }
+        }
     }
 
 

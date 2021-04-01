@@ -364,7 +364,7 @@ public func KvIs<T: FloatingPoint>(_ value: T, outOf range: Range<T>) -> Bool {
 /// - Returns: A boolean value indicating whether *value* is out of *range* taking into account the computational error.
 @inlinable
 public func KvIs<T: FloatingPoint>(_ value: T, outOf range: ClosedRange<T>) -> Bool {
-    KvIs(value, lessThan: range.lowerBound) && KvIs(value, greaterThan: range.upperBound)
+    KvIs(value, lessThan: range.lowerBound) || KvIs(value, greaterThan: range.upperBound)
 }
 
 
