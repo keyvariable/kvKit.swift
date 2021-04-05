@@ -33,6 +33,10 @@ import Foundation
 @available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public class KvTaskGroup<T> {
 
+    public typealias Result = KvCancellableResult<T?>
+
+
+
     public init() { }
 
 
@@ -44,76 +48,6 @@ public class KvTaskGroup<T> {
     private var resultAccumulator: ResultAccumulator = .init()
 
     private lazy var cancellables: [Cancellable] = .init()
-
-}
-
-
-
-// MARK: .Result
-
-@available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension KvTaskGroup {
-
-    public enum Result {
-
-        case success(T?), cancelled, failure(Error)
-
-
-        public init(catching body: () throws -> T?) {
-            do { self = .success(try body()) }
-            catch { self = .failure(error) }
-        }
-
-
-        public func get() throws -> T? {
-            switch self {
-            case .cancelled:
-                return nil
-            case .failure(let error):
-                throw error
-            case .success(let value):
-                return value
-            }
-        }
-
-
-        public func map<Y>(_ tranform: (T) -> Y?) -> KvTaskGroup<Y>.Result {
-            switch self {
-            case .cancelled:
-                return .cancelled
-            case .failure(let error):
-                return .failure(error)
-            case .success(let value):
-                switch value {
-                case .none:
-                    return .success(nil)
-                case .some(let value):
-                    return .success(tranform(value))
-                }
-            }
-        }
-
-    }
-
-}
-
-
-
-// MARK: <Void>.Result
-
-@available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension KvTaskGroup.Result {
-
-    public func map<Y>() -> KvTaskGroup<Y>.Result {
-        switch self {
-        case .cancelled:
-            return .cancelled
-        case .failure(let error):
-            return .failure(error)
-        case .success:
-            return .success(nil)
-        }
-    }
 
 }
 
@@ -137,7 +71,7 @@ extension KvTaskGroup {
 
 
     @discardableResult @inlinable
-    public func enter(_ taskInitiator: () -> Cancellable) -> Cancellable {
+    public func enter(_ taskInitiator: () -> Cancellable?) -> Cancellable? {
         let cancellable = taskInitiator()
 
         enter(cancellable)
@@ -203,7 +137,7 @@ extension KvTaskGroup {
 
     @inlinable
     public func leave(catching body: () throws -> T?) {
-        leave(with: .init(catching: body))
+        leave(with: Result(catching: body))
     }
 
 }
@@ -362,7 +296,7 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
 
 
-    public func leave(with result: KvTaskGroup<T.Element>.Result) {
+    public func leave(with result: KvCancellableResult<T.Element?>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
@@ -394,7 +328,7 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
     @inlinable
     public func leave(catching body: () throws -> T.Element?) {
-        leave(with: .init(catching: body))
+        leave(with: KvCancellableResult(catching: body))
     }
 
 }
@@ -422,7 +356,7 @@ extension KvTaskGroup.ResultAccumulator where T : RangeReplaceableCollection {
     }
 
 
-    mutating func merge(with result: KvTaskGroup<T.Element>.Result) {
+    mutating func merge(with result: KvCancellableResult<T.Element?>) {
         switch result {
         case .cancelled:
             cancel()
