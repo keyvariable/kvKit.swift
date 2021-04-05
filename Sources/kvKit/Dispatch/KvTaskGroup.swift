@@ -128,7 +128,7 @@ extension KvTaskGroup {
 @available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension KvTaskGroup {
 
-    /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*. The *callbcak* is invoked with *.success(.none)* if *cancel()* has been invoked.
+    /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*. The *callbcak* is invoked with *.success(.none)* if result value has never been provided.
     public func notify(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T?>) -> Void) {
         dispatchGroup.notify(queue: queue) {
             callback(KvThreadKit.locking(self.mutationLock) {
@@ -136,6 +136,24 @@ extension KvTaskGroup {
                 defer { self.resultAccumulator.reset() }
 
                 return self.resultAccumulator.result
+            })
+        }
+    }
+
+
+
+    /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*.
+    public func notifyUnwrapping(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T>) -> Void) {
+        dispatchGroup.notify(queue: queue) {
+            callback(KvThreadKit.locking(self.mutationLock) {
+                self.cancellables.removeAll()
+                defer { self.resultAccumulator.reset() }
+
+                return self.resultAccumulator.result.map { value in
+                    guard let value = value else { throw KvError("Force unwrapping nil result") }
+
+                    return value
+                }
             })
         }
     }
