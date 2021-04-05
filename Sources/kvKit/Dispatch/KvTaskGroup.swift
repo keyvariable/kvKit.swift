@@ -33,10 +33,6 @@ import Foundation
 @available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public class KvTaskGroup<T> {
 
-    public typealias Result = KvCancellableResult<T?>
-
-
-
     public init() { }
 
 
@@ -81,16 +77,6 @@ extension KvTaskGroup {
 
 
 
-    public func leave(with result: Result) {
-        KvThreadKit.locking(mutationLock) {
-            resultAccumulator.merge(with: result)
-        }
-
-        dispatchGroup.leave()
-    }
-
-
-
     public func leave() { dispatchGroup.leave() }
 
 
@@ -115,29 +101,22 @@ extension KvTaskGroup {
 
 
 
-    public func leave(with result: Swift.Result<T, Error>) {
+    public func leave(with result: KvCancellableResult<T?>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
-        leave()
+        dispatchGroup.leave()
     }
 
 
 
-    public func leave(with result: Swift.Result<T?, Error>) {
+    public func leave(with result: KvCancellableResult<T>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
-        leave()
-    }
-
-
-
-    @inlinable
-    public func leave(catching body: () throws -> T?) {
-        leave(with: Result(catching: body))
+        dispatchGroup.leave()
     }
 
 }
@@ -150,7 +129,7 @@ extension KvTaskGroup {
 extension KvTaskGroup {
 
     /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*. The *callbcak* is invoked with *.success(.none)* if *cancel()* has been invoked.
-    public func notify(on queue: DispatchQueue, callback: @escaping (Result) -> Void) {
+    public func notify(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T?>) -> Void) {
         dispatchGroup.notify(queue: queue) {
             callback(KvThreadKit.locking(self.mutationLock) {
                 self.cancellables.removeAll()
@@ -196,7 +175,7 @@ extension KvTaskGroup {
         fileprivate var isCancelled = false
         fileprivate var errors: Errors?
 
-        var result: Result {
+        var result: KvCancellableResult<T?> {
             switch (errors, isCancelled) {
             case (.none, false):
                 return .success(value)
@@ -224,7 +203,7 @@ extension KvTaskGroup {
         }
 
 
-        mutating func merge(with result: Result) {
+        mutating func merge(with result: KvCancellableResult<T?>) {
             switch result {
             case .cancelled:
                 cancel()
@@ -240,24 +219,15 @@ extension KvTaskGroup {
         }
 
 
-        mutating func merge(with result: Swift.Result<T, Error>) {
+        mutating func merge(with result: KvCancellableResult<T>) {
             switch result {
-            case .failure(let error):
-                merge(with: error)
-            case .success(let value):
-                merge(with: value)
-            }
-        }
+            case .cancelled:
+                cancel()
 
-
-        mutating func merge(with result: Swift.Result<T?, Error>) {
-            switch result {
             case .failure(let error):
                 merge(with: error)
 
             case .success(let value):
-                guard let value = value else { break }
-
                 merge(with: value)
             }
         }
@@ -306,29 +276,12 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
 
 
-    public func leave(with result: Swift.Result<T.Element, Error>) {
+    public func leave(with result: KvCancellableResult<T.Element>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
         leave()
-    }
-
-
-
-    public func leave(with result: Swift.Result<T.Element?, Error>) {
-        KvThreadKit.locking(mutationLock) {
-            resultAccumulator.merge(with: result)
-        }
-
-        leave()
-    }
-
-
-
-    @inlinable
-    public func leave(catching body: () throws -> T.Element?) {
-        leave(with: KvCancellableResult(catching: body))
     }
 
 }
@@ -372,24 +325,15 @@ extension KvTaskGroup.ResultAccumulator where T : RangeReplaceableCollection {
     }
 
 
-    mutating func merge(with result: Result<T.Element, Error>) {
+    mutating func merge(with result: KvCancellableResult<T.Element>) {
         switch result {
-        case .failure(let error):
-            merge(with: error)
-        case .success(let value):
-            merge(with: value)
-        }
-    }
+        case .cancelled:
+            cancel()
 
-
-    mutating func merge(with result: Result<T.Element?, Error>) {
-        switch result {
         case .failure(let error):
             merge(with: error)
 
         case .success(let value):
-            guard let value = value else { break }
-
             merge(with: value)
         }
     }
