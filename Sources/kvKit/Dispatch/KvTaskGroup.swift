@@ -405,12 +405,18 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 extension KvTaskGroup.ResultAccumulator where T : RangeReplaceableCollection {
 
     mutating func merge(with value: T) {
+        guard !isCancelled else { return }
+
         self.value?.append(contentsOf: value)
+            ?? (self.value = .init(value))
     }
 
 
     mutating func merge(with value: T.Element) {
+        guard !isCancelled else { return }
+
         self.value?.append(value)
+            ?? (self.value = .init(CollectionOfOne(value)))
     }
 
 
