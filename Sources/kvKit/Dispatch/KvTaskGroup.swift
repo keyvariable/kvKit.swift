@@ -284,16 +284,6 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
 
 
-    public func leave(with result: KvCancellableResult<T.Element?>) {
-        KvThreadKit.locking(mutationLock) {
-            resultAccumulator.merge(with: result)
-        }
-
-        leave()
-    }
-
-
-
     public func leave(with result: KvCancellableResult<T.Element>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
@@ -324,22 +314,6 @@ extension KvTaskGroup.ResultAccumulator where T : RangeReplaceableCollection {
 
         self.value?.append(value)
             ?? (self.value = .init(CollectionOfOne(value)))
-    }
-
-
-    mutating func merge(with result: KvCancellableResult<T.Element?>) {
-        switch result {
-        case .cancelled:
-            cancel()
-            
-        case .failure(let error):
-            merge(with: error)
-
-        case .success(let value):
-            guard let value = value else { return }
-
-            merge(with: value)
-        }
     }
 
 
