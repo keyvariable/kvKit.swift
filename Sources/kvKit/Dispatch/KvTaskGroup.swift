@@ -140,7 +140,7 @@ extension KvTaskGroup {
     public func enter(_ taskInitiator: () -> Cancellable) -> Cancellable {
         let cancellable = taskInitiator()
 
-        enter(taskInitiator())
+        enter(cancellable)
 
         return cancellable
     }
@@ -201,6 +201,7 @@ extension KvTaskGroup {
 
 
 
+    @inlinable
     public func leave(catching body: () throws -> T?) {
         leave(with: .init(catching: body))
     }
@@ -391,6 +392,7 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
 
 
+    @inlinable
     public func leave(catching body: () throws -> T.Element?) {
         leave(with: .init(catching: body))
     }
