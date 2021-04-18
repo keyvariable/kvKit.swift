@@ -80,25 +80,27 @@ extension KvCachedAssets {
             let urlSession = self.urlSession
 
             let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
-                completion(.init {
-                    do {
-                        guard error == nil else { throw error! }
-                        guard let response = response else { throw KvError("Response is missing for download task with \(urlRequest)") }
+                DispatchQueue.global(qos: .userInitiated).async {
+                    completion(.init {
+                        do {
+                            guard error == nil else { throw error! }
+                            guard let response = response else { throw KvError("Response is missing for download task with \(urlRequest)") }
 
-                        switch response {
-                        case let httpResponse as HTTPURLResponse:
-                            guard httpResponse.statusCode == 200 else { throw KvError("Unexpected HTTP status code \(httpResponse.statusCode) downloading data with \(urlRequest)") }
-                        default:
-                            break
+                            switch response {
+                            case let httpResponse as HTTPURLResponse:
+                                guard httpResponse.statusCode == 200 else { throw KvError("Unexpected HTTP status code \(httpResponse.statusCode) downloading data with \(urlRequest)") }
+                            default:
+                                break
+                            }
                         }
-                    }
 
-                    guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
+                        guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
 
-                    urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
+                        urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
 
-                    return data
-                })
+                        return data
+                    })
+                }
             }
 
             defer { task.resume() }
@@ -137,7 +139,9 @@ extension KvCachedAssets {
         var iterator = urlRequests.makeIterator()
 
         guard let firstUrlRequest = iterator.next() else {
-            defer { completion(.success(.init())) }
+            DispatchQueue.global(qos: .userInitiated).async {
+                completion(.success(.init()))
+            }
             return nil
         }
 
