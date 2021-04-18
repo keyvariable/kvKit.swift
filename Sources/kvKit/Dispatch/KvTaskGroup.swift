@@ -66,11 +66,17 @@ extension KvTaskGroup {
 
 
 
-    @discardableResult @inlinable
+    @discardableResult
     public func enter(_ taskInitiator: () -> Cancellable?) -> Cancellable? {
+        dispatchGroup.enter()
+
         let cancellable = taskInitiator()
 
-        enter(cancellable)
+        if cancellable != nil {
+            KvThreadKit.locking(mutationLock) {
+                cancellables.append(cancellable!)
+            }
+        }
 
         return cancellable
     }
