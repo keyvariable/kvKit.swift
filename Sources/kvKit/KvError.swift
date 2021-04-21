@@ -51,11 +51,11 @@ public struct KvError {
 
 
 
-// MARK: Error Protocol
+// MARK: : LocalizedError
 
-extension KvError : Error {
+extension KvError : LocalizedError {
 
-    public var localizedDescription: String { return "\(message) | \(file):\(line)" }
+    public var errorDescription: String? { "\(message) | \(file):\(line)" }
 
 }
 
