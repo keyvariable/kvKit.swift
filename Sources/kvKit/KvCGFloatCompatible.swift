@@ -65,15 +65,15 @@ extension Double : KvCGFloatCompatible {
 
 // MARK: Float16
 
+#if os(iOS)
 @available(iOS 14.0, *)
-@available(macOS, unavailable)
-@available(macCatalyst, unavailable)
 extension Float16 : KvCGFloatCompatible {
 
     @inlinable
     public func cgFloat() -> CGFloat { .init(self) }
 
 }
+#endif // iOS
 
 
 

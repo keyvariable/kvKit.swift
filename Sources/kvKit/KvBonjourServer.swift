@@ -27,7 +27,7 @@ import Foundation
 
 // MARK: - KvBonjourServerDelegate
 
-public protocol KvBonjourServerDelegate : class {
+public protocol KvBonjourServerDelegate : AnyObject {
 
     func bonjourServer(_ server: KvBonjour.Server, didAccept client: KvBonjour.Client)
 

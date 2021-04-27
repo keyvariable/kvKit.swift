@@ -37,7 +37,7 @@ public class KvDebug {
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @inlinable
-    public static func pause(_ reason: String, _ file: String = #file, _ line: Int = #line) {
+    public static func pause(_ reason: String, _ file: String = #fileID, _ line: Int = #line) {
         let message = "\(reason) | \(file):\(line)"
 
         print(message)
@@ -59,7 +59,7 @@ public class KvDebug {
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @inlinable
-    public static func pause<T>(code: T, _ reason: String, _ file: String = #file, _ line: Int = #line) -> T {
+    public static func pause<T>(code: T, _ reason: String, _ file: String = #fileID, _ line: Int = #line) -> T {
         pause(reason, file, line)
         return code
     }
@@ -76,7 +76,7 @@ public class KvDebug {
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @discardableResult @inlinable
-    public static func pause<E: Error>(_ error: E, _ file: String = #file, _ line: Int = #line) -> E {
+    public static func pause<E: Error>(_ error: E, _ file: String = #fileID, _ line: Int = #line) -> E {
         pause((error as? KvError)?.message ?? error.localizedDescription, file, line)
         return error
     }
@@ -138,7 +138,7 @@ extension KvDebug {
 
     /// Executes *KvDebug.pause()* when invoked when *Thread.isMainThread* returns *false*.
     @inlinable
-    public static func mainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #file, _ line: Int = #line) {
+    public static func mainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #fileID, _ line: Int = #line) {
         #if DEBUG
         guard !Thread.isMainThread else { return }
 
@@ -158,7 +158,7 @@ extension KvDebug {
     @propertyWrapper
     public struct MainThreadCheck<Value> {
 
-        public init(wrappedValue: Value, _ file: String = #file, _ line: Int = #line) {
+        public init(wrappedValue: Value, _ file: String = #fileID, _ line: Int = #line) {
             value = wrappedValue
 
             self.file = file

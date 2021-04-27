@@ -49,76 +49,6 @@ public class KvTaskGroup<T> {
 
 
 
-// MARK: .Result
-
-@available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension KvTaskGroup {
-
-    public enum Result {
-
-        case success(T?), cancelled, failure(Error)
-
-
-        public init(catching body: () throws -> T?) {
-            do { self = .success(try body()) }
-            catch { self = .failure(error) }
-        }
-
-
-        public func get() throws -> T? {
-            switch self {
-            case .cancelled:
-                return nil
-            case .failure(let error):
-                throw error
-            case .success(let value):
-                return value
-            }
-        }
-
-
-        public func map<Y>(_ tranform: (T) -> Y?) -> KvTaskGroup<Y>.Result {
-            switch self {
-            case .cancelled:
-                return .cancelled
-            case .failure(let error):
-                return .failure(error)
-            case .success(let value):
-                switch value {
-                case .none:
-                    return .success(nil)
-                case .some(let value):
-                    return .success(tranform(value))
-                }
-            }
-        }
-
-    }
-
-}
-
-
-
-// MARK: <Void>.Result
-
-@available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension KvTaskGroup.Result {
-
-    public func map<Y>() -> KvTaskGroup<Y>.Result {
-        switch self {
-        case .cancelled:
-            return .cancelled
-        case .failure(let error):
-            return .failure(error)
-        case .success:
-            return .success(nil)
-        }
-    }
-
-}
-
-
-
 // MARK: Managing Tasks
 
 @available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -136,23 +66,19 @@ extension KvTaskGroup {
 
 
 
-    @discardableResult @inlinable
-    public func enter(_ taskInitiator: () -> Cancellable) -> Cancellable {
+    @discardableResult
+    public func enter(_ taskInitiator: () -> Cancellable?) -> Cancellable? {
+        dispatchGroup.enter()
+
         let cancellable = taskInitiator()
 
-        enter(cancellable)
-
-        return cancellable
-    }
-
-
-
-    public func leave(with result: Result) {
-        KvThreadKit.locking(mutationLock) {
-            resultAccumulator.merge(with: result)
+        if cancellable != nil {
+            KvThreadKit.locking(mutationLock) {
+                cancellables.append(cancellable!)
+            }
         }
 
-        dispatchGroup.leave()
+        return cancellable
     }
 
 
@@ -181,29 +107,22 @@ extension KvTaskGroup {
 
 
 
-    public func leave(with result: Swift.Result<T, Error>) {
+    public func leave(with result: KvCancellableResult<T?>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
-        leave()
+        dispatchGroup.leave()
     }
 
 
 
-    public func leave(with result: Swift.Result<T?, Error>) {
+    public func leave(with result: KvCancellableResult<T>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
-        leave()
-    }
-
-
-
-    @inlinable
-    public func leave(catching body: () throws -> T?) {
-        leave(with: .init(catching: body))
+        dispatchGroup.leave()
     }
 
 }
@@ -215,14 +134,32 @@ extension KvTaskGroup {
 @available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension KvTaskGroup {
 
-    /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*. The *callbcak* is invoked with *.success(.none)* if *cancel()* has been invoked.
-    public func notify(on queue: DispatchQueue, callback: @escaping (Result) -> Void) {
+    /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*. The *callbcak* is invoked with *.success(.none)* if result value has never been provided.
+    public func notify(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T?>) -> Void) {
         dispatchGroup.notify(queue: queue) {
             callback(KvThreadKit.locking(self.mutationLock) {
                 self.cancellables.removeAll()
                 defer { self.resultAccumulator.reset() }
 
                 return self.resultAccumulator.result
+            })
+        }
+    }
+
+
+
+    /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*.
+    public func notifyUnwrapping(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T>) -> Void) {
+        dispatchGroup.notify(queue: queue) {
+            callback(KvThreadKit.locking(self.mutationLock) {
+                self.cancellables.removeAll()
+                defer { self.resultAccumulator.reset() }
+
+                return self.resultAccumulator.result.map { value in
+                    guard let value = value else { throw KvError("Force unwrapping nil result") }
+
+                    return value
+                }
             })
         }
     }
@@ -262,7 +199,7 @@ extension KvTaskGroup {
         fileprivate var isCancelled = false
         fileprivate var errors: Errors?
 
-        var result: Result {
+        var result: KvCancellableResult<T?> {
             switch (errors, isCancelled) {
             case (.none, false):
                 return .success(value)
@@ -290,7 +227,7 @@ extension KvTaskGroup {
         }
 
 
-        mutating func merge(with result: Result) {
+        mutating func merge(with result: KvCancellableResult<T?>) {
             switch result {
             case .cancelled:
                 cancel()
@@ -306,24 +243,15 @@ extension KvTaskGroup {
         }
 
 
-        mutating func merge(with result: Swift.Result<T, Error>) {
+        mutating func merge(with result: KvCancellableResult<T>) {
             switch result {
-            case .failure(let error):
-                merge(with: error)
-            case .success(let value):
-                merge(with: value)
-            }
-        }
+            case .cancelled:
+                cancel()
 
-
-        mutating func merge(with result: Swift.Result<T?, Error>) {
-            switch result {
             case .failure(let error):
                 merge(with: error)
 
             case .success(let value):
-                guard let value = value else { break }
-
                 merge(with: value)
             }
         }
@@ -362,39 +290,12 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
 
 
-    public func leave(with result: KvTaskGroup<T.Element>.Result) {
+    public func leave(with result: KvCancellableResult<T.Element>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
         leave()
-    }
-
-
-
-    public func leave(with result: Swift.Result<T.Element, Error>) {
-        KvThreadKit.locking(mutationLock) {
-            resultAccumulator.merge(with: result)
-        }
-
-        leave()
-    }
-
-
-
-    public func leave(with result: Swift.Result<T.Element?, Error>) {
-        KvThreadKit.locking(mutationLock) {
-            resultAccumulator.merge(with: result)
-        }
-
-        leave()
-    }
-
-
-
-    @inlinable
-    public func leave(catching body: () throws -> T.Element?) {
-        leave(with: .init(catching: body))
     }
 
 }
@@ -422,40 +323,15 @@ extension KvTaskGroup.ResultAccumulator where T : RangeReplaceableCollection {
     }
 
 
-    mutating func merge(with result: KvTaskGroup<T.Element>.Result) {
+    mutating func merge(with result: KvCancellableResult<T.Element>) {
         switch result {
         case .cancelled:
             cancel()
-            
+
         case .failure(let error):
             merge(with: error)
 
         case .success(let value):
-            guard let value = value else { return }
-
-            merge(with: value)
-        }
-    }
-
-
-    mutating func merge(with result: Result<T.Element, Error>) {
-        switch result {
-        case .failure(let error):
-            merge(with: error)
-        case .success(let value):
-            merge(with: value)
-        }
-    }
-
-
-    mutating func merge(with result: Result<T.Element?, Error>) {
-        switch result {
-        case .failure(let error):
-            merge(with: error)
-
-        case .success(let value):
-            guard let value = value else { break }
-
             merge(with: value)
         }
     }

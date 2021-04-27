@@ -925,9 +925,9 @@ extension KvStatistics {
 
             public private(set) lazy var variance: Value = count > 0 ? value / count : 0
 
-            public private(set) lazy var unbiasedStandardDeviation: Value = { $0 > 0 ? (value / $0).squareRoot() : 0 }(count - 1)
+            public private(set) lazy var unbiasedStandardDeviation: Value = { $0 > 0 ? (value / $0).squareRoot() : 0 }(count - 1 as Value)
 
-            public private(set) lazy var unbiasedVariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1)
+            public private(set) lazy var unbiasedVariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1 as Value)
 
 
 
@@ -1263,7 +1263,7 @@ extension KvStatistics {
 
             public private(set) lazy var covariance: Value = count > 0 ? value / count : 0
 
-            public private(set) lazy var unbiasedCovariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1)
+            public private(set) lazy var unbiasedCovariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1 as Value)
 
 
 

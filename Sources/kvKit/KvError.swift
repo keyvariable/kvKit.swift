@@ -34,7 +34,7 @@ public struct KvError {
 
 
 
-    public init(_ message: String, _ file: String = #file, _ line: Int = #line) {
+    public init(_ message: String, _ file: String = #fileID, _ line: Int = #line) {
         self.message = message
         self.file = file
         self.line = line
@@ -43,7 +43,7 @@ public struct KvError {
 
 
     @inlinable
-    public static func inconsistency(_ message: String, _ file: String = #file, _ line: Int = #line) -> KvError {
+    public static func inconsistency(_ message: String, _ file: String = #fileID, _ line: Int = #line) -> KvError {
         .init("Internal inconsistency: \(message)", file, line)
     }
 
@@ -51,11 +51,11 @@ public struct KvError {
 
 
 
-// MARK: Error Protocol
+// MARK: : LocalizedError
 
-extension KvError : Error {
+extension KvError : LocalizedError {
 
-    public var localizedDescription: String { return "\(message) | \(file):\(line)" }
+    public var errorDescription: String? { "\(message) | \(file):\(line)" }
 
 }
 

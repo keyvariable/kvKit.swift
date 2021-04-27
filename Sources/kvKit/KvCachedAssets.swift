@@ -60,7 +60,7 @@ extension KvCachedAssets {
 
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult @inlinable
-    public func withData(for url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
+    public func withData(for url: URL, completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable? {
         withData(for: .init(url: url), completion: completion)
     }
 
@@ -68,28 +68,61 @@ extension KvCachedAssets {
 
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData(for urlRequest: URLRequest, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
-        guard let task = dataTask(with: urlRequest, completion: completion)
-        else {
-            // TODO: Return nil.
-            return AnyCancellable { }
-        }
+    public func withData(for urlRequest: URLRequest, completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable? {
+        switch urlRequest.url {
+        case let .some(url) where url.isFileURL:
+            DispatchQueue.global(qos: .userInitiated).async {
+                completion(.init { try .init(contentsOf: url) })
+            }
+            return nil
 
-        defer { task.resume() }
+        default:
+            let urlSession = self.urlSession
 
-        return AnyCancellable {
-            task.cancel()
+            let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    completion(.init {
+                        do {
+                            guard error == nil else { throw error! }
+                            guard let response = response else { throw KvError("Response is missing for download task with \(urlRequest)") }
+
+                            switch response {
+                            case let httpResponse as HTTPURLResponse:
+                                guard httpResponse.statusCode == 200 else { throw KvError("Unexpected HTTP status code \(httpResponse.statusCode) downloading data with \(urlRequest)") }
+                            default:
+                                break
+                            }
+                        }
+
+                        guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
+
+                        urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
+
+                        return data
+                    })
+                }
+            }
+
+            defer { task.resume() }
+
+            return AnyCancellable {
+                task.cancel()
+            }
         }
     }
 
 
 
-    /// - Note: Data objects passed to *completion* match order of *urls*. First data object is for first URL etc.
-    ///
-    /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
+    public typealias UrlRequestDataPair = KeyValuePairs<URLRequest, Data>.Element
+
+    public typealias UrlRequestDataPairs = [UrlRequestDataPair]
+
+
+
+    /// - Note: When download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult @inlinable
-    public func withData<URLs>(for urls: URLs, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    public func withData<URLs>(for urls: URLs, completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
     where URLs : Sequence, URLs.Element == URL
     {
         withData(for: urls.lazy.map { .init(url: $0) }, completion: completion)
@@ -97,188 +130,51 @@ extension KvCachedAssets {
 
 
 
-    /// - Note: Data objects passed to *completion* match order of *urls*. First data object is for first URL etc.
-    ///
-    /// - Note: Then download for any of *urls* fails then all other downloads are cancelled.
+    /// - Note: When download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData<URLRequests>(for urlRequests: URLRequests, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    public func withData<URLRequests>(for urlRequests: URLRequests, completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
     where URLRequests : Sequence, URLRequests.Element == URLRequest
     {
-        let taskSet = URLSessionTaskSet<Data>(urlRequests: urlRequests)
-        defer {
-            taskSet.run(
-                taskFabric: { (urlRequest, taskHandler) in dataTask(with: urlRequest, completion: taskHandler) },
-                completion: completion)
-        }
+        var iterator = urlRequests.makeIterator()
 
-        return taskSet
-    }
-
-
-
-    private static func processTaskCompletion(_ urlRequest: URLRequest, _ response: URLResponse?, _ error: Error?) throws {
-        guard error == nil else { throw error! }
-        guard let response = response else { throw KvError("Response is missing for download task with \(urlRequest)") }
-
-        switch response {
-        case let httpResponse as HTTPURLResponse:
-            guard httpResponse.statusCode == 200 else { throw KvError("Unexpected HTTP status code \(httpResponse.statusCode) downloading data with \(urlRequest)") }
-        default:
-            break
-        }
-    }
-
-
-
-    private func dataTask(with urlRequest: URLRequest, completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionDataTask? {
-        switch urlRequest.url {
-        case let .some(url) where url.isFileURL:
-            completion(.init { try .init(contentsOf: url) })
-
+        guard let firstUrlRequest = iterator.next() else {
+            DispatchQueue.global(qos: .userInitiated).async {
+                completion(.success(.init()))
+            }
             return nil
-
-        default:
-            let urlSession = self.urlSession
-
-            return urlSession.dataTask(with: urlRequest) { (data, response, error) in
-                completion(.init {
-                    try Self.processTaskCompletion(urlRequest, response, error)
-
-                    guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
-
-                    urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
-
-                    return data
-                })
-            }
-        }
-    }
-
-
-
-    // MARK: .URLSessionTaskSet
-
-    private class URLSessionTaskSet<T> : Cancellable {
-
-        typealias TaskResult = Result<T, Error>
-        typealias TaskHandler = (TaskResult) -> Void
-        typealias TaskFabric = (URLRequest, @escaping TaskHandler) -> URLSessionTask?
-
-
-
-        init<URLRequests>(urlRequests: URLRequests)
-        where URLRequests : Sequence, URLRequests.Element == URLRequest
-        {
-            items = urlRequests.map { .init(for: $0) }
         }
 
 
-
-        private let items: [Item]
-
-
-
-        // MARK: Life Cycle
-
-        func run(taskFabric: TaskFabric, completion: @escaping (Result<[T], Error>) -> Void) {
-            let dispatchGroup = DispatchGroup()
-
-            items.forEach { item in
-                dispatchGroup.enter()
-
-                item.run(taskFabric) { [weak self] (result) in
-                    defer { dispatchGroup.leave() }
-
-                    if case .failure = result {
-                        self?.cancel()
+        func Run(_ urlRequest: URLRequest, in taskGroup: KvTaskGroup<UrlRequestDataPairs>) {
+            taskGroup.enter {
+                withData(for: urlRequest) { (dataResult) in
+                    switch dataResult {
+                    case .cancelled, .failure:
+                        taskGroup.cancel()
+                    case .success:
+                        break
                     }
+
+                    taskGroup.leave(with: dataResult.map { data in (urlRequest, data) })
                 }
-            }
-
-            // - Note: `self` is strongly captured to prevent it's release.
-            dispatchGroup.notify(queue: .global(qos: .userInitiated)) {
-                var payload: [T] = .init()
-                var errorMessages: [String] = .init()
-
-                self.items.forEach { context in
-                    switch context.result {
-                    case .success(let value):
-                        payload.append(value)
-                    case .failure(let error):
-                        errorMessages.append(error.localizedDescription)
-                    case .none:
-                        errorMessages.append("Unknown error")
-                    }
-                }
-
-                completion(errorMessages.isEmpty ? .success(payload) : .failure(KvError(errorMessages.joined(separator: "\n"))))
             }
         }
 
 
+        let taskGroup = KvTaskGroup<UrlRequestDataPairs>()
 
-        func cancel() {
-            items.forEach { $0.cancel() }
+        Run(firstUrlRequest, in: taskGroup)
+
+        while let urlRequest = iterator.next() {
+            Run(urlRequest, in: taskGroup)
         }
 
-
-
-        // MARK: .Item
-
-        class Item {
-
-            let urlRequest: URLRequest
-
-            var result: TaskResult? {
-                get { KvThreadKit.locking(mutationLock) { _result } }
-                set { KvThreadKit.locking(mutationLock) { _result = newValue } }
-            }
-
-
-            init(for urlRequest: URLRequest) {
-                self.urlRequest = urlRequest
-            }
-
-
-            private let mutationLock = NSLock()
-
-            private var task: URLSessionTask? {
-                didSet {
-                    oldValue?.cancel()
-                    task?.resume()
-                }
-            }
-
-            private var _result: TaskResult? = nil
-
-
-            // MARK: Life Cycle
-
-            func run(_ taskFabric: TaskFabric, completion: @escaping (TaskResult) -> Void) {
-                do {
-                    mutationLock.lock()
-                    defer { mutationLock.unlock() }
-
-                    guard _result == nil else { return completion(_result!) }
-                }
-
-                task = taskFabric(urlRequest) { [weak self] (result) in
-                    defer { completion(result) }
-
-                    self?.result = result
-                }
-            }
-
-
-            func cancel() {
-                guard result == nil else { return }
-
-                task = nil
-            }
-
+        taskGroup.notify(on: .global(qos: .userInitiated)) {
+            completion($0.map { $0 ?? .init() })
         }
 
+        return taskGroup
     }
 
 }
@@ -295,6 +191,52 @@ extension KvCachedAssets {
 
     public func removeCachedResponse(for urlRequest: URLRequest) {
         urlSession.configuration.urlCache?.removeCachedResponse(for: urlRequest)
+    }
+
+}
+
+
+
+// MARK: Legacy
+
+extension KvCachedAssets {
+
+    @available(*, unavailable, message: "Use actual overload of this method")
+    @available(iOS 13.0, macOS 10.15, *)
+    @discardableResult @inlinable
+    public func withData(for url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
+        fatalError("Attempt to invoke method marked as unavailable")
+    }
+
+
+
+    @available(*, unavailable, message: "Use actual overload of this method")
+    @available(iOS 13.0, macOS 10.15, *)
+    @discardableResult
+    public func withData(for urlRequest: URLRequest, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
+        fatalError("Attempt to invoke method marked as unavailable")
+    }
+
+
+
+    @available(*, unavailable, message: "Use actual overload of this method")
+    @available(iOS 13.0, macOS 10.15, *)
+    @discardableResult @inlinable
+    public func withData<URLs>(for urls: URLs, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    where URLs : Sequence, URLs.Element == URL
+    {
+        fatalError("Attempt to invoke method marked as unavailable")
+    }
+
+
+
+    @available(*, unavailable, message: "Use actual overload of this method")
+    @available(iOS 13.0, macOS 10.15, *)
+    @discardableResult
+    public func withData<URLRequests>(for urlRequests: URLRequests, completion: @escaping (Result<[Data], Error>) -> Void) -> Cancellable
+    where URLRequests : Sequence, URLRequests.Element == URLRequest
+    {
+        fatalError("Attempt to invoke method marked as unavailable")
     }
 
 }
