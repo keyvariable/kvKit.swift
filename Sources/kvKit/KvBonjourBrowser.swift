@@ -27,7 +27,7 @@ import Foundation
 
 // MARK: - KvBonjourBrowserDelegate
 
-public protocol KvBonjourBrowserDelegate : class {
+public protocol KvBonjourBrowserDelegate : AnyObject {
 
     func bonjourBrowserDidStart(_ browser: KvBonjour.Browser)
     func bonjourBrowserDidStop(_ browser: KvBonjour.Browser)

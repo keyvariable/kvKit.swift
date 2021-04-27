@@ -27,7 +27,7 @@ import Foundation
 
 // MARK: - KvBonjourClientDelegate
 
-public protocol KvBonjourClientDelegate : class {
+public protocol KvBonjourClientDelegate : AnyObject {
 
     func bonjourClientDidStart(_ client: KvBonjour.Client)
     func bonjourClientDidStop(_ client: KvBonjour.Client)
@@ -45,7 +45,7 @@ public protocol KvBonjourClientDelegate : class {
 
 // MARK: - KvBonjourClientStreamsDelegate
 
-fileprivate protocol KvBonjourClientStreamsDelegate : class {
+fileprivate protocol KvBonjourClientStreamsDelegate : AnyObject {
 
     func streamsDidStart(_ streams: KvBonjour.Client.Streams)
     func streamsDidStop(_ streams: KvBonjour.Client.Streams)
