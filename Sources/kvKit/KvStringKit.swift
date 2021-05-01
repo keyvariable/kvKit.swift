@@ -568,10 +568,91 @@ extension KvStringKit {
 
 
 
+// MARK: .Accumulator
+
+extension KvStringKit {
+
+    public struct Accumulator {
+
+        public private(set) var string: String?
+
+        public var separator: String?
+
+
+
+        public init(initialValue: String? = nil, separator: String? = nil) {
+            self.string = initialValue
+            self.separator = separator
+        }
+
+
+
+        public init<Elements>(_ elements: Elements, separator: String? = nil)
+        where Elements : Sequence, Elements.Element : StringProtocol
+        {
+            self.init()
+
+            append(elements)
+        }
+
+
+
+        // MARK: Mutation
+
+        public mutating func append(_ element: String) {
+            guard !element.isEmpty else { return }
+
+            switch string?.isEmpty ?? true {
+            case true:
+                string = element
+
+            case false:
+                if let separator = separator {
+                    string!.append(separator)
+                }
+                string!.append(element)
+            }
+        }
+
+
+
+        public mutating func append<S>(_ element: S) where S : StringProtocol {
+            guard !element.isEmpty else { return }
+
+            switch string?.isEmpty ?? true {
+            case true:
+                string = .init(element)
+
+            case false:
+                if let separator = separator {
+                    string!.append(separator)
+                }
+                string!.append(contentsOf: element)
+            }
+        }
+
+
+
+        public mutating func append<Elements>(_ elements: Elements) where Elements : Sequence, Elements.Element : StringProtocol {
+            switch separator {
+            case .some(let separator):
+                append(elements.joined(separator: separator))
+            case .none:
+                append(elements.joined())
+            }
+        }
+
+    }
+
+}
+
+
+
 // MARK: Composing
 
 extension KvStringKit {
 
+    @available(*, deprecated, message: "Use KvStringKit.Accumulator instead")
     public static func append<S1, S2>(_ string: inout String, with component: S1, separator: S2) where S1 : StringProtocol, S2 : StringProtocol {
         if !string.isEmpty {
             string.append(contentsOf: separator)
@@ -582,6 +663,7 @@ extension KvStringKit {
 
 
 
+    @available(*, deprecated, message: "Use KvStringKit.Accumulator instead")
     public static func append<S1, S2>(_ string: inout String, with firstComponent: S1, _ secondComponent: S1, _ otherComponents: S1..., separator: S2)
         where S1 : StringProtocol, S2 : StringProtocol
     {

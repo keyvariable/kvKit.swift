@@ -55,39 +55,20 @@ extension KvSwiftUiKit {
 
 
     private static func alertContent(for error: Error) -> (title: Text, message: Text?) {
+        let message: Text? = {
+            var message = KvStringKit.Accumulator(initialValue: error.localizedDescription, separator: "\n")
 
-        func Message(from error: Error) -> Text? {
-
-            func Append(_ dest: inout [String], from error: Error) {
-
-                func AppendIfPresent(_ item: String?) {
-                    guard let item = item else { return }
-
-                    dest.append(item)
-                }
-
-
-                switch error {
-                case let nsError as NSError:
-                    AppendIfPresent(nsError.localizedFailureReason)
-                    AppendIfPresent(nsError.localizedRecoverySuggestion)
-
-                default:
-                    dest.append(error.localizedDescription)
-                }
+            if let error = error as? LocalizedError {
+                message.append(error.failureReason ?? "")
+                message.append(error.recoverySuggestion ?? "")
             }
 
+            guard let string = message.string else { return nil }
 
-            var components: [String] = .init()
+            return Text(string)
+        }()
 
-            Append(&components, from: error)
-
-            return !components.isEmpty ? Text(components.joined(separator: "\n")) : nil
-        }
-
-
-        return (title: Text((error as? KvError)?.message ?? error.localizedDescription),
-                message: Message(from: error))
+        return (title: Text(error.localizedDescription), message: message)
     }
 
 }
