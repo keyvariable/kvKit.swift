@@ -152,8 +152,8 @@ extension KvUI {
         public static func present(message error: Error, title: String = "Error", in viewController: UIViewController? = nil, completion: (() -> Void)? = nil) {
             let message: String = {
                 switch error {
-                case let nsError as NSError:
-                    return [ nsError.localizedDescription, nsError.localizedFailureReason, nsError.localizedRecoverySuggestion ].lazy
+                case let error as LocalizedError:
+                    return [ error.localizedDescription, error.failureReason, error.recoverySuggestion ].lazy
                         .compactMap({ $0 }).joined(separator: "\n")
                 default:
                     return error.localizedDescription
