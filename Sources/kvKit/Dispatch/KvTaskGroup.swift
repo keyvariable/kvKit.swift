@@ -197,7 +197,7 @@ extension KvTaskGroup {
 
         fileprivate var value: T?
         fileprivate var isCancelled = false
-        fileprivate var errors: Errors?
+        fileprivate var errors: KvError.Accumulator<Error>?
 
         var result: KvCancellableResult<T?> {
             switch (errors, isCancelled) {
@@ -334,54 +334,6 @@ extension KvTaskGroup.ResultAccumulator where T : RangeReplaceableCollection {
         case .success(let value):
             merge(with: value)
         }
-    }
-
-}
-
-
-
-// MARK: .Errors
-
-@available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension KvTaskGroup {
-
-    public struct Errors : Error {
-
-        public var elements: [Error] = .init()
-
-
-        public init() { }
-
-
-        public init(_ error: Error) {
-            elements = [ error ]
-        }
-
-
-        public init<Errors>(_ errors: Errors) where Errors : Sequence, Errors.Element == Error {
-            switch errors {
-            case let errors as [Error]:
-                elements = errors
-            default:
-                elements = .init(errors)
-            }
-        }
-
-
-        // MARK: : Error
-
-        public var localizedDescription: String { elements.lazy.map({ $0.localizedDescription }).joined(separator: "\n") }
-
-
-        // MARK: Operations
-
-        mutating public func append(_ error: Error) { elements.append(error) }
-
-
-        mutating public func append<Errors>(contentsOf errors: Errors) where Errors : Sequence, Errors.Element == Error {
-            elements.append(contentsOf: errors)
-        }
-
     }
 
 }
