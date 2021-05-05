@@ -79,14 +79,14 @@ extension KvCancellableResult {
 
 
 
-    public func map<Y>(_ tranform: (T) throws -> Y) -> KvCancellableResult<Y> {
+    public func map<Y>(_ transform: (T) throws -> Y) -> KvCancellableResult<Y> {
         switch self {
         case .cancelled:
             return .cancelled
         case .failure(let error):
             return .failure(error)
         case .success(let value):
-            do { return .success(try tranform(value)) }
+            do { return .success(try transform(value)) }
             catch { return .failure(error) }
         }
     }
