@@ -67,6 +67,22 @@ extension KvUI {
 
 
 
+// MARK: .Image
+
+extension KvUI {
+
+    #if canImport(Cocoa)
+    /// Platform high level image type.
+    public typealias Image = NSImage
+    #elseif canImport(UIKit)
+    /// Platform high level image type.
+    public typealias Image = UIImage
+    #endif // iOS
+
+}
+
+
+
 // MARK: .Alert
 
 extension KvUI {
