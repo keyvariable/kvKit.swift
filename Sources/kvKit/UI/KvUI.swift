@@ -43,8 +43,10 @@ public class KvUI { }
 extension KvUI {
 
     #if canImport(Cocoa)
+    /// Platform high level color type.
     public typealias Color = NSColor
     #elseif canImport(UIKit)
+    /// Platform high level color type.
     public typealias Color = UIColor
     #endif // iOS
 
