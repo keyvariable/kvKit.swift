@@ -85,7 +85,14 @@ public struct KvUserDefault<Value> : KvUserDefaultWrapper {
     @inlinable
     public var wrappedValue: Value {
         get { defaults.object(forKey: key) as! Value }
-        set { defaults.set(newValue, forKey: key) }
+        set {
+            switch newValue as Any {
+            case Optional<Any>.none:
+                defaults.removeObject(forKey: key)
+            default:
+                defaults.set(newValue, forKey: key)
+            }
+        }
     }
 
 
