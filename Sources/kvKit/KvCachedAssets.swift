@@ -60,18 +60,24 @@ extension KvCachedAssets {
 
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult @inlinable
-    public func withData(for url: URL, completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable? {
-        withData(for: .init(url: url), completion: completion)
+    public func withData(for url: URL,
+                         on queue: DispatchQueue = .global(),
+                         completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable?
+    {
+        withData(for: .init(url: url), on: queue, completion: completion)
     }
 
 
 
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData(for urlRequest: URLRequest, completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable? {
+    public func withData(for urlRequest: URLRequest,
+                         on queue: DispatchQueue = .global(),
+                         completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable?
+    {
         switch urlRequest.url {
         case let .some(url) where url.isFileURL:
-            DispatchQueue.global(qos: .userInitiated).async {
+            queue.async {
                 completion(.init { try .init(contentsOf: url) })
             }
             return nil
@@ -80,7 +86,7 @@ extension KvCachedAssets {
             let urlSession = self.urlSession
 
             let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
-                DispatchQueue.global(qos: .userInitiated).async {
+                queue.async {
                     completion(.init {
                         do {
                             guard error == nil else { throw error! }
@@ -122,10 +128,12 @@ extension KvCachedAssets {
     /// - Note: When download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult @inlinable
-    public func withData<URLs>(for urls: URLs, completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
+    public func withData<URLs>(for urls: URLs,
+                               on queue: DispatchQueue = .global(),
+                               completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
     where URLs : Sequence, URLs.Element == URL
     {
-        withData(for: urls.lazy.map { .init(url: $0) }, completion: completion)
+        withData(for: urls.lazy.map { .init(url: $0) }, on: queue, completion: completion)
     }
 
 
@@ -133,13 +141,13 @@ extension KvCachedAssets {
     /// - Note: When download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData<URLRequests>(for urlRequests: URLRequests, completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
+    public func withData<URLRequests>(for urlRequests: URLRequests, on queue: DispatchQueue = .global(), completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
     where URLRequests : Sequence, URLRequests.Element == URLRequest
     {
         var iterator = urlRequests.makeIterator()
 
         guard let firstUrlRequest = iterator.next() else {
-            DispatchQueue.global(qos: .userInitiated).async {
+            queue.async {
                 completion(.success(.init()))
             }
             return nil
@@ -148,7 +156,7 @@ extension KvCachedAssets {
 
         func Run(_ urlRequest: URLRequest, in taskGroup: KvTaskGroup<UrlRequestDataPairs>) {
             taskGroup.enter {
-                withData(for: urlRequest) { (dataResult) in
+                withData(for: urlRequest, on: queue) { (dataResult) in
                     switch dataResult {
                     case .cancelled, .failure:
                         taskGroup.cancel()
@@ -170,7 +178,7 @@ extension KvCachedAssets {
             Run(urlRequest, in: taskGroup)
         }
 
-        taskGroup.notify(on: .global(qos: .userInitiated)) {
+        taskGroup.notify(on: queue) {
             completion($0.map { $0 ?? .init() })
         }
 

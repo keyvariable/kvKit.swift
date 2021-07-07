@@ -61,6 +61,30 @@ extension KvThreadKit {
 
 
 
+    /// A shortcut trying to execute *body* while *lock* is being locked. *body* is not invoked then *lock* has already been locked.
+    @inlinable
+    public static func tryLocking(_ lock: NSLock, body: () throws -> Void) rethrows {
+        guard lock.try() else { return }
+
+        defer { lock.unlock() }
+
+        try body()
+    }
+
+
+
+    /// A shortcut trying to execute *body* while *lock* is being locked. *body* is not invoked then *lock* has already been locked.
+    @inlinable
+    public static func tryLocking(_ lock: NSRecursiveLock, body: () throws -> Void) rethrows {
+        guard lock.try() else { return }
+
+        defer { lock.unlock() }
+
+        try body()
+    }
+
+
+
     /// A shortcut to execute *body* while *lock* is being locked. If *lock* is `nil` then nothing execued and `nil` is returned.
     ///
     /// - Returns: The result of *body* invocation or `nil`.

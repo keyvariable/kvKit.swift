@@ -43,8 +43,10 @@ public class KvUI { }
 extension KvUI {
 
     #if canImport(Cocoa)
+    /// Platform high level color type.
     public typealias Color = NSColor
     #elseif canImport(UIKit)
+    /// Platform high level color type.
     public typealias Color = UIColor
     #endif // iOS
 
@@ -62,6 +64,22 @@ extension KvUI {
         return Color(red: components.red, green: components.green, blue: components.blue, alpha: alpha)
         #endif // canImport(UIKit)
     }
+
+}
+
+
+
+// MARK: .Image
+
+extension KvUI {
+
+    #if canImport(Cocoa)
+    /// Platform high level image type.
+    public typealias Image = NSImage
+    #elseif canImport(UIKit)
+    /// Platform high level image type.
+    public typealias Image = UIImage
+    #endif // iOS
 
 }
 
@@ -152,8 +170,8 @@ extension KvUI {
         public static func present(message error: Error, title: String = "Error", in viewController: UIViewController? = nil, completion: (() -> Void)? = nil) {
             let message: String = {
                 switch error {
-                case let nsError as NSError:
-                    return [ nsError.localizedDescription, nsError.localizedFailureReason, nsError.localizedRecoverySuggestion ].lazy
+                case let error as LocalizedError:
+                    return [ error.localizedDescription, error.failureReason, error.recoverySuggestion ].lazy
                         .compactMap({ $0 }).joined(separator: "\n")
                 default:
                     return error.localizedDescription

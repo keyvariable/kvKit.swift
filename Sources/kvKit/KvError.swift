@@ -90,3 +90,106 @@ extension KvError {
     }
 
 }
+
+
+
+// MARK: .Storage
+
+extension KvError {
+
+    public struct Accumulator<Error> : LocalizedError where Error : Swift.Error {
+
+        public private(set) var errors: [Error]
+
+
+        public var first: Error { errors.first! }
+        public var last: Error { errors.last! }
+
+
+
+        public init(_ error: Error) { errors = [ error ] }
+
+
+
+        public init(_ first: Error, _ others: Error...) {
+            errors = [ first ]
+            errors.append(contentsOf: others)
+        }
+
+
+
+        public init?<Errors>(_ errors: Errors) where Errors : Sequence, Errors.Element == Error {
+            var iterator = errors.makeIterator()
+
+            guard let first = iterator.next() else { return nil }
+
+            self.errors = [ first ]
+
+            while let next = iterator.next() {
+                self.errors.append(next)
+            }
+        }
+
+
+
+        // MARK: Mutation
+
+        public mutating func append(_ error: Error) { errors.append(error) }
+
+
+
+        // MARK: : LocalizedError
+
+        public var errorDescription: String? {
+
+            func Description(of error: Error) -> String? {
+                switch error {
+                case let error as LocalizedError:
+                    return error.errorDescription
+                default:
+                    return error.localizedDescription
+                }
+            }
+
+
+            return errors.count != 1
+                ? KvStringKit.Accumulator(errors.lazy.compactMap(Description(of:)), separator: "\n").string
+                : Description(of: errors.first!)
+        }
+
+
+        public var failureReason: String? {
+
+            func FailureReason(of error: Error) -> String? { (error as? LocalizedError)?.failureReason }
+
+
+            return errors.count != 1
+                ? KvStringKit.Accumulator(errors.lazy.compactMap(FailureReason(of:)), separator: "\n").string
+                : FailureReason(of: errors.first!)
+        }
+
+
+        public var helpAnchor: String? {
+
+            func HelpAnchor(of error: Error) -> String? { (error as? LocalizedError)?.helpAnchor }
+
+
+            return errors.count != 1
+                ? KvStringKit.Accumulator(errors.lazy.compactMap(HelpAnchor(of:)), separator: "\n").string
+                : HelpAnchor(of: errors.first!)
+        }
+
+
+        public var recoverySuggestion: String? {
+
+            func RecoverySuggestion(of error: Error) -> String? { (error as? LocalizedError)?.recoverySuggestion }
+
+
+            return errors.count != 1
+                ? KvStringKit.Accumulator(errors.lazy.compactMap(RecoverySuggestion(of:)), separator: "\n").string
+                : RecoverySuggestion(of: errors.first!)
+        }
+
+    }
+
+}

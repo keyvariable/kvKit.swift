@@ -89,6 +89,13 @@ extension KvMath {
         (1 - weight) * a + weight * b
     }
 
+
+
+    @inlinable
+    public static func lg₂<T : FixedWidthInteger>(_ x: T) -> Int {
+        x.bitWidth - (x.leadingZeroBitCount + 1)
+    }
+
 }
 
 

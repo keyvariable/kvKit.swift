@@ -57,18 +57,26 @@ public struct KvUserDefault<Value> : KvUserDefaultWrapper {
     public let key: String
 
 
+    public var defaults: UserDefaults { _defaults ?? .standard }
 
-    public init(key: String) {
+
+
+    public init(key: String, in defaults: UserDefaults? = nil) {
         self.key = key
+        self._defaults = defaults
     }
 
 
 
-    public init(wrappedValue: Value, key: String) {
-        self.init(key: key)
+    public init(wrappedValue: Value, key: String, in defaults: UserDefaults? = nil) {
+        self.init(key: key, in: defaults)
 
-        UserDefaults.standard.register(defaults: [ key : wrappedValue ])
+        self.defaults.register(defaults: [ key : wrappedValue ])
     }
+
+
+
+    private let _defaults: UserDefaults?
 
 
 
@@ -76,8 +84,15 @@ public struct KvUserDefault<Value> : KvUserDefaultWrapper {
 
     @inlinable
     public var wrappedValue: Value {
-        get { UserDefaults.standard.object(forKey: key) as! Value }
-        set { UserDefaults.standard.set(newValue, forKey: key) }
+        get { defaults.object(forKey: key) as! Value }
+        set {
+            switch newValue as Any {
+            case Optional<Any>.none:
+                defaults.removeObject(forKey: key)
+            default:
+                defaults.set(newValue, forKey: key)
+            }
+        }
     }
 
 
@@ -100,21 +115,25 @@ fileprivate class KvUserDefaultObservationToken : NSObject {
     typealias Callback = KvUserDefaultWrapper.ObservationCallback
 
 
-    init(keyPath: String, callback: @escaping Callback) {
+    init(_ defaults: UserDefaults? = nil, keyPath: String, callback: @escaping Callback) {
+        self._defaults = defaults
         self.keyPath = keyPath
         self.callback = callback
 
         super.init()
 
-        UserDefaults.standard.addObserver(self, forKeyPath: keyPath, options: [ ], context: nil)
+        self.defaults.addObserver(self, forKeyPath: keyPath, options: [ ], context: nil)
     }
 
 
     deinit {
-        UserDefaults.standard.removeObserver(self, forKeyPath: keyPath)
+        defaults.removeObserver(self, forKeyPath: keyPath)
     }
 
 
+    private var defaults: UserDefaults { _defaults ?? .standard }
+
+    private let _defaults: UserDefaults?
     private let keyPath: String
 
     private let callback: Callback
