@@ -590,7 +590,7 @@ extension KvStringKit {
         public init<Elements>(_ elements: Elements, separator: String? = nil)
         where Elements : Sequence, Elements.Element : StringProtocol
         {
-            self.init()
+            self.init(separator: separator)
 
             append(elements)
         }
