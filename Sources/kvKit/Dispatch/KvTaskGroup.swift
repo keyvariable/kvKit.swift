@@ -107,12 +107,30 @@ extension KvTaskGroup {
 
 
 
+    @inlinable
+    public func leave(valueProvider: () throws -> T) {
+        do { leave(try valueProvider()) }
+        catch { return leave(error) }
+    }
+
+
+
+    @inlinable
+    public func leave(valueProvider: () throws -> Void) {
+        do { try valueProvider() }
+        catch { return leave(error) }
+
+        leave()
+    }
+
+
+
     public func leave(with result: KvCancellableResult<T?>) {
         KvThreadKit.locking(mutationLock) {
             resultAccumulator.merge(with: result)
         }
 
-        dispatchGroup.leave()
+        leave()
     }
 
 
@@ -122,7 +140,7 @@ extension KvTaskGroup {
             resultAccumulator.merge(with: result)
         }
 
-        dispatchGroup.leave()
+        leave()
     }
 
 }
@@ -183,6 +201,18 @@ extension KvTaskGroup : Cancellable {
             resultAccumulator.cancel()
         }
     }
+
+}
+
+
+
+// MARK: AnyCancellable
+
+@available (macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension KvTaskGroup {
+
+    @inlinable
+    public func eraseToAnyCancellable() -> AnyCancellable { .init(self) }
 
 }
 
