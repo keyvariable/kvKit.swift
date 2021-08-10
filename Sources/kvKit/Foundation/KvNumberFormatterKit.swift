@@ -37,7 +37,7 @@ extension KvNumberFormatterKit {
     public static var floatingPoint: NumberFormatter {
         make {
             $0.allowsFloats = true
-            $0.maximumFractionDigits = .max
+            $0.usesSignificantDigits = true
         }
     }
 
