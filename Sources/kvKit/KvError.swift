@@ -132,9 +132,20 @@ extension KvError {
 
 
 
-        // MARK: Mutation
+        // MARK: Operations
 
         public mutating func append(_ error: Error) { errors.append(error) }
+
+
+
+        /// Invokes *body* for all errors, traversing all the hierarchy of accumulators starting from the receiver.
+        @inlinable
+        public func traverse(body: (Swift.Error) -> Void) {
+            errors.forEach {
+                ($0 as? Accumulator<Swift.Error>)?.traverse(body: body)
+                    ?? body($0)
+            }
+        }
 
 
 
