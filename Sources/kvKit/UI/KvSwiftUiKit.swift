@@ -56,7 +56,7 @@ extension KvSwiftUiKit {
 
     private static func alertContent(for error: Error) -> (title: Text, message: Text?) {
         let message: Text? = {
-            var message = KvStringKit.Accumulator(initialValue: error.localizedDescription, separator: "\n")
+            var message = KvStringKit.Accumulator(separator: "\n")
 
             if let error = error as? LocalizedError {
                 message.append(error.failureReason ?? "")
