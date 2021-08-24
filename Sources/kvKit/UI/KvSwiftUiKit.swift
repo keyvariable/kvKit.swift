@@ -54,7 +54,7 @@ extension KvSwiftUiKit {
 
 
 
-    private static func alertContent(for error: Error) -> (title: Text, message: Text?) {
+    public static func alertContent(for error: Error) -> (title: Text, message: Text?) {
         let message: Text? = {
             var message = KvStringKit.Accumulator(separator: "\n")
 
