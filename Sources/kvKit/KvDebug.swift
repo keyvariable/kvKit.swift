@@ -33,6 +33,7 @@ import UIKit
 
 public class KvDebug {
 
+    #if DEBUG
     /// Analog for *assert* providing ability to continue execution.
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
@@ -42,13 +43,22 @@ public class KvDebug {
 
         print(message)
         
-        #if DEBUG
         do { throw KvError(message) } catch { }
-        #endif // DEBUG
     }
 
+    #else // !DEBUG
+    /// Analog for *assert* providing ability to continue execution.
+    ///
+    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    @inlinable
+    public static func pause(_ reason: String) {
+        print(reason)
+    }
+    #endif // !DEBUG
 
 
+
+    #if DEBUG
     /// Analog for *assert* providing ability to continue execution.
     ///
     /// - Returns: *code* passed an argument.
@@ -64,8 +74,26 @@ public class KvDebug {
         return code
     }
 
+    #else // !DEBUG
+    /// Analog for *assert* providing ability to continue execution.
+    ///
+    /// - Returns: *code* passed an argument.
+    ///
+    /// - Note: It's a shortcut designed to be used like this:
+    ///
+    ///     `return KvDebug.pause(code: -1, "Unexpected input")`
+    ///
+    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    @inlinable
+    public static func pause<T>(code: T, _ reason: String) -> T {
+        pause(reason)
+        return code
+    }
+    #endif // !DEBUG
 
 
+
+    #if DEBUG
     /// Analog for *assert* providing ability to continue execution.
     ///
     /// - Returns: *error* passed an argument.
@@ -80,6 +108,23 @@ public class KvDebug {
         pause((error as? KvError)?.message ?? error.localizedDescription, file, line)
         return error
     }
+
+    #else // !DEBUG
+    /// Analog for *assert* providing ability to continue execution.
+    ///
+    /// - Returns: *error* passed an argument.
+    ///
+    /// - Note: It's a shortcut designed to be used like this:
+    ///
+    ///     `throw KvDebug.pause(KvError("Unexpected input"))`
+    ///
+    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    @discardableResult @inlinable
+    public static func pause<E: Error>(_ error: E) -> E {
+        pause((error as? KvError)?.message ?? error.localizedDescription)
+        return error
+    }
+    #endif // !DEBUG
 
 }
 
@@ -136,27 +181,39 @@ extension KvDebug {
 
 extension KvDebug {
 
+    #if DEBUG
     /// Executes *KvDebug.pause()* if invoked when *Thread.isMainThread* returns *false*.
     @inlinable
     public static func mainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #fileID, _ line: Int = #line) {
-        #if DEBUG
         guard !Thread.isMainThread else { return }
 
         pause("Main thread check has failed on \(Thread.current): \(description())", file, line)
-        #endif // DEBUG
     }
 
+    #else // !DEBUG
+    /// Executes *KvDebug.pause()* if invoked when *Thread.isMainThread* returns *false*.
+    @inlinable
+    public static func mainThreadCheck(_ description: @autoclosure () -> String = "") { }
+    #endif // !DEBUG
 
 
+
+    #if DEBUG
     /// Executes *KvDebug.pause()* if invoked when *Thread.isMainThread* returns *true*.
     @inlinable
     public static func nonmainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #fileID, _ line: Int = #line) {
         #if DEBUG
         guard Thread.isMainThread else { return }
 
-        pause("Main thread check has failed on \(Thread.current): \(description())", file, line)
+        pause("Non-main thread check has failed on \(Thread.current): \(description())", file, line)
         #endif // DEBUG
     }
+
+    #else // !DEBUG
+    /// Executes *KvDebug.pause()* if invoked when *Thread.isMainThread* returns *true*.
+    @inlinable
+    public static func nonmainThreadCheck(_ description: @autoclosure () -> String = "") { }
+    #endif // !DEBUG
 
 
 
@@ -170,6 +227,7 @@ extension KvDebug {
     @propertyWrapper
     public struct MainThreadCheck<Value> {
 
+        #if DEBUG
         public init(wrappedValue: Value, _ file: String = #fileID, _ line: Int = #line) {
             value = wrappedValue
 
@@ -177,12 +235,20 @@ extension KvDebug {
             self.line = line
         }
 
+        #else // !DEBUG
+        public init(wrappedValue: Value) {
+            value = wrappedValue
+        }
+        #endif // !DEBUG
+
 
 
         private var value: Value
 
+        #if DEBUG
         private let file: String
         private let line: Int
+        #endif // DEBUG
 
 
 
@@ -190,15 +256,33 @@ extension KvDebug {
 
         public var wrappedValue: Value {
             get {
-                mainThreadCheck("⚠️ attempt to get value of property defined at \(file):\(line)", file, line)
+                #if DEBUG
+                mainThreadCheck(Constants.propertyReadWarningMessage, file, line)
+                #else // !DEBUG
+                mainThreadCheck(Constants.propertyReadWarningMessage)
+                #endif // !DEBUG
 
                 return value
             }
             set {
-                mainThreadCheck("⚠️ Attempt to set property defined at \(file):\(line)", file, line)
+                #if DEBUG
+                mainThreadCheck(Constants.propertyWriteWarningMessage, file, line)
+                #else // !DEBUG
+                mainThreadCheck(Constants.propertyWriteWarningMessage)
+                #endif // !DEBUG
 
                 value = newValue
             }
+        }
+
+
+        // MARK: .Constants
+
+        private struct Constants {
+
+            static var propertyReadWarningMessage: String { "⚠️ Attempt to get value of property in a non-main thread" }
+            static var propertyWriteWarningMessage: String { "⚠️ Attempt to assign value to property in a non-main thread" }
+
         }
 
     }

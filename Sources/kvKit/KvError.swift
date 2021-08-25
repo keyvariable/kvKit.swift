@@ -29,23 +29,42 @@ public struct KvError {
 
     public let message: String
 
+    #if DEBUG
     public let file: String
     public let line: Int
+    #endif // DEBUG
 
 
 
+    #if DEBUG
+    @inlinable
     public init(_ message: String, _ file: String = #fileID, _ line: Int = #line) {
         self.message = message
         self.file = file
         self.line = line
     }
 
+    #else // !DEBUG
+    @inlinable
+    public init(_ message: String) {
+        self.message = message
+    }
+    #endif // !DEBUG
 
 
+
+    #if DEBUG
     @inlinable
     public static func inconsistency(_ message: String, _ file: String = #fileID, _ line: Int = #line) -> KvError {
         .init("Internal inconsistency: \(message)", file, line)
     }
+
+    #else // !DEBUG
+    @inlinable
+    public static func inconsistency(_ message: String) -> KvError {
+        .init("Internal inconsistency: \(message)")
+    }
+    #endif // !DEBUG
 
 }
 
@@ -55,7 +74,14 @@ public struct KvError {
 
 extension KvError : LocalizedError {
 
-    public var errorDescription: String? { "\(message) | \(file):\(line)" }
+    @inlinable
+    public var errorDescription: String? {
+        #if DEBUG
+        "\(message) | \(file):\(line)"
+        #else // !DEBUG
+        return message
+        #endif // !DEBUG
+    }
 
 }
 
@@ -66,7 +92,7 @@ extension KvError : LocalizedError {
 extension KvError {
 
     /// - Returns: *self* for cascading.
-    @discardableResult
+    @discardableResult @inlinable
     public func log() -> KvError {
         print("\(localizedDescription)")
 
@@ -86,7 +112,11 @@ extension KvError {
     /// - Returns: *self* for cascading.
     @discardableResult @inlinable
     public func debugPause() -> KvError {
+        #if DEBUG
         return KvDebug.pause(self, file, line)
+        #else // !DEBUG
+        KvDebug.pause(self)
+        #endif // !DEBUG
     }
 
 }
