@@ -38,7 +38,7 @@ public class KvDebug {
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @inlinable
-    public static func pause(_ reason: String, _ file: String = #fileID, _ line: Int = #line) {
+    public static func pause(_ reason: String, _ file: StaticString = #fileID, _ line: UInt = #line) {
         let message = "\(reason) | \(file):\(line)"
 
         print(message)
@@ -69,7 +69,7 @@ public class KvDebug {
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @inlinable
-    public static func pause<T>(code: T, _ reason: String, _ file: String = #fileID, _ line: Int = #line) -> T {
+    public static func pause<T>(code: T, _ reason: String, _ file: StaticString = #fileID, _ line: UInt = #line) -> T {
         pause(reason, file, line)
         return code
     }
@@ -104,7 +104,7 @@ public class KvDebug {
     ///
     /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
     @discardableResult @inlinable
-    public static func pause<E: Error>(_ error: E, _ file: String = #fileID, _ line: Int = #line) -> E {
+    public static func pause<E: Error>(_ error: E, _ file: StaticString = #fileID, _ line: UInt = #line) -> E {
         pause((error as? KvError)?.message ?? error.localizedDescription, file, line)
         return error
     }
@@ -184,7 +184,7 @@ extension KvDebug {
     #if DEBUG
     /// Executes *KvDebug.pause()* if invoked when *Thread.isMainThread* returns *false*.
     @inlinable
-    public static func mainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #fileID, _ line: Int = #line) {
+    public static func mainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: StaticString = #fileID, _ line: UInt = #line) {
         guard !Thread.isMainThread else { return }
 
         pause("Main thread check has failed on \(Thread.current): \(description())", file, line)
@@ -201,7 +201,7 @@ extension KvDebug {
     #if DEBUG
     /// Executes *KvDebug.pause()* if invoked when *Thread.isMainThread* returns *true*.
     @inlinable
-    public static func nonmainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: String = #fileID, _ line: Int = #line) {
+    public static func nonmainThreadCheck(_ description: @autoclosure () -> String = #function, _ file: StaticString = #fileID, _ line: UInt = #line) {
         #if DEBUG
         guard Thread.isMainThread else { return }
 
@@ -228,7 +228,7 @@ extension KvDebug {
     public struct MainThreadCheck<Value> {
 
         #if DEBUG
-        public init(wrappedValue: Value, _ file: String = #fileID, _ line: Int = #line) {
+        public init(wrappedValue: Value, _ file: StaticString = #fileID, _ line: UInt = #line) {
             value = wrappedValue
 
             self.file = file
@@ -246,8 +246,8 @@ extension KvDebug {
         private var value: Value
 
         #if DEBUG
-        private let file: String
-        private let line: Int
+        private let file: StaticString
+        private let line: UInt
         #endif // DEBUG
 
 

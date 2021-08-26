@@ -30,15 +30,15 @@ public struct KvError {
     public let message: String
 
     #if DEBUG
-    public let file: String
-    public let line: Int
+    public let file: StaticString
+    public let line: UInt
     #endif // DEBUG
 
 
 
     #if DEBUG
     @inlinable
-    public init(_ message: String, _ file: String = #fileID, _ line: Int = #line) {
+    public init(_ message: String, _ file: StaticString = #fileID, _ line: UInt = #line) {
         self.message = message
         self.file = file
         self.line = line
@@ -55,7 +55,7 @@ public struct KvError {
 
     #if DEBUG
     @inlinable
-    public static func inconsistency(_ message: String, _ file: String = #fileID, _ line: Int = #line) -> KvError {
+    public static func inconsistency(_ message: String, _ file: StaticString = #fileID, _ line: UInt = #line) -> KvError {
         .init("Internal inconsistency: \(message)", file, line)
     }
 
