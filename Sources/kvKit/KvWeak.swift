@@ -26,6 +26,7 @@ import Foundation
 
 
 /// A container for a weak reference.
+@available(*, deprecated, message: "Use custom containers")
 public struct KvWeak<T: AnyObject> {
 
     public private(set) weak var value: T?
@@ -47,6 +48,7 @@ public struct KvWeak<T: AnyObject> {
 
 // MARK: : Equatable
 
+@available(*, deprecated, message: "Use custom containers")
 extension KvWeak : Equatable {
 
     public static func ==(_ lhs: KvWeak<T>, _ rhs: KvWeak<T>) -> Bool {
@@ -61,6 +63,7 @@ extension KvWeak : Equatable {
 
 // MARK: : Hashable
 
+@available(*, deprecated, message: "Use custom containers")
 extension KvWeak : Hashable where T: Hashable {
 
     public func hash(into hasher: inout Hasher) { objectID.hash(into: &hasher) }
@@ -71,6 +74,7 @@ extension KvWeak : Hashable where T: Hashable {
 
 // MARK: : ExpressibleByNilLiteral
 
+@available(*, deprecated, message: "Use custom containers")
 extension KvWeak : ExpressibleByNilLiteral {
 
     public init(nilLiteral: ()) {
