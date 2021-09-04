@@ -26,7 +26,7 @@ import Foundation
 
 
 /// A collection of RAII objects.
-public class KvRAII { }
+public enum KvRAII { }
 
 
 
@@ -107,18 +107,26 @@ extension KvRAII {
     /// - Warning: It's not thread-safe.
     public class TokenSet {
 
-        public typealias EmptyCallback = (TokenSet) -> Void
+        public typealias IsEmptyCallback = (Bool) -> Void
 
 
 
-        public var emptyCallback: EmptyCallback?
+        public var isEmptyCallback: IsEmptyCallback?
+
+
+
+        public init(isEmptyCallback: IsEmptyCallback? = nil) {
+            self.isEmptyCallback = isEmptyCallback
+        }
 
 
 
         private var tokens: Set<KvWeak<Token>> = .init() {
             didSet {
-                if tokens.isEmpty {
-                    emptyCallback?(self)
+                let isEmpty = tokens.isEmpty
+
+                if isEmpty != oldValue.isEmpty {
+                    isEmptyCallback?(isEmpty)
                 }
             }
         }

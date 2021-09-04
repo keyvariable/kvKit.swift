@@ -40,7 +40,15 @@ public class KvEventCenter<Sender, Event> {
 
 
     public var emptyCallback: EmptyCallback? {
-        didSet { tokenSet.emptyCallback = emptyCallback != nil ? { [weak self] _ in self?.emptyCallback?(self!) } : nil }
+        didSet {
+            tokenSet.isEmptyCallback = emptyCallback.map { emptyCallback in
+                { [weak self] isEmpty in
+                    guard isEmpty else { return }
+
+                    self?.emptyCallback?(self!)
+                }
+            }
+        }
     }
 
 
