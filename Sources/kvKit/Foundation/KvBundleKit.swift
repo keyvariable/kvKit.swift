@@ -58,8 +58,8 @@ extension KvBundleKit {
 
     /// - Returns: Value for *CFBundleVersion* key from the info dictionary of given *bundle*.
     ///
-    /// - Note: See shortcut *KvStringKit.bundleVection(_:)*.
-    public static func bundleVection(_ bundle: Bundle = .main) -> String? {
+    /// - Note: See shortcut *KvStringKit.bundleVersion(_:)*.
+    public static func bundleVersion(_ bundle: Bundle = .main) -> String? {
         bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
     }
 

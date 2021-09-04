@@ -406,8 +406,8 @@ extension KvStringKit {
 
 
     /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleVersion* key from the info dictionary of given *bundle*.
-    public static func withBundleVection(_ bundle: Bundle = .main) -> String? {
-        with(KvBundleKit.bundleVection(bundle))
+    public static func withBundleVersion(_ bundle: Bundle = .main) -> String? {
+        with(KvBundleKit.bundleVersion(bundle))
     }
 
 }

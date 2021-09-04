@@ -87,25 +87,31 @@ extension KvCachedAssets {
 
             let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
                 queue.async {
-                    completion(.init {
-                        do {
-                            guard error == nil else { throw error! }
-                            guard let response = response else { throw KvError("Response is missing for download task with \(urlRequest)") }
+                    let result: KvCancellableResult<Data> = {
+                        // Preventing redundant error throwing.
+                        guard error == nil else { return .init(error!) }
 
-                            switch response {
-                            case let httpResponse as HTTPURLResponse:
-                                guard httpResponse.statusCode == 200 else { throw KvError("Unexpected HTTP status code \(httpResponse.statusCode) downloading data with \(urlRequest)") }
-                            default:
-                                break
+                        return .init {
+                            do {
+                                guard let response = response else { throw KvError("Response is missing for download task with \(urlRequest)") }
+
+                                switch response {
+                                case let httpResponse as HTTPURLResponse:
+                                    guard httpResponse.statusCode == 200 else { throw KvError("Unexpected HTTP status code \(httpResponse.statusCode) downloading data with \(urlRequest)") }
+                                default:
+                                    break
+                                }
                             }
+
+                            guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
+
+                            urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
+
+                            return data
                         }
+                    }()
 
-                        guard let data = data else { throw KvError("There is no data downloaded with \(urlRequest)") }
-
-                        urlSession.configuration.urlCache?.storeCachedResponse(.init(response: response!, data: data), for: urlRequest)
-
-                        return data
-                    })
+                    completion(result)
                 }
             }
 

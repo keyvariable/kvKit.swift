@@ -25,7 +25,34 @@ import Foundation
 
 
 
-public class KvDispatchQueueKit {
+public enum KvDispatchQueueKit { }
+
+
+
+// MARK: Auxiliary Queues
+
+extension KvDispatchQueueKit {
+
+    public enum GlobalSerialQueue {
+
+        /// Serial dispatch queue executing tasks with *.background* quality of service.
+        public static let background = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.background", qos: .background, autoreleaseFrequency: .inherit)
+
+        /// Serial dispatch queue executing tasks with *.userInitiated* quality of service.
+        public static let userInitialted = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.background", qos: .userInitiated, autoreleaseFrequency: .inherit)
+
+        /// Serial dispatch queue executing tasks with *.utility* quality of service.
+        public static let utility = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.background", qos: .utility, autoreleaseFrequency: .inherit)
+
+    }
+
+}
+
+
+
+// MARK: Conditional Invocations
+
+extension KvDispatchQueueKit {
 
     /// Invokes *block* immediately when method is invoked on the main thread. Otherwise *block* is invoked on the main thread synchronously.
     public static func mainSyncIfNeeded<T>(_ block: @escaping () throws -> T) rethrows -> T {
