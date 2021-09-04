@@ -63,7 +63,7 @@ extension KvCompressionKit {
                 throw KvError("Unable to open \(stream) stream")
             }
 
-            return KvRAII.Token { (_, _) in
+            return KvRAII.Token { _ in
                 stream.close()
             }
         }

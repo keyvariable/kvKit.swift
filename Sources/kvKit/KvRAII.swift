@@ -34,23 +34,20 @@ public enum KvRAII { }
 
 extension KvRAII {
 
-    /// Invokes given callback when destroyed.
+    /// Invokes the callback when destroyed.
     public class Token : Hashable {
 
-        public typealias ReleaseCallback = (Token, Any?) -> Void
+        public typealias ReleaseCallback = (Any?) -> Void
 
 
 
         public var userData: Any?
 
 
-        fileprivate var tokenSet: TokenSet?
 
-
-
-        public init(releaseCallback: ReleaseCallback?, userData: Any? = nil) {
+        public init(userData: Any? = nil, releaseCallback: @escaping ReleaseCallback) {
             self.userData = userData
-            self.releaseCallback = releaseCallback
+            self.releaseCallbacks = [ releaseCallback ]
         }
 
 
@@ -59,22 +56,7 @@ extension KvRAII {
 
 
 
-        private var releaseCallback: ReleaseCallback?
-
-
-
-        // MARK: Life Cycle
-
-        /// Invoke this method to release the receiver immediately.
-        ///
-        /// - Note: Sometimes it helps to prevent the «never read» compiler warning.
-        public func release() {
-            releaseCallback?(self, userData)
-            try? tokenSet?.remove(self)
-
-            releaseCallback = nil
-            tokenSet = nil
-        }
+        private var releaseCallbacks: [ReleaseCallback]
 
 
 
@@ -84,13 +66,29 @@ extension KvRAII {
 
 
 
-        public static func !=(lhs: Token, rhs: Token) -> Bool { lhs !== rhs }
-
-
-
         // MARK: : Hashable
 
         public func hash(into hasher: inout Hasher) { ObjectIdentifier(self).hash(into: &hasher) }
+
+
+
+        // MARK: Operations
+
+        public func addReleaseCallback(_ releaseCallback: @escaping ReleaseCallback) {
+            releaseCallbacks.append(releaseCallback)
+        }
+
+
+
+        /// Invoke this method to release the receiver immediately.
+        ///
+        /// - Note: Sometimes it helps to prevent the «never read» compiler warning.
+        public func release() {
+            releaseCallbacks.removeAll {
+                $0(userData)
+                return true
+            }
+        }
 
     }
 
@@ -103,30 +101,32 @@ extension KvRAII {
 extension KvRAII {
 
     /// Executes a callback when becomes empty.
-    ///
-    /// - Warning: It's not thread-safe.
     public class TokenSet {
 
         public typealias IsEmptyCallback = (Bool) -> Void
 
 
 
-        public var isEmptyCallback: IsEmptyCallback?
+        public var isEmptyCallback: IsEmptyCallback
 
 
 
-        public init(isEmptyCallback: IsEmptyCallback? = nil) {
+        public init(isEmptyCallback: @escaping IsEmptyCallback) {
             self.isEmptyCallback = isEmptyCallback
         }
 
 
 
-        private var tokens: Set<KvWeak<Token>> = .init() {
-            didSet {
-                let isEmpty = tokens.isEmpty
+        private let mutationLock = NSLock()
 
-                if isEmpty != oldValue.isEmpty {
-                    isEmptyCallback?(isEmpty)
+        private var count: Int = 0 {
+            willSet { assert(newValue >= 0, "Internal inconsistency: attempt to assign \(newValue) to count property") }
+            didSet {
+                guard count != oldValue else { return }
+
+                let isEmpty = isEmpty
+                if isEmpty != (oldValue <= 0) {
+                    isEmptyCallback(isEmpty)
                 }
             }
         }
@@ -135,44 +135,45 @@ extension KvRAII {
 
         // MARK: Access
 
-        public var isEmpty: Bool { tokens.isEmpty || tokens.allSatisfy { $0.value == nil } }
-
-
-
-        public func forEach(_ body: (Token) throws -> Void) rethrows {
-            try tokens.forEach {
-                guard let token = $0.value else {
-                    // Released tokens are removed.
-                    tokens.remove($0)
-                    return
-                }
-
-                try body(token)
-            }
-        }
+        public var isEmpty: Bool { KvThreadKit.locking(mutationLock) { count <= 0 } }
 
 
 
         // MARK: Mutation
 
-        public func insert(_ token: Token) {
-            guard token.tokenSet !== self else { return }
+        /// This method creates a token and stores it in the receiver. This method is convenient when empty state of the receiver is observed.
+        public func make() -> Token {
+            increateCount()
 
-            try? token.tokenSet?.remove(token)
-
-            tokens.insert(.init(token))
-
-            token.tokenSet = self
+            return .init { [weak self] _ in
+                self?.decreaseCount()
+            }
         }
 
 
 
-        public func remove(_ token: Token) throws {
-            guard token.tokenSet === self else {
-                throw KvError.inconsistency("attempt to remove RAII token having reference to an unexpected token set")
+        public func make(userData: Any? = nil, releaseCallback: @escaping Token.ReleaseCallback) -> Token {
+            let token = make()
+
+            token.userData = userData
+            token.addReleaseCallback(releaseCallback)
+
+            return token
+        }
+
+
+
+        private func increateCount() {
+            KvThreadKit.locking(mutationLock) {
+                count += 1
             }
-            guard tokens.remove(.init(token)) != nil else {
-                throw KvError.inconsistency("attempt to remove an unexpected RAII token having token set reference to the receiver")
+        }
+
+
+
+        private func decreaseCount() {
+            KvThreadKit.locking(mutationLock) {
+                count -= 1
             }
         }
 

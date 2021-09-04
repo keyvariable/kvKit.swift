@@ -36,20 +36,10 @@ public class KvEventCenter<Sender, Event> {
 
 
 
-    public var isEmpty: Bool { tokenSet.isEmpty }
+    public var isEmpty: Bool { entries.isEmpty }
 
 
-    public var emptyCallback: EmptyCallback? {
-        didSet {
-            tokenSet.isEmptyCallback = emptyCallback.map { emptyCallback in
-                { [weak self] isEmpty in
-                    guard isEmpty else { return }
-
-                    self?.emptyCallback?(self!)
-                }
-            }
-        }
-    }
+    public var emptyCallback: EmptyCallback?
 
 
 
@@ -57,7 +47,13 @@ public class KvEventCenter<Sender, Event> {
 
 
 
-    private let tokenSet: KvRAII.TokenSet = .init()
+    private var entries: [Entry] = .init() {
+        didSet {
+            if isEmpty, !oldValue.isEmpty {
+                emptyCallback?(self)
+            }
+        }
+    }
 
 }
 
@@ -68,8 +64,8 @@ public class KvEventCenter<Sender, Event> {
 extension KvEventCenter {
 
     public func post(_ event: Event, from sender: Sender) {
-        tokenSet.forEach {
-            ($0 as! ObservationToken).trigger(event, from: sender)
+        entries.forEach { entry in
+            entry.callback(sender, event)
         }
     }
 
@@ -77,10 +73,10 @@ extension KvEventCenter {
 
     /// - parameter eventProvider: It is passed with user data for each registered callback. Then returned value is passed to the callbacks.
     public func post(from sender: Sender, with eventProvider: (Any?) -> Event?) {
-        tokenSet.forEach { (token) in
-            guard let event = eventProvider(token.userData) else { return }
+        entries.forEach { entry in
+            guard let event = eventProvider(entry.userData) else { return }
 
-            (token as! ObservationToken).trigger(event, from: sender)
+            entry.callback(sender, event)
         }
     }
 
@@ -93,36 +89,42 @@ extension KvEventCenter {
 extension KvEventCenter {
 
     public func newToken(with callback: @escaping Callback, userData: Any? = nil) -> Token {
-        let token = ObservationToken(with: callback, userData)
+        let entry = Entry(callback, userData: userData)
 
-        tokenSet.insert(token)
+        entries.append(entry)
 
-        return token
+        return Token { [weak self] _ in
+            guard let _self = self,
+                  let index = _self.entries.firstIndex(of: entry)
+            else { return }
+
+            _self.entries.remove(at: index)
+        }
     }
 
 }
 
 
 
-// MARK: .ObservationToken
+// MARK: .Entry
 
 extension KvEventCenter {
 
-    private class ObservationToken : Token {
+    private class Entry : Equatable {
 
-        private let callback: Callback
+        let callback: Callback
+        let userData: Any?
 
 
-        fileprivate init(with callback: @escaping Callback, _ userData: Any? = nil) {
+        init(_ callback: @escaping Callback, userData: Any?) {
             self.callback = callback
-
-            super.init(releaseCallback: nil, userData: userData)
+            self.userData = userData
         }
 
 
-        func trigger(_ event: Event, from sender: Sender) {
-            callback(sender, event)
-        }
+        // MARK: : Equatable
+
+        static func ==(lhs: Entry, rhs: Entry) -> Bool { lhs === rhs }
 
     }
 
