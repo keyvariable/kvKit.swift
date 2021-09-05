@@ -121,14 +121,6 @@ extension KvRAII {
 
         private var count: Int = 0 {
             willSet { assert(newValue >= 0, "Internal inconsistency: attempt to assign \(newValue) to count property") }
-            didSet {
-                guard count != oldValue else { return }
-
-                let isEmpty = isEmpty
-                if isEmpty != (oldValue <= 0) {
-                    isEmptyCallback(isEmpty)
-                }
-            }
         }
 
 
@@ -164,16 +156,26 @@ extension KvRAII {
 
 
         private func increateCount() {
-            KvThreadKit.locking(mutationLock) {
-                count += 1
+            let wasEmpty: Bool = KvThreadKit.locking(mutationLock) {
+                defer { count += 1 }
+                return count == 0
+            }
+
+            if wasEmpty {
+                isEmptyCallback(false)
             }
         }
 
 
 
         private func decreaseCount() {
-            KvThreadKit.locking(mutationLock) {
+            let becameEmpty: Bool = KvThreadKit.locking(mutationLock) {
                 count -= 1
+                return count == 0
+            }
+
+            if becameEmpty {
+                isEmptyCallback(true)
             }
         }
 
