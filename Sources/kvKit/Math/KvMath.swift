@@ -21,12 +21,12 @@
 //  Created by Svyatoslav Popov on 11.12.2019.
 //
 
-import Foundation
+import simd
 
 
 
-/// Varios math auxiliaries.
-public class KvMath { }
+/// Various math auxiliaries.
+public enum KvMath<Scalar> where Scalar : Numeric & Comparable & SIMDScalar { }
 
 
 
@@ -34,67 +34,111 @@ public class KvMath { }
 
 extension KvMath {
 
-    /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
+    /// - Returns: *x*².
     @inlinable
-    public static func sign<T: BinaryInteger, S: ExpressibleByIntegerLiteral>(_ x: T) -> S {
-        x > 0 ? 1 : (x == 0 ? 0 : -1)
+    public static func sqr(_ x: Scalar) -> Scalar {
+        x * x
     }
 
 
+    /// - Returns: The closest value to *x* from *min*...*max* range.
+    @inlinable
+    public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar {
+        x < min ? min : (x > max ? max : x)
+    }
+
+
+    /// - Returns: The closest value to *x* from given range.
+    @inlinable
+    public static func clamp(_ x: Scalar, to range: ClosedRange<Scalar>) -> Scalar {
+        clamp(x, min: range.lowerBound, max: range.upperBound)
+    }
+
+}
+
+
+// MARK: Arithmetic: SignedNumeric
+
+extension KvMath where Scalar : SignedNumeric {
 
     /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
     @inlinable
-    public static func sign<T: BinaryFloatingPoint, S: ExpressibleByIntegerLiteral>(_ x: T) -> S {
+    public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar, eps: Scalar) -> Sign {
+        x >= eps ? 1 : (x > -eps ? 0 : -1)
+    }
+
+}
+
+
+// MARK: Arithmetic : BinaryInteger
+
+extension KvMath where Scalar : BinaryInteger {
+
+    /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
+    @inlinable
+    public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar) -> Sign {
+        x > 0 ? 1 : (x == 0 ? 0 : -1)
+    }
+
+}
+
+
+// MARK: Arithmetic : BinaryFloatingPoint
+
+extension KvMath where Scalar : BinaryFloatingPoint {
+
+    /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
+    @inlinable
+    public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar) -> Sign {
         var isPositive = false
 
         return KvIsZero(x, alsoIsPositive: &isPositive) ? 0 : (isPositive ? 1 : -1)
     }
 
 
-
-    /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
+    /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
     @inlinable
-    public static func sign<T: SignedNumeric & Comparable, S: ExpressibleByIntegerLiteral>(_ x: T, eps: T) -> S {
-        x >= eps ? 1 : (x > -eps ? 0 : -1)
+    public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar {
+        (1 - t) * a + t * b
     }
 
+}
 
 
-    /// - Returns: *x*².
-    @inlinable
-    public static func sqr<T: Numeric>(_ x: T) -> T {
-        x * x
-    }
+// MARK: Arithmetic : FixedWidthInteger
 
-
-
-    /// - Returns: The closest value to *x* from *min*...*max* range.
-    @inlinable
-    public static func clamp<T: Comparable>(_ x: T, min: T, max: T) -> T {
-        x < min ? min : (x > max ? max : x)
-    }
-
-
-
-    /// - Returns: The closest value to *x* from given range.
-    @inlinable
-    public static func clamp<T: Comparable>(_ x: T, to range: ClosedRange<T>) -> T {
-        clamp(x, min: range.lowerBound, max: range.upperBound)
-    }
-
-
+extension KvMath where Scalar : FixedWidthInteger {
 
     @inlinable
-    public static func lerp<T : Numeric>(_ a: T, _ b: T, weight: T) -> T {
-        (1 - weight) * a + weight * b
-    }
-
-
-
-    @inlinable
-    public static func lg₂<T : FixedWidthInteger>(_ x: T) -> Int {
+    public static func lg₂(_ x: Scalar) -> Int {
         x.bitWidth - (x.leadingZeroBitCount + 1)
     }
+
+}
+
+
+// MARK: Arithmetic : Float
+
+extension KvMath where Scalar == Float {
+
+    /// - Returns: The closest value to *x* from *min*...*max* range.
+    @inlinable public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+
+    /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
+    @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { simd_mix(a, b, t) }
+
+}
+
+
+// MARK: Arithmetic : Double
+
+extension KvMath where Scalar == Double {
+
+    /// - Returns: The closest value to *x* from *min*...*max* range.
+    @inlinable public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+
+    /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
+    @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { simd_mix(a, b, t) }
 
 }
 
@@ -105,41 +149,35 @@ extension KvMath {
 extension KvMath {
 
     @inlinable
-    public static func min<T : Comparable>(_ lhs: T, _ rhs: T?) -> T {
-        rhs != nil ? Swift.min(lhs, rhs!) : lhs
+    public static func min(_ x: Scalar, _ y: Scalar?) -> Scalar {
+        y.map({ Swift.min(x, $0) }) ?? x
     }
 
 
-
     @inlinable
-    public static func min<T : Comparable>(_ first: T, _ second: T?, _ others: T?...) -> T {
-        min(first, others.reduce(second, min))
+    public static func min(_ x: Scalar, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar {
+        rest.reduce(min(min(x, y), z), min)
     }
 
 
-
     @inlinable
-    public static func min<T : Comparable>(_ lhs: T?, _ rhs: T?) -> T? {
-        switch (lhs, rhs) {
-        case let (.some(l), .some(r)):
-            return Swift.min(l, r)
-
+    public static func min(_ x: Scalar?, _ y: Scalar?) -> Scalar? {
+        switch (x, y) {
+        case let (.some(x), .some(y)):
+            return Swift.min(x, y)
         case (.some, .none):
-            return lhs
-
+            return x
         case (.none, .some):
-            return rhs
-
+            return y
         case (.none, .none):
             return nil
         }
     }
 
 
-
     @inlinable
-    public static func min<T : Comparable>(_ first: T?, _ second: T?, _ others: T?...) -> T? {
-        min(first, others.reduce(second, min))
+    public static func min(_ x: Scalar?, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar? {
+        min(min(x, y), rest.reduce(z, min))
     }
 
 }
@@ -151,41 +189,35 @@ extension KvMath {
 extension KvMath {
 
     @inlinable
-    public static func max<T : Comparable>(_ lhs: T, _ rhs: T?) -> T {
-        rhs != nil ? Swift.max(lhs, rhs!) : lhs
+    public static func max(_ x: Scalar, _ y: Scalar?) -> Scalar {
+        y.map({ Swift.max(x, $0) }) ?? x
     }
 
 
-
     @inlinable
-    public static func max<T : Comparable>(_ first: T, _ second: T?, _ others: T?...) -> T {
-        max(first, others.reduce(second, max))
+    public static func max(_ x: Scalar, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar {
+        rest.reduce(max(max(x, y), z), max)
     }
 
 
-
     @inlinable
-    public static func max<T : Comparable>(_ lhs: T?, _ rhs: T?) -> T? {
-        switch (lhs, rhs) {
-        case let (.some(l), .some(r)):
-            return Swift.max(l, r)
-
+    public static func max(_ x: Scalar?, _ y: Scalar?) -> Scalar? {
+        switch (x, y) {
+        case let (.some(x), .some(y)):
+            return Swift.max(x, y)
         case (.some, .none):
-            return lhs
-
+            return x
         case (.none, .some):
-            return rhs
-
+            return y
         case (.none, .none):
             return nil
         }
     }
 
 
-
     @inlinable
-    public static func max<T : Comparable>(_ first: T?, _ second: T?, _ others: T?...) -> T? {
-        max(first, others.reduce(second, max))
+    public static func max(_ x: Scalar?, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar? {
+        max(max(x, y), rest.reduce(z, max))
     }
 
 }
