@@ -46,9 +46,53 @@ extension KvMath2 {
 
         @inlinable
         public init(min: Position, max: Position) {
+            assert(min.x <= max.x)
+            assert(min.y <= max.y)
+
             self.min = min
             self.max = max
         }
+
+
+        @inlinable
+        public init(over point: Position) { self.init(min: point, max: point) }
+
+
+        @inlinable
+        public init(over first: Position, _ second: Position, _ rest: Position...) {
+            var min = first, max = first
+
+            min = KvMath2.min(min, second)
+            max = KvMath2.max(max, second)
+
+            rest.forEach { point in
+                min = KvMath2.min(min, point)
+                max = KvMath2.max(max, point)
+            }
+
+            self.init(min: min, max: max)
+        }
+
+
+        @inlinable
+        public init?<Points>(over points: Points) where Points : Sequence, Points.Element == Position {
+            var iterator = points.makeIterator()
+
+            guard let first = iterator.next() else { return nil }
+
+            var min = first, max = first
+
+            while let point = iterator.next() {
+                min = KvMath2.min(min, point)
+                max = KvMath2.max(max, point)
+            }
+
+            self.init(min: min, max: max)
+        }
+
+
+        @inlinable
+        public static var zero: Self { .init(over: .zero) }
 
 
         @inlinable
@@ -57,6 +101,62 @@ extension KvMath2 {
         @inlinable
         public var size: Vector { max - min }
 
+
+        @inlinable
+        public static var numberOfPoints: Int { 4 }
+
+        @inlinable
+        public static var pointIndices: Range<Int> { 0 ..< numberOfPoints }
+
+
+        @inlinable
+        public var pointIndices: Range<Int> { Self.pointIndices }
+
+
+        @inlinable
+        public func point(at index: Int) -> Position {
+            .init(x: (index & 1) == 0 ? min.x : max.x,
+                  y: (index & 2) == 0 ? min.y : max.y)
+        }
+
+
+        @inlinable
+        public func translated(by translation: Vector) -> Self { .init(min: min + translation, max: max + translation) }
+
+    }
+
+}
+
+
+
+// MARK: <Float>.AABR
+
+extension KvMath2.AABR where Scalar == Float {
+
+    @inlinable
+    public func applying(_ transform: simd_float3x3) -> Self {
+        Self(over: Self.pointIndices.lazy.map { index in
+            let p3 = transform * .init(point(at: index), 1)
+
+            return .init(p3.x, p3.y) * (1 / p3.z)
+        })!
+    }
+
+}
+
+
+
+// MARK: <Double>.AABR
+
+extension KvMath2.AABR where Scalar == Double {
+
+    @inlinable
+    public func applying(_ transform: simd_double3x3) -> Self {
+        Self(over: Self.pointIndices.lazy.map { index in
+            let p3 = transform * .init(point(at: index), 1)
+
+            return .init(p3.x, p3.y) * (1 / p3.z)
+        })!
     }
 
 }

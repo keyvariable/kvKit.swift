@@ -664,10 +664,13 @@ extension KvMath3 {
 
 
         @inlinable
-        public init(over firstPoint: Position, _ otherPoints: Position...) {
-            var min = firstPoint, max = firstPoint
+        public init(over first: Position, _ second: Position, _ rest: Position...) {
+            var min = first, max = first
 
-            otherPoints.forEach { point in
+            min = KvMath3.min(min, second)
+            max = KvMath3.max(max, second)
+
+            rest.forEach { point in
                 min = KvMath3.min(min, point)
                 max = KvMath3.max(max, point)
             }
