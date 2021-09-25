@@ -36,6 +36,58 @@ public enum KvMath3<Scalar> where Scalar : BinaryFloatingPoint & Comparable & SI
 
 
 
+// MARK: Matrix Fabrics <Float>
+
+extension KvMath3 where Scalar == Float {
+
+    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented(_ base: simd_float2x2) -> simd_float3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
+    }
+
+    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented(_ base: simd_float2x3) -> simd_float3x3 {
+        .init(base[0], base[1], [ 0, 0, 1 ])
+    }
+
+    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented(_ base: simd_float3x2) -> simd_float3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
+    }
+
+}
+
+
+
+// MARK: Matrix Fabrics <Float>
+
+extension KvMath3 where Scalar == Double {
+
+    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented(_ base: simd_double2x2) -> simd_double3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
+    }
+
+    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented(_ base: simd_double2x3) -> simd_double3x3 {
+        .init(base[0], base[1], [ 0, 0, 1 ])
+    }
+
+    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented(_ base: simd_double3x2) -> simd_double3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
+    }
+
+}
+
+
+
 // MARK: Martix Operations <Float>
 
 extension KvMath3 where Scalar == Float {
