@@ -26,13 +26,13 @@ import simd
 
 
 /// Various math auxiliaries.
-public enum KvMath<Scalar> where Scalar : Numeric & Comparable & SIMDScalar { }
+public enum KvMath<Scalar> { }
 
 
 
 // MARK: Arithmetic
 
-extension KvMath {
+extension KvMath where Scalar : Numeric {
 
     /// - Returns: *x*².
     @inlinable
@@ -40,6 +40,10 @@ extension KvMath {
         x * x
     }
 
+}
+
+
+extension KvMath where Scalar : Comparable {
 
     /// - Returns: The closest value to *x* from *min*...*max* range.
     @inlinable
@@ -59,7 +63,7 @@ extension KvMath {
 
 // MARK: Arithmetic: SignedNumeric
 
-extension KvMath where Scalar : SignedNumeric {
+extension KvMath where Scalar : SignedNumeric & Comparable {
 
     /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
     @inlinable
@@ -146,7 +150,7 @@ extension KvMath where Scalar == Double {
 
 // MARK: Minimum for Optionals
 
-extension KvMath {
+extension KvMath where Scalar : Comparable {
 
     @inlinable
     public static func min(_ x: Scalar, _ y: Scalar?) -> Scalar {
@@ -186,7 +190,7 @@ extension KvMath {
 
 // MARK: Maximum for Optionals
 
-extension KvMath {
+extension KvMath where Scalar : Comparable {
 
     @inlinable
     public static func max(_ x: Scalar, _ y: Scalar?) -> Scalar {
