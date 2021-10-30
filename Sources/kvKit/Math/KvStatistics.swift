@@ -1810,11 +1810,104 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Local Maximums
-    public class LocalMaximum {
+    public class LocalMaximum<Value : Numeric & Comparable> {
+
+        public struct Stream : KvStatisticsStream {
+
+            public typealias Callback = (Value) -> Void
+
+
+            public var threshold: Value { 1 - minimumRatio }
+
+
+            /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+            public init(threshold: Value, callback: @escaping Callback) {
+                self.callback = callback
+                minimumRatio = 1 - threshold
+            }
+
+
+            private let callback: Callback
+
+            private var prev: Value?
+            private var candidate: Value?
+
+            private let minimumRatio: Value
+
+
+            // MARK: Operations
+
+            public mutating func flush() {
+                guard let candidate = candidate else { return }
+
+                callback(candidate)
+                self.candidate = nil
+            }
+
+
+            @inlinable
+            public mutating func processAndFlush(_ value: Value) {
+                process(value)
+                flush()
+            }
+
+
+            @inlinable
+            public mutating func processAndFlush<S>(_ values: S) where S : Sequence, S.Element == Value {
+                process(values)
+                flush()
+            }
+
+
+            // MARK: : KvStatisticsStream
+
+            /// - Note: Call *flush()* to commit deferred results.
+            public mutating func process(_ value: Value) {
+                switch (candidate, prev) {
+                case (_, .none):
+                    candidate = value
+
+                case (.none, .some(let prev)):
+                    guard value > prev else { break }
+
+                    candidate = value
+
+                case let (.some(candidate), .some):
+                    if value > candidate {
+                        self.candidate = value
+
+                    } else if value < candidate * minimumRatio {
+                        callback(candidate)
+                        self.candidate = nil
+                    }
+                }
+
+                prev = value
+            }
+
+
+            /// - Note: Call *flush()* to commit deferred results.
+            @inlinable
+            public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
+                values.forEach { process($0) }
+            }
+
+
+            public mutating func reset() {
+                flush()
+
+                prev = nil
+            }
+
+        }
+
+
 
         /// Invokes callback for each local maximum in *values* sequence.
-        public static func run<Values>(with values: Values, threshold: Values.Element, callback: (Values.Element, inout Bool) -> Void)
-        where Values : Sequence, Values.Element : Numeric & Comparable
+        ///
+        /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+        public static func run<Values>(with values: Values, threshold: Value, callback: (Value, inout Bool) -> Void)
+        where Values : Sequence, Values.Element == Value
         {
             let minimumRatio = 1 - threshold
 
@@ -1854,10 +1947,12 @@ extension KvStatistics {
 
 
         /// Invokes callback for each local maximum in *values* sequence transformed with *map* block.
-        public static func run<Values, MapType>(with values: Values, threshold: MapType, map: (Values.Element) -> MapType, callback: (Values.Element, MapType, inout Bool) -> Void)
-        where Values : Sequence, MapType : Numeric & Comparable
+        ///
+        /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+        public static func run<Values>(with values: Values, threshold: Value, map: (Values.Element) -> Value, callback: (Values.Element, Value, inout Bool) -> Void)
+        where Values : Sequence
         {
-            typealias Element = (value: Values.Element, map: MapType)
+            typealias Element = (value: Values.Element, map: Value)
 
 
             let minimumRatio = 1 - threshold
