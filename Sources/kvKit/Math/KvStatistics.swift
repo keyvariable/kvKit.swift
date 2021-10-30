@@ -1812,9 +1812,16 @@ extension KvStatistics {
     /// Local Maximums
     public class LocalMaximum<Value : Numeric & Comparable> {
 
-        public struct Stream : KvStatisticsStream {
+        public typealias Value = Value
 
-            public typealias Callback = (Value) -> Void
+
+        /// Note generic argument is desinated to help process deferred invocations of *callback*. Use *Void* if note is unused.
+        public struct Stream<Note> {
+
+            public typealias Value = LocalMaximum.Value
+            public typealias Note = Note
+
+            public typealias Callback = (SourceValue) -> Void
 
 
             public var threshold: Value { 1 - minimumRatio }
@@ -1829,10 +1836,54 @@ extension KvStatistics {
 
             private let callback: Callback
 
-            private var prev: Value?
-            private var candidate: Value?
+            private var prev: SourceValue?
+            private var candidate: SourceValue?
 
             private let minimumRatio: Value
+
+
+            // MARK: .SourceValue
+
+            public struct SourceValue : Comparable {
+
+                public typealias Value = Stream.Value
+                public typealias Note = Stream.Note
+
+
+                public var value: Value
+                public var note: Note
+
+
+                @inlinable
+                public init(_ value: Value, note: Note) {
+                    self.value = value
+                    self.note = note
+                }
+
+
+                // MARK: : Equatable
+
+                @inlinable
+                public static func ==(lhs: Self, rhs: Self) -> Bool { lhs.value == rhs.value }
+
+
+                // MARK: : Comparable
+
+                @inlinable
+                public static func <(lhs: Self, rhs: Self) -> Bool { lhs.value < rhs.value }
+
+
+                // MARK: Operations
+
+                fileprivate static func *(lhs: Value, rhs: Self) -> Value { lhs * rhs.value }
+
+                fileprivate static func *(lhs: Self, rhs: Value) -> Value { lhs.value * rhs }
+
+                fileprivate static func <(lhs: Self, rhs: Value) -> Bool { lhs.value < rhs }
+
+                fileprivate static func <(lhs: Value, rhs: Self) -> Bool { lhs < rhs.value }
+
+            }
 
 
             // MARK: Operations
@@ -1846,23 +1897,20 @@ extension KvStatistics {
 
 
             @inlinable
-            public mutating func processAndFlush(_ value: Value) {
+            public mutating func processAndFlush(_ value: SourceValue) {
                 process(value)
                 flush()
             }
 
 
             @inlinable
-            public mutating func processAndFlush<S>(_ values: S) where S : Sequence, S.Element == Value {
+            public mutating func processAndFlush<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
                 process(values)
                 flush()
             }
 
-
-            // MARK: : KvStatisticsStream
-
             /// - Note: Call *flush()* to commit deferred results.
-            public mutating func process(_ value: Value) {
+            public mutating func process(_ value: SourceValue) {
                 switch (candidate, prev) {
                 case (_, .none):
                     candidate = value
@@ -1888,9 +1936,18 @@ extension KvStatistics {
 
             /// - Note: Call *flush()* to commit deferred results.
             @inlinable
-            public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
+            public mutating func process<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
                 values.forEach { process($0) }
             }
+
+
+            /// - Note: Call *flush()* to commit deferred results.
+            @inlinable
+            public mutating func process(_ value: Value, note: Note) { process(SourceValue(value, note: note)) }
+
+
+            @inlinable
+            public mutating func processAndFlush(_ value: Value, note: Note) { processAndFlush(SourceValue(value, note: note)) }
 
 
             public mutating func reset() {
@@ -1993,6 +2050,49 @@ extension KvStatistics {
             }
         }
 
+    }
+
+}
+
+
+extension KvStatistics.LocalMaximum.Stream.SourceValue where Note == Void {
+
+    @inlinable
+    public init(_ value: Value) { self.init(value, note: ()) }
+
+}
+
+
+extension KvStatistics.LocalMaximum.Stream where Note == Void {
+
+    /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+    @inlinable
+    public init(threshold: Value, callback: @escaping (Value) -> Void) {
+        self.init(threshold: threshold, callback: { callback($0.value) } as Callback)
+    }
+
+
+    @inlinable
+    public mutating func processAndFlush(_ value: Value) {
+        processAndFlush(SourceValue(value))
+    }
+
+
+    @inlinable
+    public mutating func processAndFlush<S>(_ values: S) where S : Sequence, S.Element == Value {
+        processAndFlush(values.lazy.map { SourceValue($0) }) }
+
+    /// - Note: Call *flush()* to commit deferred results.
+    @inlinable
+    public mutating func process(_ value: Value) {
+        process(SourceValue(value))
+    }
+
+
+    /// - Note: Call *flush()* to commit deferred results.
+    @inlinable
+    public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
+        process(values.lazy.map { SourceValue($0) })
     }
 
 }

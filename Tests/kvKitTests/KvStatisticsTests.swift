@@ -37,35 +37,37 @@ final class KvStatisticsTests : XCTestCase {
     // MARK: LocalMaximum
 
     func testLocalMaximum() {
-        typealias Value = Double
+        typealias NotedValue = KvStatistics.LocalMaximum<Double>.Stream<Int>.SourceValue
 
-        let values: [Value] = [ 0, 1, 0, 1, 2, 1, 2, 3, 3, 2.9, 4, 3.99, 5, 0, 5.9999, 6, 5.9999, 6 ]
+        let values: [NotedValue.Value] = [ 0, 1, 0, 1, 2, 1, 2, 3, 3, 2.9, 4, 3.99, 5, 0, 5.9999, 6, 5.9999, 6 ]
+        let notedValues = values
+            .enumerated().map { NotedValue($0.element, note: $0.offset) }
 
-        let cases: [(threshold: Value, expectedResult: [Value])] = [
-            (1e-5, [ 1, 2, 3, 4, 5, 6, 6 ]),
-            (1e-3, [ 1, 2, 3, 4, 5, 6 ]),
-            (1e-2, [ 1, 2, 3, 5, 6 ]),
-            (1e-1, [ 1, 2, 5, 6 ]),
-        ]
+        let cases: [(threshold: NotedValue.Value, expectedResult: [NotedValue])] = [
+            (1e-5, [ .init(1, note: 1), .init(2, note: 4), .init(3, note: 7), .init(4, note: 10), .init(5, note: 12), .init(6, note: 15), .init(6, note: 17) ]),
+            (1e-3, [ .init(1, note: 1), .init(2, note: 4), .init(3, note: 7), .init(4, note: 10), .init(5, note: 12), .init(6, note: 15) ]),
+            (1e-2, [ .init(1, note: 1), .init(2, note: 4), .init(3, note: 7), .init(5, note: 12), .init(6, note: 15) ]),
+            (1e-1, [ .init(1, note: 1), .init(2, note: 4), .init(5, note: 7), .init(6, note: 15) ]),
+                   ]
 
         for (threshold, expectedResult) in cases {
             do {
-                var result: [Double] = .init()
+                var result: [NotedValue.Value] = .init()
                 KvStatistics.LocalMaximum.run(with: values, threshold: threshold) { value, stopFlag in
                     result.append(value)
                 }
 
-                XCTAssertEqual(result, expectedResult, "LocalMaximum.run(threshold: \(threshold))")
+                XCTAssertEqual(result, expectedResult.map { $0.value }, "LocalMaximum.run(threshold: \(threshold), no notes)")
             }
             do {
-                var result: [Double] = .init()
+                var result: [NotedValue] = .init()
                 var stream = KvStatistics.LocalMaximum<Double>.Stream(threshold: threshold) {
                     result.append($0)
                 }
 
-                stream.processAndFlush(values)
+                stream.processAndFlush(notedValues)
 
-                XCTAssertEqual(result, expectedResult, "LocalMaximum.Stream(threshold: \(threshold))")
+                XCTAssertEqual(result, expectedResult, "LocalMaximum.Stream(threshold: \(threshold), no notes)")
             }
         }
     }
