@@ -22,6 +22,7 @@
 //
 
 import Foundation
+import Accessibility
 
 
 
@@ -1810,13 +1811,13 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Local Maximums
-    public class LocalMaximum<Value : Numeric & Comparable> {
+    public class LocalMaximum<Value : Comparable> {
 
         public typealias Value = Value
 
 
         /// Note generic argument is desinated to help process deferred invocations of *callback*. Use *Void* if note is unused.
-        public struct Stream<Note> {
+        public struct Stream<Note> : KvStatisticsStream {
 
             public typealias Value = LocalMaximum.Value
             public typealias Note = Note
@@ -1824,27 +1825,46 @@ extension KvStatistics {
             public typealias Callback = (SourceValue) -> Void
 
 
-            public var threshold: Value { 1 - minimumRatio }
+            public let threshold: Threshold
 
 
             /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
-            public init(threshold: Value, callback: @escaping Callback) {
+            public init(threshold: Threshold, callback: @escaping Callback) {
+                self.threshold = threshold
                 self.callback = callback
-                minimumRatio = 1 - threshold
             }
 
 
             private let callback: Callback
 
-            private var prev: SourceValue?
-            private var candidate: SourceValue?
+            private var state: State = .initial
 
-            private let minimumRatio: Value
+
+            // MARK: .Threshold
+
+            public struct Threshold {
+
+                /// First argument (lhs) is a maximum candidate, second is an other element.
+                /// Returns a boolean value indicating whether lhs is greater then rhs enough to be threated as a local maximum.
+                public typealias Predicate = (Value, Value) -> Bool
+
+
+                /// First argument (lhs) is a maximum candidate, second is an other element.
+                /// Returns a boolean value indicating whether lhs is greater then rhs enough to be threated as a local maximum.
+                public let predicate: Predicate
+
+
+                @inlinable
+                public init(predicate: @escaping Predicate) {
+                    self.predicate = predicate
+                }
+
+            }
 
 
             // MARK: .SourceValue
 
-            public struct SourceValue : Comparable {
+            public struct SourceValue {
 
                 public typealias Value = Stream.Value
                 public typealias Note = Stream.Note
@@ -1860,194 +1880,81 @@ extension KvStatistics {
                     self.note = note
                 }
 
-
-                // MARK: : Equatable
-
-                @inlinable
-                public static func ==(lhs: Self, rhs: Self) -> Bool { lhs.value == rhs.value }
+            }
 
 
-                // MARK: : Comparable
+            // MARK: .State
 
-                @inlinable
-                public static func <(lhs: Self, rhs: Self) -> Bool { lhs.value < rhs.value }
-
-
-                // MARK: Operations
-
-                fileprivate static func *(lhs: Value, rhs: Self) -> Value { lhs * rhs.value }
-
-                fileprivate static func *(lhs: Self, rhs: Value) -> Value { lhs.value * rhs }
-
-                fileprivate static func <(lhs: Self, rhs: Value) -> Bool { lhs.value < rhs }
-
-                fileprivate static func <(lhs: Value, rhs: Self) -> Bool { lhs < rhs.value }
-
+            private enum State {
+                case initial
+                case minimum(Value)
+                case candidate(SourceValue)
             }
 
 
             // MARK: Operations
 
-            public mutating func flush() {
-                guard let candidate = candidate else { return }
-
-                callback(candidate)
-                self.candidate = nil
-            }
-
-
             @inlinable
-            public mutating func processAndFlush(_ value: SourceValue) {
+            public mutating func processAndReset(_ value: SourceValue) {
                 process(value)
-                flush()
+                reset()
             }
 
 
             @inlinable
-            public mutating func processAndFlush<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
+            public mutating func processAndReset<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
                 process(values)
-                flush()
+                reset()
             }
 
-            /// - Note: Call *flush()* to commit deferred results.
-            public mutating func process(_ value: SourceValue) {
-                switch (candidate, prev) {
-                case (_, .none):
-                    candidate = value
-
-                case (.none, .some(let prev)):
-                    guard value > prev else { break }
-
-                    candidate = value
-
-                case let (.some(candidate), .some):
-                    if value > candidate {
-                        self.candidate = value
-
-                    } else if value < candidate * minimumRatio {
+            /// - Note: Call *reset()* to commit deferred results.
+            public mutating func process(_ next: SourceValue) {
+                switch state {
+                case .candidate(let candidate):
+                    if threshold.predicate(candidate.value, next.value) {
                         callback(candidate)
-                        self.candidate = nil
+                        state = .minimum(next.value)
                     }
-                }
+                    else if next.value > candidate.value {
+                        state = .candidate(next)
+                    }
 
-                prev = value
+                case .minimum(let minimum):
+                    state = threshold.predicate(next.value, minimum) ? .candidate(next) : .minimum(min(minimum, next.value))
+
+                case .initial:
+                    state = .candidate(next)
+                }
             }
 
 
-            /// - Note: Call *flush()* to commit deferred results.
+            /// - Note: Call *reset()* to commit deferred results.
             @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
                 values.forEach { process($0) }
             }
 
 
-            /// - Note: Call *flush()* to commit deferred results.
+            /// - Note: Call *reset()* to commit deferred results.
             @inlinable
             public mutating func process(_ value: Value, note: Note) { process(SourceValue(value, note: note)) }
 
 
             @inlinable
-            public mutating func processAndFlush(_ value: Value, note: Note) { processAndFlush(SourceValue(value, note: note)) }
+            public mutating func processAndReset(_ value: Value, note: Note) { processAndReset(SourceValue(value, note: note)) }
 
 
             public mutating func reset() {
-                flush()
-
-                prev = nil
-            }
-
-        }
-
-
-
-        /// Invokes callback for each local maximum in *values* sequence.
-        ///
-        /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
-        public static func run<Values>(with values: Values, threshold: Value, callback: (Value, inout Bool) -> Void)
-        where Values : Sequence, Values.Element == Value
-        {
-            let minimumRatio = 1 - threshold
-
-            var iterator = values.makeIterator()
-
-            guard var prev = iterator.next() else { return }
-
-            var candidate = Optional(prev)
-            var stopFlag = false
-
-
-            while let value = iterator.next() {
-                if candidate != nil {
-                    if value > candidate! {
-                        candidate = value
-
-                    } else if value < candidate! * minimumRatio {
-                        callback(candidate!, &stopFlag)
-
-                        guard !stopFlag else { return }
-
-                        candidate = nil
-                    }
-
-                } else if value > prev {
-                    candidate = value
+                switch state {
+                case .candidate(let candidate):
+                    callback(candidate)
+                case .initial, .minimum:
+                    break
                 }
 
-                prev = value
+                state = .initial
             }
 
-            if candidate != nil {
-                callback(candidate!, &stopFlag)
-            }
-        }
-
-
-
-        /// Invokes callback for each local maximum in *values* sequence transformed with *map* block.
-        ///
-        /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
-        public static func run<Values>(with values: Values, threshold: Value, map: (Values.Element) -> Value, callback: (Values.Element, Value, inout Bool) -> Void)
-        where Values : Sequence
-        {
-            typealias Element = (value: Values.Element, map: Value)
-
-
-            let minimumRatio = 1 - threshold
-
-            var iterator = values.makeIterator()
-
-            guard let firstValue = iterator.next() else { return }
-
-            var prev: Element = (firstValue, map(firstValue))
-            var candidate = Optional(prev)
-            var stopFlag = false
-
-
-            while let value = iterator.next() {
-                let element: Element = (value, map(value))
-
-                if candidate != nil {
-                    if element.map > candidate!.map {
-                        candidate = element
-
-                    } else if element.map < candidate!.map * minimumRatio {
-                        callback(candidate!.value, candidate!.map, &stopFlag)
-
-                        guard !stopFlag else { return }
-
-                        candidate = nil
-                    }
-
-                } else if element.map > prev.map {
-                    candidate = element
-                }
-
-                prev = element
-            }
-
-            if candidate != nil {
-                callback(candidate!.value, candidate!.map, &stopFlag)
-            }
         }
 
     }
@@ -2067,20 +1974,20 @@ extension KvStatistics.LocalMaximum.Stream where Note == Void {
 
     /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
     @inlinable
-    public init(threshold: Value, callback: @escaping (Value) -> Void) {
+    public init(threshold: Threshold, callback: @escaping (Value) -> Void) {
         self.init(threshold: threshold, callback: { callback($0.value) } as Callback)
     }
 
 
     @inlinable
-    public mutating func processAndFlush(_ value: Value) {
-        processAndFlush(SourceValue(value))
+    public mutating func processAndReset(_ value: Value) {
+        processAndReset(SourceValue(value))
     }
 
 
     @inlinable
-    public mutating func processAndFlush<S>(_ values: S) where S : Sequence, S.Element == Value {
-        processAndFlush(values.lazy.map { SourceValue($0) }) }
+    public mutating func processAndReset<S>(_ values: S) where S : Sequence, S.Element == Value {
+        processAndReset(values.lazy.map { SourceValue($0) }) }
 
     /// - Note: Call *flush()* to commit deferred results.
     @inlinable
@@ -2093,6 +2000,131 @@ extension KvStatistics.LocalMaximum.Stream where Note == Void {
     @inlinable
     public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
         process(values.lazy.map { SourceValue($0) })
+    }
+
+}
+
+
+extension KvStatistics.LocalMaximum.Stream.Threshold where Value : AdditiveArithmetic {
+
+    // MARK: .absolute
+
+    public static func absolute(_ delta: Value) -> Self {
+        .init { maximum, other in
+            other < maximum - delta
+        }
+    }
+
+}
+
+
+extension KvStatistics.LocalMaximum.Stream.Threshold where Value : Numeric {
+
+    // MARK: .relative
+
+    @inlinable
+    public static func relative(_ ratio: Value) -> Self {
+        .init { maximum, other in
+            other < maximum * ratio
+        }
+    }
+
+}
+
+
+extension KvStatistics.LocalMaximum.Stream.SourceValue : Equatable where Value : Equatable, Note : Equatable { }
+
+
+extension KvStatistics.LocalMaximum where Value : Numeric {
+
+    /// Invokes callback for each local maximum in *values* sequence.
+    ///
+    /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+    public static func run<Values>(with values: Values, threshold: Value, callback: (Value, inout Bool) -> Void)
+    where Values : Sequence, Values.Element == Value
+    {
+        let minimumRatio = 1 - threshold
+
+        var iterator = values.makeIterator()
+
+        guard var prev = iterator.next() else { return }
+
+        var candidate = Optional(prev)
+        var stopFlag = false
+
+
+        while let value = iterator.next() {
+            if candidate != nil {
+                if value > candidate! {
+                    candidate = value
+
+                } else if value < candidate! * minimumRatio {
+                    callback(candidate!, &stopFlag)
+
+                    guard !stopFlag else { return }
+
+                    candidate = nil
+                }
+
+            } else if value > prev {
+                candidate = value
+            }
+
+            prev = value
+        }
+
+        if candidate != nil {
+            callback(candidate!, &stopFlag)
+        }
+    }
+
+
+
+    /// Invokes callback for each local maximum in *values* sequence transformed with *map* block.
+    ///
+    /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+    public static func run<Values>(with values: Values, threshold: Value, map: (Values.Element) -> Value, callback: (Values.Element, Value, inout Bool) -> Void)
+    where Values : Sequence
+    {
+        typealias Element = (value: Values.Element, map: Value)
+
+
+        let minimumRatio = 1 - threshold
+
+        var iterator = values.makeIterator()
+
+        guard let firstValue = iterator.next() else { return }
+
+        var prev: Element = (firstValue, map(firstValue))
+        var candidate = Optional(prev)
+        var stopFlag = false
+
+
+        while let value = iterator.next() {
+            let element: Element = (value, map(value))
+
+            if candidate != nil {
+                if element.map > candidate!.map {
+                    candidate = element
+
+                } else if element.map < candidate!.map * minimumRatio {
+                    callback(candidate!.value, candidate!.map, &stopFlag)
+
+                    guard !stopFlag else { return }
+
+                    candidate = nil
+                }
+
+            } else if element.map > prev.map {
+                candidate = element
+            }
+
+            prev = element
+        }
+
+        if candidate != nil {
+            callback(candidate!.value, candidate!.map, &stopFlag)
+        }
     }
 
 }
