@@ -488,7 +488,7 @@ extension KvSortedKit {
 
     /// Inserts elements from sorted *src* into sorted *dest* preserving order.
     ///
-    /// - Parameter options: if *strictIncreasing* options is set then *src* and *dest* are threated as strictly increasing sequences and strictly increasing order is preserved.
+    /// - Parameter options: if *strictIncreasing* options is set then *src* and *dest* are considered as strictly increasing sequences and strictly increasing order is preserved.
     /// - Parameter isLess: A less relation predicate.
     public static func merge<S, D, T>(_ src: S, into dest: inout D, options: MergeOptions = .noOptions, sortedBy isLess: LessPredicate<T>)
     where D : BidirectionalCollection & RangeReplaceableCollection, D.Element == T, D.Index : BinaryInteger,
@@ -593,7 +593,7 @@ extension KvSortedKit {
 
     /// Inserts elements from sorted *src* into sorted *dest* preserving order.
     ///
-    /// - Parameter options: if *strictIncreasing* options is set then *src* and *dest* are threated as strictly increasing sequences and strictly increasing order is preserved.
+    /// - Parameter options: if *strictIncreasing* options is set then *src* and *dest* are considered as strictly increasing sequences and strictly increasing order is preserved.
     @inlinable
     public static func merge<S, D, T>(_ src: S, into dest: inout D, options: MergeOptions = .noOptions)
     where T : Comparable,
@@ -763,7 +763,7 @@ extension KvSortedKit {
 
         public static let noOptions = MergeOptions([])
 
-        /// if *strictIncreasing* is set then *src* and *dest* arguments of *merge()* method are threated as strictly increasing sequences and the result is in strictly increasing order.
+        /// if *strictIncreasing* is set then *src* and *dest* arguments of *merge()* method are considered as strictly increasing sequences and the result is in strictly increasing order.
         public static let strictIncreasing = MergeOptions(rawValue: 1 << 0)
 
 

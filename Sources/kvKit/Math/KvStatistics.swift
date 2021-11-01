@@ -1845,12 +1845,12 @@ extension KvStatistics {
             public struct Threshold {
 
                 /// First argument (lhs) is a maximum candidate, second is an other element.
-                /// Returns a boolean value indicating whether lhs is greater then rhs enough to be threated as a local maximum.
+                /// Returns a boolean value indicating whether lhs is greater then rhs enough to be considered as a local maximum.
                 public typealias Predicate = (Value, Value) -> Bool
 
 
                 /// First argument (lhs) is a maximum candidate, second is an other element.
-                /// Returns a boolean value indicating whether lhs is greater then rhs enough to be threated as a local maximum.
+                /// Returns a boolean value indicating whether lhs is greater then rhs enough to be considered as a local maximum.
                 public let predicate: Predicate
 
 
