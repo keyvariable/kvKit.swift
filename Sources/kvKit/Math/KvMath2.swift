@@ -352,7 +352,7 @@ extension KvMath2 {
     ///
     /// - Note: It's helpful to find sine of angle between two unit vectors.
     @inlinable
-    public static func cross2(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.y - x.y * y.x }
+    public static func cross2(_ lhs: Vector, _ rhs: Vector) -> Scalar { lhs.x * rhs.y - lhs.y * rhs.x }
 
 }
 
