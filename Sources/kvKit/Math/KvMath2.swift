@@ -25,10 +25,164 @@ import simd
 
 
 
-public enum KvMath2<Scalar> where Scalar : BinaryFloatingPoint & Comparable & SIMDScalar {
+public typealias KvMathScalar2 = BinaryFloatingPoint & SIMDScalar
+
+
+
+public enum KvMath2<Scalar> where Scalar : KvMathScalar2 {
 
     public typealias Vector = SIMD2<Scalar>
     public typealias Position = Vector
+
+}
+
+
+
+// MARK: Martix Operations <Float>
+
+extension KvMath2 where Scalar == Float {
+
+    @inlinable
+    public static func abs(_ matrix: simd_float2x2) -> simd_float2x2 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]))
+    }
+
+
+    @inlinable
+    public static func min(_ matrix: simd_float2x2) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min())
+    }
+
+
+    @inlinable
+    public static func max(_ matrix: simd_float2x2) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max())
+    }
+
+}
+
+
+
+// MARK: Martix Operations <Double>
+
+extension KvMath2 where Scalar == Double {
+
+    @inlinable
+    public static func abs(_ matrix: simd_double2x2) -> simd_double2x2 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]))
+    }
+
+
+    @inlinable
+    public static func min(_ matrix: simd_double2x2) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min())
+    }
+
+
+    @inlinable
+    public static func max(_ matrix: simd_double2x2) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max())
+    }
+
+}
+
+
+
+// MARK: .Line
+
+extension KvMath2 {
+
+    public struct Line : Hashable {
+
+        /// Line origin is the closest point to origin of the coordinate space.
+        public let origin: Position
+        /// A unit vector.
+        public let direction: Vector
+
+
+        @inlinable
+        public init?(_ p0: Position, _ p1: Position) {
+            self.init(from: p0, in: p1 - p0)
+        }
+
+
+        @inlinable
+        public init?(from point: Position, in direction: Vector) {
+            guard let direction = normalizedOrNil(direction) else { return nil }
+
+            self.origin = point - direction * dot(point, direction)
+            self.direction = direction
+        }
+
+
+        /// - Returns: A boolean value indicating whether the receiver's direction is on the halfcircle where angle is in (-pi/2, pi/2].
+        @inlinable
+        public var hasStandardDirection: Bool { direction.x > 0 || (direction.x == 0 && direction.y > 0) }
+
+
+        /// - Returns: The direction or negated direction so the result is on the halfcircle where angle is in (-pi/2, pi/2].
+        @inlinable
+        public var standardDirection: Vector { hasStandardDirection ? direction : -direction }
+
+
+        @inlinable
+        public func at(_ offset: Scalar) -> Position { origin + direction * offset }
+
+
+        /// - Returns: Y coordinate for x coordinate or nil whether the receiver is not vertical.
+        @inlinable
+        public func y(x: Scalar) -> Scalar? {
+            guard KvIsNonzero(direction.x) else { return nil }
+
+            return origin.y - (direction.y / direction.x) * (origin.x - x)
+        }
+
+        /// - Returns: X coordinate for y coordinate or nil whether the receiver is not horizontal.
+        @inlinable
+        public func x(y: Scalar) -> Scalar? {
+            guard KvIsNonzero(direction.y) else { return nil }
+
+            return origin.x - (direction.x / direction.y) * (origin.y - y)
+        }
+
+
+        @inlinable
+        public func signedDistance(to point: Position) -> Scalar { KvMath2.cross2(point - origin, direction) }
+
+        @inlinable
+        public func distance(to point: Position) -> Scalar { Swift.abs(signedDistance(to: point)) }
+
+
+        @inlinable
+        public func projection(for point: Position) -> Position { at(projectionOffset(for: point)) }
+
+        @inlinable
+        public func projectionOffset(for point: Position) -> Scalar { KvMath2.dot(point - origin, direction) }
+
+
+        @inlinable
+        public func contains(_ point: Position) -> Bool {
+            KvIsZero(signedDistance(to: point))
+        }
+
+
+        // MARK: : Equatable
+
+        @inlinable
+        public static func ==(lhs: Self, rhs: Self) -> Bool {
+            lhs.origin == rhs.origin && lhs.standardDirection == rhs.standardDirection
+        }
+
+
+        // MARK: : Hashable
+
+        @inlinable
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(origin)
+            hasher.combine(standardDirection)
+        }
+
+    }
 
 }
 
@@ -163,6 +317,31 @@ extension KvMath2.AABR where Scalar == Double {
 
 
 
+// MARK: Auxiliaries
+
+extension KvMath2 {
+
+    /// - Returns: Normalized vector when source vector has nonzero length. Otherwise *nil* is returned.
+    @inlinable
+    public static func normalizedOrNil(_ vector: Vector) -> Vector? {
+        let l² = length_squared(vector)
+
+        guard KvIsNonzero(l²) else { return nil }
+
+        return KvIs(l², inequalTo: 1) ? (vector / sqrt(l²)) : vector
+    }
+
+
+    /// - Returns: ((x, 0)  × (y, 0)).z
+    ///
+    /// - Note: It's helpful to find sine of angle between two unit vectors.
+    @inlinable
+    public static func cross2(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.y - x.y * y.x }
+
+}
+
+
+
 // MARK: Generalization of SIMD
 
 extension KvMath2 {
@@ -257,4 +436,88 @@ extension KvMath2 where Scalar == Double {
 
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
+}
+
+
+
+// MARK: - Vector Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, equalTo rhs: KvMath2<Scalar>.Vector) -> Bool
+where Scalar : KvMathScalar2
+{
+    KvIsZero(KvMath2.abs(lhs - rhs).max())
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, inequalTo rhs: KvMath2<Scalar>.Vector) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIsNonzero(KvMath2.abs(lhs - rhs).max())
+}
+
+
+
+// MARK: - Matrix Comparisons
+
+@inlinable
+public func KvIs(_ lhs: simd_float2x2, equalTo rhs: simd_float2x2) -> Bool {
+    KvIsZero(KvMath2.max(KvMath2.abs(lhs - rhs)))
+}
+
+
+@inlinable
+public func KvIs(_ lhs: simd_double2x2, equalTo rhs: simd_double2x2) -> Bool {
+    KvIsZero(KvMath2.max(KvMath2.abs(lhs - rhs)))
+}
+
+
+@inlinable
+public func KvIs(_ lhs: simd_float2x2, inequalTo rhs: simd_float2x2) -> Bool {
+    KvIsNonzero(KvMath2.max(KvMath2.abs(lhs - rhs)))
+}
+
+
+@inlinable
+public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
+    KvIsNonzero(KvMath2.max(KvMath2.abs(lhs - rhs)))
+}
+
+
+
+// MARK: - Line Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, equalTo rhs: KvMath2<Scalar>.Line) -> Bool
+where Scalar : KvMathScalar2
+{
+    lhs.contains(rhs.origin) && KvIs(lhs.standardDirection, equalTo: rhs.standardDirection)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, inequalTo rhs: KvMath2<Scalar>.Line) -> Bool
+where Scalar : KvMathScalar2
+{
+    !lhs.contains(rhs.origin) || KvIs(lhs.standardDirection, inequalTo: rhs.standardDirection)
+}
+
+
+
+// MARK: - AABR Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, equalTo rhs: KvMath2<Scalar>.AABR) -> Bool
+where Scalar : KvMathScalar2
+{
+    KvIs(lhs.min, equalTo: rhs.min) && KvIs(lhs.max, equalTo: rhs.max)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, inequalTo rhs: KvMath2<Scalar>.AABR) -> Bool
+where Scalar : KvMathScalar2
+{
+    KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)
 }
