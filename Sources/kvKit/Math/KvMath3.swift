@@ -295,8 +295,14 @@ extension KvMath3 {
         public init?(from point: Position, in direction: Vector) {
             guard let direction = normalizedOrNil(direction) else { return nil }
 
-            self.origin = point - direction * dot(point, direction)
-            self.direction = direction
+            self.init(origin: point - direction * dot(point, direction), unitDirection: direction)
+        }
+
+
+        @inlinable
+        public init(origin: Position, unitDirection: Vector) {
+            self.origin = origin
+            self.direction = unitDirection
         }
 
 
@@ -356,6 +362,15 @@ extension KvMath3 {
         public func contains(_ point: Position) -> Bool {
             KvIsZero(length_squared(cross(point - origin, direction)))
         }
+
+
+        /// - Returns: Line equal to the receiver having opposite direction.
+        @inlinable
+        public var negated: Self { .init(origin: origin, unitDirection: -direction) }
+
+        /// - Returns: Line equal to the receiver having opposite direction.
+        @inlinable
+        public static prefix func -(line: Self) -> Self { line.negated }
 
 
         // MARK: : Equatable
@@ -627,7 +642,10 @@ extension KvMath3 {
 
 
         @inlinable
-        public func negated() -> Plane { .init(unitNormal: -normal, d: -d) }
+        public var negated: Self { .init(unitNormal: -normal, d: -d) }
+
+        @inlinable
+        public static prefix func -(plane: Self) -> Self { plane.negated }
 
 
         @inlinable
@@ -708,6 +726,13 @@ extension KvMath3 {
         /// - Retuens: A boolean value indicating whether the receiver is below the point. In other words *point* is above the receiver.
         @inlinable
         public func isBelow(_ point: Position) -> Bool { KvIsPositive(at(point)) }
+
+
+        @inlinable
+        public var negated: Self { .init(normal: -normal, d: -d) }
+
+        @inlinable
+        public static prefix func -(plane: Self) -> Self { plane.negated }
 
     }
 

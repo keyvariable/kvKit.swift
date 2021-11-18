@@ -110,8 +110,14 @@ extension KvMath2 {
         public init?(from point: Position, in direction: Vector) {
             guard let direction = normalizedOrNil(direction) else { return nil }
 
-            self.origin = point - direction * dot(point, direction)
-            self.direction = direction
+            self.init(origin: point - direction * dot(point, direction), unitDirection: direction)
+        }
+
+
+        @inlinable
+        public init(origin: Position, unitDirection: Vector) {
+            self.origin = origin
+            self.direction = unitDirection
         }
 
 
@@ -164,6 +170,16 @@ extension KvMath2 {
         public func contains(_ point: Position) -> Bool {
             KvIsZero(signedDistance(to: point))
         }
+
+
+        /// - Returns: Line equal to the receiver having opposite direction.
+        @inlinable
+        public var negated: Self { .init(origin: origin, unitDirection: -direction) }
+
+        /// - Returns: Line equal to the receiver having opposite direction.
+        @inlinable
+        public static prefix func -(line: Self) -> Self { line.negated }
+
 
 
         // MARK: : Equatable
