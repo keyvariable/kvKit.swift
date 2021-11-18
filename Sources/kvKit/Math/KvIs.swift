@@ -311,7 +311,7 @@ public func KvIs<T: FloatingPoint>(_ lhs: T?, inequalTo rhs: T?) -> Bool {
 
 
 
-// MARK: FP Range Comparizons
+// MARK: FP Range Comparisons
 
 /// - Returns: A boolean value indicating whether *range* contains *value* taking into account the computational error.
 @inlinable

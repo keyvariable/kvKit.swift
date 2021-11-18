@@ -1367,7 +1367,7 @@ extension KvMath3 where Scalar == Double {
 
 
 
-// MARK: - Vector Comparizons
+// MARK: - Vector Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, equalTo rhs: KvMath3<Scalar>.Vector) -> Bool
@@ -1413,7 +1413,7 @@ public func KvIs(_ lhs: simd_double3x3, inequalTo rhs: simd_double3x3) -> Bool {
 
 
 
-// MARK: - Line Comparizons
+// MARK: - Line Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, equalTo rhs: KvMath3<Scalar>.Line) -> Bool
@@ -1432,7 +1432,7 @@ where Scalar : KvMathScalar3
 
 
 
-// MARK: - Segment Comparizons
+// MARK: - Segment Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, equalTo rhs: KvMath3<Scalar>.Segment) -> Bool
@@ -1453,7 +1453,7 @@ where Scalar : KvMathScalar3
 
 
 
-// MARK: - Plane Comparizons
+// MARK: - Plane Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, equalTo rhs: KvMath3<Scalar>.Plane) -> Bool
@@ -1472,7 +1472,7 @@ where Scalar : KvMathScalar3
 
 
 
-// MARK: - AABB Comparizons
+// MARK: - AABB Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, equalTo rhs: KvMath3<Scalar>.AABB) -> Bool
@@ -1491,7 +1491,7 @@ where Scalar : KvMathScalar3
 
 
 
-// MARK: - Frustum Comparizons
+// MARK: - Frustum Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, equalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
@@ -1512,7 +1512,7 @@ where Scalar : KvMathScalar3
 
 
 
-// MARK: - Sphere Comparizons
+// MARK: - Sphere Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, equalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
@@ -1531,7 +1531,7 @@ where Scalar : KvMathScalar3
 
 
 
-// MARK: - MeshVolume Comparizons
+// MARK: - MeshVolume Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, equalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool

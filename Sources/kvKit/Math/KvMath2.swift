@@ -440,7 +440,7 @@ extension KvMath2 where Scalar == Double {
 
 
 
-// MARK: - Vector Comparizons
+// MARK: - Vector Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, equalTo rhs: KvMath2<Scalar>.Vector) -> Bool
@@ -486,7 +486,7 @@ public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
 
 
 
-// MARK: - Line Comparizons
+// MARK: - Line Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, equalTo rhs: KvMath2<Scalar>.Line) -> Bool
@@ -505,7 +505,7 @@ where Scalar : KvMathScalar2
 
 
 
-// MARK: - AABR Comparizons
+// MARK: - AABR Comparisons
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, equalTo rhs: KvMath2<Scalar>.AABR) -> Bool
