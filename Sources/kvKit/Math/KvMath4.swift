@@ -25,7 +25,11 @@ import simd
 
 
 
-public enum KvMath4<Scalar> where Scalar : BinaryFloatingPoint & Comparable & SIMDScalar {
+public typealias KvMathScalar4 = BinaryFloatingPoint & SIMDScalar
+
+
+
+public enum KvMath4<Scalar> where Scalar : KvMathScalar4 {
 
     public typealias Scalar = Scalar
 
@@ -162,4 +166,81 @@ extension KvMath4 where Scalar == Double {
         .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 0), Vector(base[3], 1))
     }
 
+}
+
+
+
+// MARK: Martix Operations <Float>
+
+extension KvMath4 where Scalar == Float {
+
+    @inlinable
+    public static func abs(_ matrix: simd_float4x4) -> simd_float4x4 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]), simd.abs(matrix[3]))
+    }
+
+
+    @inlinable
+    public static func min(_ matrix: simd_float4x4) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min(), matrix[3].min())
+    }
+
+
+    @inlinable
+    public static func max(_ matrix: simd_float4x4) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max(), matrix[3].max())
+    }
+
+}
+
+
+
+// MARK: Martix Operations <Double>
+
+extension KvMath4 where Scalar == Double {
+
+    @inlinable
+    public static func abs(_ matrix: simd_double4x4) -> simd_double4x4 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]), simd.abs(matrix[3]))
+    }
+
+
+    @inlinable
+    public static func min(_ matrix: simd_double4x4) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min(), matrix[3].min())
+    }
+
+
+    @inlinable
+    public static func max(_ matrix: simd_double4x4) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max(), matrix[3].max())
+    }
+
+}
+
+
+
+// MARK: - Matrix Comparisons
+
+@inlinable
+public func KvIs(_ lhs: simd_float4x4, equalTo rhs: simd_float4x4) -> Bool {
+    KvIsZero(KvMath4.max(KvMath4.abs(lhs - rhs)))
+}
+
+
+@inlinable
+public func KvIs(_ lhs: simd_double4x4, equalTo rhs: simd_double4x4) -> Bool {
+    KvIsZero(KvMath4.max(KvMath4.abs(lhs - rhs)))
+}
+
+
+@inlinable
+public func KvIs(_ lhs: simd_float4x4, inequalTo rhs: simd_float4x4) -> Bool {
+    KvIsNonzero(KvMath4.max(KvMath4.abs(lhs - rhs)))
+}
+
+
+@inlinable
+public func KvIs(_ lhs: simd_double4x4, inequalTo rhs: simd_double4x4) -> Bool {
+    KvIsNonzero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }

@@ -25,7 +25,11 @@ import simd
 
 
 
-public enum KvMath3<Scalar> where Scalar : BinaryFloatingPoint & Comparable & SIMDScalar {
+public typealias KvMathScalar3 = BinaryFloatingPoint & SIMDScalar
+
+
+
+public enum KvMath3<Scalar> where Scalar : KvMathScalar3 {
 
     public typealias Scalar = Scalar
 
@@ -93,20 +97,20 @@ extension KvMath3 where Scalar == Double {
 extension KvMath3 where Scalar == Float {
 
     @inlinable
-    public static func abs(_ matrix: simd_float4x4) -> simd_float4x4 {
-        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]), simd.abs(matrix[3]))
+    public static func abs(_ matrix: simd_float3x3) -> simd_float3x3 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]))
     }
 
 
     @inlinable
-    public static func min(_ matrix: simd_float4x4) -> Scalar {
-        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min(), matrix[3].min())
+    public static func min(_ matrix: simd_float3x3) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min())
     }
 
 
     @inlinable
-    public static func max(_ matrix: simd_float4x4) -> Scalar {
-        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max(), matrix[3].max())
+    public static func max(_ matrix: simd_float3x3) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max())
     }
 
 }
@@ -118,20 +122,20 @@ extension KvMath3 where Scalar == Float {
 extension KvMath3 where Scalar == Double {
 
     @inlinable
-    public static func abs(_ matrix: simd_double4x4) -> simd_double4x4 {
-        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]), simd.abs(matrix[3]))
+    public static func abs(_ matrix: simd_double3x3) -> simd_double3x3 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]))
     }
 
 
     @inlinable
-    public static func min(_ matrix: simd_double4x4) -> Scalar {
-        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min(), matrix[3].min())
+    public static func min(_ matrix: simd_double3x3) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min())
     }
 
 
     @inlinable
-    public static func max(_ matrix: simd_double4x4) -> Scalar {
-        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max(), matrix[3].max())
+    public static func max(_ matrix: simd_double3x3) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max())
     }
 
 }
@@ -273,9 +277,9 @@ extension KvMath3 where Scalar == Double {
 
 extension KvMath3 {
 
-    public struct Line : Equatable, Hashable {
+    public struct Line : Hashable {
 
-        /// Line origin is the closest point to coordinate space origin.
+        /// Line origin is the closest point to origin of the coordinate space.
         public let origin: Position
         /// A unit vector.
         public let direction: Vector
@@ -294,6 +298,21 @@ extension KvMath3 {
             self.origin = point - direction * dot(point, direction)
             self.direction = direction
         }
+
+
+        /// - Returns: A boolean value indicating whether the receiver's direction is on the halfsphere where angles in XY and XZ is in (-pi/2, pi/2].
+        @inlinable
+        public var hasStandardDirection: Bool {
+            direction.x > 0
+            || (direction.x == 0
+                && (direction.y > 0
+                    || (direction.y == 0 && direction.z > 0)))
+        }
+
+
+        /// - Returns: The direction or negated direction so the result is on the halfsphere where angles in XY and XZ is in (-pi/2, pi/2].
+        @inlinable
+        public var standardDirection: Vector { hasStandardDirection ? direction : -direction }
 
 
         @inlinable
@@ -342,9 +361,17 @@ extension KvMath3 {
         // MARK: : Equatable
 
         @inlinable
-        public static func ==(lhs: Line, rhs: Line) -> Bool {
-            lhs.contains(rhs.origin)
-                && (KvMath3.is(lhs.direction, equalTo: rhs.direction) || KvMath3.is(lhs.direction, equalTo: -rhs.direction))
+        public static func ==(lhs: Self, rhs: Self) -> Bool {
+            lhs.origin == rhs.origin && lhs.standardDirection == rhs.standardDirection
+        }
+
+
+        // MARK: : Hashable
+
+        @inlinable
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(origin)
+            hasher.combine(standardDirection)
         }
 
     }
@@ -357,7 +384,7 @@ extension KvMath3 {
 
 extension KvMath3 {
 
-    public struct Segment : Equatable, Hashable {
+    public struct Segment : Hashable {
 
         public let line: Line
         public let range: ClosedRange<Scalar>
@@ -374,6 +401,11 @@ extension KvMath3 {
             line = Line(p1, p2)!
             range = line.projectionOffset(for: p1) ... line.projectionOffset(for: p2)
         }
+
+
+        ///  - Returns: The receiver's range when the receiver's line has standard direction. Otherwise projection of the range on the receiver's line in standard direction is returned.
+        @inlinable
+        public var standardRange: ClosedRange<Scalar> { line.hasStandardDirection ? range : (-range.upperBound ... -range.lowerBound) }
 
 
         /// - Parameter point: A point on the line.
@@ -437,12 +469,15 @@ extension KvMath3 {
         // MARK: : Equatable
 
         @inlinable
-        public static func ==(lhs: Self, rhs: Self) -> Bool {
-            let p11 = lhs.p1, p12 = lhs.p2
-            let p21 = rhs.p1, p22 = rhs.p2
+        public static func ==(lhs: Self, rhs: Self) -> Bool { lhs.line == rhs.line && lhs.standardRange == rhs.standardRange }
 
-            return (KvMath3.is(p11, equalTo: p21) || KvMath3.is(p11, equalTo: p22))
-                && (KvMath3.is(p12, equalTo: p22) || KvMath3.is(p12, equalTo: p21))
+
+        // MARK: : Hashable
+
+        @inlinable
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(line)
+            hasher.combine(standardRange)
         }
 
     }
@@ -456,7 +491,7 @@ extension KvMath3 {
 extension KvMath3 {
 
     /// Plane equation: *normal* · *x* + *d* = 0, where *x* in on the plane.
-    public struct Plane : Equatable, Hashable {
+    public struct Plane : Hashable {
 
         public let normal: Vector
         public let d: Scalar
@@ -614,15 +649,6 @@ extension KvMath3 {
             .init(unitNormal: normal, d: scale * d)
         }
 
-
-        // MARK: : Equatable
-
-        @inlinable
-        public static func ==(lhs: Plane, rhs: Plane) -> Bool {
-            KvIsZero(abs(lhs.normal - rhs.normal).max())
-                && KvIs(lhs.d, equalTo: rhs.d)
-        }
-
     }
 
 }
@@ -636,7 +662,7 @@ extension KvMath3 {
     /// A plane with neither normalization nor normal validation.
     ///
     /// Plane equation: *normal* · *x* + *d* = 0, where *x* in on the plane.
-    public struct FastPlane : Equatable, Hashable {
+    public struct FastPlane {
 
         public let normal: Vector
         public let d: Scalar
@@ -694,7 +720,7 @@ extension KvMath3 {
 extension KvMath3 {
 
     /// Axis-alligned bounding box.
-    public struct AABB : Equatable, Hashable {
+    public struct AABB : Hashable {
 
         public let min: Position
         public let max: Position
@@ -870,38 +896,51 @@ extension KvMath3.AABB where Scalar == Double {
 
 extension KvMath3 {
 
-    public struct Frustum : Equatable, Hashable {
+    public struct Frustum : Hashable {
 
-        public let planes: [Plane]
+        public let left, right, bottom, top, near, far: Plane
 
 
         @inlinable
-        public init(_ planes: [Plane]) {
-            assert(!planes.isEmpty)
+        public init(left: Plane, right: Plane, bottom: Plane, top: Plane, near: Plane, far: Plane) {
+            self.left = left
+            self.right = right
+            self.bottom = bottom
+            self.top = top
+            self.near = near
+            self.far = far
+        }
 
-            self.planes = planes
+
+        /// - Returns: Minimum of signed distances to the receiver's planes.
+        ///
+        /// - Note: The result is positive whether given point is inside the receiver.
+        @inlinable
+        public func minimumInnerDistance(to x: Position) -> Scalar {
+            Swift.min(Swift.min(left.signedDistance(to: x), right.signedDistance(to: x)),
+                      Swift.min(bottom.signedDistance(to: x), top.signedDistance(to: x)),
+                      Swift.min(near.signedDistance(to: x), far.signedDistance(to: x)))
         }
 
 
         @inlinable
-        public static var infinite: Self { .init([ Plane(unitNormal: [ 0, 0, -1 ], d: .infinity) ]) }
-
-
-        @inlinable
-        public func contains(_ x: Position) -> Bool {
-            KvIsNotNegative(planes.lazy.map({ $0.at(x) }).min() ?? 0)
-        }
+        public func contains(_ x: Position) -> Bool { KvIsNotNegative(minimumInnerDistance(to: x)) }
 
 
         @inlinable
         public func contains(_ x: Position, margin: Scalar) -> Bool {
-            KvIsNotNegative(planes.lazy.map({ $0.at(x) - margin }).min() ?? 0)
+            KvIs(minimumInnerDistance(to: x), greaterThanOrEqualTo: margin)
         }
 
 
         @inlinable
         public func inset(by d: Scalar) -> Self {
-            .init(planes.map { $0.translated(by: $0.normal * d) })
+            .init(left: left.translated(by: left.normal * d),
+                  right: right.translated(by: right.normal * d),
+                  bottom: bottom.translated(by: bottom.normal * d),
+                  top: top.translated(by: top.normal * d),
+                  near: near.translated(by: near.normal * d),
+                  far: far.translated(by: far.normal * d))
         }
 
     }
@@ -915,31 +954,25 @@ extension KvMath3 {
 extension KvMath3.Frustum where Scalar == Float {
 
     /// Initializes a frustum with a perspective projecoin matrix.
-    public init?(_ projectionMatrix: simd_float4x4, negativeZ: Bool = false) {
+    public init?(_ projectionMatrix: simd_float4x4) {
         let m = projectionMatrix.transpose
 
         guard let l = KvMath3.Plane(m[3] + m[0]),
               let r = KvMath3.Plane(m[3] - m[0]),
               let b = KvMath3.Plane(m[3] + m[1]),
-              let t = KvMath3.Plane(m[3] - m[1])
+              let t = KvMath3.Plane(m[3] - m[1]),
+              let n = KvMath3.Plane(m[3] + m[2]),
+              let f = KvMath3.Plane(m[3] - m[2])
         else { return nil }
 
-        planes = [
-            KvMath3.Plane(m[3] + m[2]) ?? .init(unitNormal: [ 0, 0, negativeZ ? -1 : 1 ], d: -.ulpOfOne),     // Near
-            KvMath3.Plane(m[3] - m[2]) ?? .init(unitNormal: [ 0, 0, negativeZ ? 1 : -1 ], d: .infinity),      // Far
-            l, r, b, t,
-        ]
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
     }
 
 
 
-    /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
-    public init?(_ projectionMatrix: simd_float4x4, zRange: ClosedRange<Scalar>) {
-        assert(zRange.lowerBound > 0 || zRange.upperBound < 0)
-
+    /// Initializes a frustum with a perspective projecoin matrix overriding Z planes.
+    public init?(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
         let m = projectionMatrix.transpose
-        let negativeZ = zRange.upperBound < 0
-        let zRange = negativeZ ? (-zRange.upperBound) ... (-zRange.lowerBound) : zRange
 
         guard let l = KvMath3.Plane(m[3] + m[0]),
               let r = KvMath3.Plane(m[3] - m[0]),
@@ -947,11 +980,11 @@ extension KvMath3.Frustum where Scalar == Float {
               let t = KvMath3.Plane(m[3] - m[1])
         else { return nil }
 
-        planes = [
-            .init(unitNormal: [ 0, 0, negativeZ ? -1 : 1 ], d: -zRange.lowerBound),  // Near
-            .init(unitNormal: [ 0, 0, negativeZ ? 1 : -1 ], d: zRange.upperBound),  // Far
-            l, r, b, t,
-        ]
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
+
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
     }
 
 }
@@ -963,31 +996,25 @@ extension KvMath3.Frustum where Scalar == Float {
 extension KvMath3.Frustum where Scalar == Double {
 
     /// Initializes a frustum with a perspective projecoin matrix.
-    public init?(_ projectionMatrix: simd_double4x4, negativeZ: Bool = false) {
+    public init?(_ projectionMatrix: simd_double4x4) {
         let m = projectionMatrix.transpose
 
         guard let l = KvMath3.Plane(m[3] + m[0]),
               let r = KvMath3.Plane(m[3] - m[0]),
               let b = KvMath3.Plane(m[3] + m[1]),
-              let t = KvMath3.Plane(m[3] - m[1])
+              let t = KvMath3.Plane(m[3] - m[1]),
+              let n = KvMath3.Plane(m[3] + m[2]),
+              let f = KvMath3.Plane(m[3] - m[2])
         else { return nil }
 
-        planes = [
-            KvMath3.Plane(m[3] + m[2]) ?? .init(unitNormal: [ 0, 0, negativeZ ? -1 : 1 ], d: -.ulpOfOne),  // Near
-            KvMath3.Plane(m[3] - m[2]) ?? .init(unitNormal: [ 0, 0, negativeZ ? 1 : -1 ], d: .infinity),   // Far
-            l, r, b, t,
-        ]
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
     }
 
 
 
     /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
-    public init?(_ projectionMatrix: simd_double4x4, zRange: ClosedRange<Scalar>) {
-        assert(zRange.lowerBound > 0 || zRange.upperBound < 0)
-
+    public init?(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
         let m = projectionMatrix.transpose
-        let negativeZ = zRange.upperBound < 0
-        let zRange = negativeZ ? (-zRange.upperBound) ... (-zRange.lowerBound) : zRange
 
         guard let l = KvMath3.Plane(m[3] + m[0]),
               let r = KvMath3.Plane(m[3] - m[0]),
@@ -995,11 +1022,11 @@ extension KvMath3.Frustum where Scalar == Double {
               let t = KvMath3.Plane(m[3] - m[1])
         else { return nil }
 
-        planes = [
-            .init(unitNormal: [ 0, 0, negativeZ ? -1 : 1 ], d: -zRange.lowerBound), // Near
-            .init(unitNormal: [ 0, 0, negativeZ ? 1 : -1 ], d: zRange.upperBound),  // Far
-            l, r, b, t,
-        ]
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
+
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
     }
 
 }
@@ -1010,22 +1037,27 @@ extension KvMath3.Frustum where Scalar == Double {
 
 extension KvMath3 {
 
-    public struct FastFrustum : Equatable, Hashable {
+    public struct FastFrustum {
 
-        public let planes: [FastPlane]
+        public let left, right, bottom, top, near, far: FastPlane
 
 
         @inlinable
-        public init(_ planes: [FastPlane]) {
-            assert(!planes.isEmpty)
-
-            self.planes = planes
+        public init(left: FastPlane, right: FastPlane, bottom: FastPlane, top: FastPlane, near: FastPlane, far: FastPlane) {
+            self.left = left
+            self.right = right
+            self.bottom = bottom
+            self.top = top
+            self.near = near
+            self.far = far
         }
 
 
         @inlinable
         public func contains(_ x: Position) -> Bool {
-            KvIsNotNegative(planes.lazy.map({ $0.at(x) }).min() ?? 0)
+            KvIsNotNegative(Swift.min(Swift.min(left.at(x), right.at(x)),
+                                      Swift.min(bottom.at(x), top.at(x)),
+                                      Swift.min(near.at(x), far.at(x))))
         }
 
     }
@@ -1041,37 +1073,32 @@ extension KvMath3.FastFrustum where Scalar == Float {
     /// Initializes a frustum with a perspective projecoin matrix.
     @inlinable
     public init(_ projectionMatrix: simd_float4x4) {
-        let t = projectionMatrix.transpose
+        let m = projectionMatrix.transpose
 
-        planes = [
-            .init(t[3] + t[2]), // Near
-            .init(t[3] - t[2]), // Far
-            .init(t[3] + t[0]), // Left
-            .init(t[3] - t[0]), // Right
-            .init(t[3] + t[1]), // Bottom
-            .init(t[3] - t[1]), // Top
-        ]
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   .init(m[3] + m[2]),
+                  far:    .init(m[3] - m[2]))
     }
 
 
 
     /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
     @inlinable
-    public init(_ projectionMatrix: simd_float4x4, zRange: ClosedRange<Scalar>) {
-        assert(zRange.lowerBound > 0 || zRange.upperBound < 0)
+    public init(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
+        let m = projectionMatrix.transpose
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zNear), KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zNear), KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
 
-        let t = projectionMatrix.transpose
-        let negativeZ = zRange.upperBound < 0
-        let zRange = negativeZ ? (-zRange.upperBound) ... (-zRange.lowerBound) : zRange
-
-        planes = [
-            .init(a: 0, b: 0, c: negativeZ ? -1 : 1, d: -zRange.lowerBound),    // Near
-            .init(a: 0, b: 0, c: negativeZ ? 1 : -1, d:  zRange.upperBound),    // Far
-            .init(t[3] + t[0]),     // Left
-            .init(t[3] - t[0]),     // Right
-            .init(t[3] + t[1]),     // Bottom
-            .init(t[3] - t[1]),     // Top
-        ]
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   n,
+                  far:    f)
     }
 
 }
@@ -1085,37 +1112,32 @@ extension KvMath3.FastFrustum where Scalar == Double {
     /// Initializes a frustum with a perspective projecoin matrix.
     @inlinable
     public init(_ projectionMatrix: simd_double4x4) {
-        let t = projectionMatrix.transpose
+        let m = projectionMatrix.transpose
 
-        planes = [
-            .init(t[3] + t[2]), // Near
-            .init(t[3] - t[2]), // Far
-            .init(t[3] + t[0]), // Left
-            .init(t[3] - t[0]), // Right
-            .init(t[3] + t[1]), // Bottom
-            .init(t[3] - t[1]), // Top
-        ]
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   .init(m[3] + m[2]),
+                  far:    .init(m[3] - m[2]))
     }
 
 
 
     /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
     @inlinable
-    public init(_ projectionMatrix: simd_double4x4, zRange: ClosedRange<Scalar>) {
-        assert(zRange.lowerBound > 0 || zRange.upperBound < 0)
+    public init(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
+        let m = projectionMatrix.transpose
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zNear), KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zNear), KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
 
-        let t = projectionMatrix.transpose
-        let negativeZ = zRange.upperBound < 0
-        let zRange = negativeZ ? (-zRange.upperBound) ... (-zRange.lowerBound) : zRange
-
-        planes = [
-            .init(a: 0, b: 0, c: negativeZ ? -1 : 1, d: -zRange.lowerBound),    // Near
-            .init(a: 0, b: 0, c: negativeZ ? 1 : -1, d:  zRange.upperBound),    // Far
-            .init(t[3] + t[0]),     // Left
-            .init(t[3] - t[0]),     // Right
-            .init(t[3] + t[1]),     // Bottom
-            .init(t[3] - t[1]),     // Top
-        ]
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   n,
+                  far:    f)
     }
 
 }
@@ -1136,13 +1158,6 @@ extension KvMath3 {
         return KvIs(l², inequalTo: 1) ? (vector / sqrt(l²)) : vector
     }
 
-
-
-    @inlinable
-    public static func `is`(_ lhs: Vector, equalTo rhs: Vector) -> Bool {
-        KvIsZero(abs(lhs - rhs).max())
-    }
-
 }
 
 
@@ -1151,7 +1166,7 @@ extension KvMath3 {
 
 extension KvMath3 {
 
-    public struct Sphere : Equatable, Hashable {
+    public struct Sphere : Hashable {
 
         public let center: Position
         public let radius: Scalar
@@ -1192,12 +1207,17 @@ extension KvMath3 {
 
 
 
-// MARK: .Volume
+// MARK: .MeshVolume
 
 extension KvMath3 {
 
-    /// Stream accumulating volume of solid body composed of processed triangles. Volume is calculated as sum of signed pyramid volumes where bases are surface triangles and having the same the top vertex.
-    public struct Volume {
+    @available(*, deprecated, renamed: "MeshVolume")
+    public struct Volume { }
+
+
+
+    /// Stream accumulating volume of solid body composed of triangles. Volume is calculated as sum of signed pyramid volumes where bases are surface triangles and having the same top vertex.
+    public struct MeshVolume : Hashable {
 
         @inlinable
         public var value: Scalar {
@@ -1350,16 +1370,16 @@ extension KvMath3 where Scalar == Double {
 // MARK: - Vector Comparizons
 
 @inlinable
-public func KvIs<Scalar>(_ lhs: SIMD3<Scalar>, equalTo rhs: SIMD3<Scalar>) -> Bool
-where Scalar : BinaryFloatingPoint & Comparable & SIMDScalar
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, equalTo rhs: KvMath3<Scalar>.Vector) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIsZero(KvMath3.abs(lhs - rhs).max())
 }
 
 
 @inlinable
-public func KvIs<Scalar>(_ lhs: SIMD3<Scalar>, inequalTo rhs: SIMD3<Scalar>) -> Bool
-where Scalar : BinaryFloatingPoint & Comparable & SIMDScalar
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, inequalTo rhs: KvMath3<Scalar>.Vector) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIsNonzero(KvMath3.abs(lhs - rhs).max())
 }
@@ -1369,25 +1389,161 @@ where Scalar : BinaryFloatingPoint & Comparable & SIMDScalar
 // MARK: - Matrix Comparisons
 
 @inlinable
-public func KvIs(_ lhs: simd_float4x4, equalTo rhs: simd_float4x4) -> Bool {
+public func KvIs(_ lhs: simd_float3x3, equalTo rhs: simd_float3x3) -> Bool {
     KvIsZero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
 
 @inlinable
-public func KvIs(_ lhs: simd_double4x4, equalTo rhs: simd_double4x4) -> Bool {
+public func KvIs(_ lhs: simd_double3x3, equalTo rhs: simd_double3x3) -> Bool {
     KvIsZero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
 
-
 @inlinable
-public func KvIs(_ lhs: simd_float4x4, inequalTo rhs: simd_float4x4) -> Bool {
+public func KvIs(_ lhs: simd_float3x3, inequalTo rhs: simd_float3x3) -> Bool {
     KvIsNonzero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
 
 @inlinable
-public func KvIs(_ lhs: simd_double4x4, inequalTo rhs: simd_double4x4) -> Bool {
+public func KvIs(_ lhs: simd_double3x3, inequalTo rhs: simd_double3x3) -> Bool {
     KvIsNonzero(KvMath3.max(KvMath3.abs(lhs - rhs)))
+}
+
+
+
+// MARK: - Line Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, equalTo rhs: KvMath3<Scalar>.Line) -> Bool
+where Scalar : KvMathScalar3
+{
+    lhs.contains(rhs.origin) && KvIs(lhs.standardDirection, equalTo: rhs.standardDirection)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, inequalTo rhs: KvMath3<Scalar>.Line) -> Bool
+where Scalar : KvMathScalar3
+{
+    !lhs.contains(rhs.origin) || KvIs(lhs.standardDirection, inequalTo: rhs.standardDirection)
+}
+
+
+
+// MARK: - Segment Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, equalTo rhs: KvMath3<Scalar>.Segment) -> Bool
+where Scalar : KvMathScalar3
+{
+    let p11 = lhs.p1, p21 = rhs.p1
+
+    return KvIs(p11, equalTo: p21) ? KvIs(lhs.p2, equalTo: rhs.p2) : (KvIs(p11, equalTo: rhs.p2) && KvIs(lhs.p2, equalTo: p21))
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, inequalTo rhs: KvMath3<Scalar>.Segment) -> Bool
+where Scalar : KvMathScalar3
+{
+    !KvIs(lhs, equalTo: rhs)
+}
+
+
+
+// MARK: - Plane Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, equalTo rhs: KvMath3<Scalar>.Plane) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.normal, equalTo: rhs.normal) && KvIs(lhs.d, equalTo: rhs.d)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, inequalTo rhs: KvMath3<Scalar>.Plane) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.normal, inequalTo: rhs.normal) || KvIs(lhs.d, inequalTo: rhs.d)
+}
+
+
+
+// MARK: - AABB Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, equalTo rhs: KvMath3<Scalar>.AABB) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.min, equalTo: rhs.min) && KvIs(lhs.max, equalTo: rhs.max)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, inequalTo rhs: KvMath3<Scalar>.AABB) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)
+}
+
+
+
+// MARK: - Frustum Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, equalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.left, equalTo: rhs.left) && KvIs(lhs.right, equalTo: rhs.right)
+    && KvIs(lhs.bottom, equalTo: rhs.bottom) && KvIs(lhs.top, equalTo: rhs.top)
+    && KvIs(lhs.near, equalTo: rhs.near) && KvIs(lhs.far, equalTo: rhs.far)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, inequalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
+where Scalar : KvMathScalar3
+{
+    !KvIs(lhs, equalTo: rhs)
+}
+
+
+
+// MARK: - Sphere Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, equalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.center, equalTo: rhs.center) && KvIs(lhs.radius, equalTo: rhs.radius)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, inequalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs.center, inequalTo: rhs.center) || KvIs(lhs.radius, inequalTo: rhs.radius)
+}
+
+
+
+// MARK: - MeshVolume Comparizons
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, equalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs._value, equalTo: rhs._value)
+}
+
+
+@inlinable
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, inequalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
+where Scalar : KvMathScalar3
+{
+    KvIs(lhs._value, inequalTo: rhs._value)
 }
