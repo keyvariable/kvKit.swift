@@ -528,11 +528,11 @@ extension KvMath3 {
         public init?(a: Scalar, b: Scalar, c: Scalar, d: Scalar) {
             let normal = Vector(x: a, y: b, z: c)
 
-            let l² = KvMath3.length_squared(normal)
+            let l = KvMath3.length(normal)
 
-            guard KvIsPositive(l²) else { return nil }
+            guard l != 0 else { return nil }
 
-            let scale = 1 / sqrt(l²)
+            let scale = 1 / l
 
             self.init(unitNormal: normal * scale, d: d * scale)
         }
