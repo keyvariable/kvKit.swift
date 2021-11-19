@@ -153,7 +153,7 @@ extension KvMath2 {
 
 
         @inlinable
-        public func signedDistance(to point: Position) -> Scalar { KvMath2.cross2(point - origin, direction) }
+        public func signedDistance(to point: Position) -> Scalar { KvMath2.cross2(direction, point - origin) }
 
         @inlinable
         public func distance(to point: Position) -> Scalar { Swift.abs(signedDistance(to: point)) }
