@@ -333,6 +333,122 @@ extension KvMath2.AABR where Scalar == Double {
 
 
 
+// MARK: .Convex
+
+extension KvMath2 {
+
+    /// Simple implementation of convex shape equal to intersections of left halfspaces produced by given oriented lines.
+    public struct Convex {
+
+        public let lines: [Line]
+
+
+        /// - Parameter points: Convex shape vertices in counterclockwise order.
+        @inlinable
+        public init?(_ points: [Position]) {
+            guard points.count >= 3 else {
+                KvDebug.pause("\(points.count) points not enough to make a convex shape")
+                return nil
+            }
+
+            var iterator = points.makeIterator()
+
+            let first = iterator.next()!
+            var last: (line: Line, point: Position)
+
+            do {
+                let second = iterator.next()!
+
+                guard let line = Line(first, second) else {
+                    KvDebug.pause("Unable to make a line for points \(first) and \(second)")
+                    return nil
+                }
+
+                last = (line, second)
+            }
+
+            var lines = [ last.line ]
+
+
+            func Process(_ point: Position) -> Bool {
+                guard let line = Line(last.point, point)
+                else { return KvDebug.pause(code: false, "Unable to make a line for points \(last.point) and \(point)") }
+
+                guard KvIsPositive(KvMath2.cross2(last.line.direction, line.direction))
+                else { return KvDebug.pause(code: false, "\(point) point breaks CCW order") }
+
+                lines.append(line)
+                last = (line, point)
+
+                return true
+            }
+
+
+            while let next = iterator.next() {
+                guard Process(next) else { return nil }
+            }
+            guard Process(first) else { return nil }
+
+            self.lines = lines
+        }
+
+
+        /// - Parameter points: Convex shape vertices in counterclockwise order.
+        @inlinable
+        public init?(_ points: Position...) { self.init(points) }
+
+
+        /// - Note: Points have to be in counter-clockwise order.
+        @inlinable
+        public init?(p1: Position, p2: Position, p3: Position) {
+            guard let line1 = Line(p1, p2) else { return nil }
+
+            var isNegative = false
+
+            if KvIsPositive(line1.signedDistance(to: p3), alsoIsNegative: &isNegative) {
+                lines = [ line1, .init(p2, p3)!, .init(p3, p1)! ]
+            }
+            else if isNegative {
+                lines = [ -line1, .init(p1, p3)!, .init(p3, p2)! ]
+            }
+            else { return nil }
+        }
+
+
+        // MARK: Operations
+
+        /// - Returns: Range of X-coordinates inside the receiver at given Y-coordinate.
+        @inlinable
+        public func segment(y: Scalar) -> ClosedRange<Scalar>? {
+            var lowerBound: Scalar = -.infinity
+            var upperBound: Scalar = .infinity
+
+            var iterator = lines.makeIterator()
+
+            while let line = iterator.next() {
+                switch line.x(y: y) {
+                case .some(let x):
+                    // If line intersects with horizontal then it isn't horizontal.
+                    line.direction.y > 0
+                    ? (upperBound = Swift.min(upperBound, x))
+                    : (lowerBound = Swift.max(lowerBound, x))
+
+                case .none:
+                    // line.direction.x = ±1
+                    guard line.direction.x > 0 ? KvIs(y, greaterThanOrEqualTo: line.origin.y) : KvIs(y, lessThanOrEqualTo: line.origin.y)
+                    else { return nil }
+                }
+            }
+
+            return upperBound >= lowerBound ? lowerBound ... upperBound : nil
+        }
+
+    }
+
+}
+
+
+
 // MARK: Auxiliaries
 
 extension KvMath2 {
