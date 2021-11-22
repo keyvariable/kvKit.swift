@@ -35,6 +35,7 @@ public struct KvRoundedRectangle : InsettableShape {
 
 
 
+    @inlinable
     public init(radii: Radii, segments: Segments = .all, inset: CGFloat = 0) {
         self.radii = radii
         self.segments = segments
@@ -46,7 +47,7 @@ public struct KvRoundedRectangle : InsettableShape {
     // MARK: : Shape
 
     public func path(in rect: CGRect) -> Path {
-        let rect = rect.insetBy(dx: inset, dy: inset)
+        let rect = rect.insetBy(dx: min(inset, 0.5 * rect.width), dy: min(inset, 0.5 * rect.height))
 
         let radii = radii
             .inset(by: inset)
@@ -166,6 +167,7 @@ public struct KvRoundedRectangle : InsettableShape {
 
     // MARK: : InsettableShape
 
+    @inlinable
     public func inset(by amount: CGFloat) -> some InsettableShape {
         var insetShape = self
 
@@ -252,17 +254,16 @@ extension KvRoundedRectangle {
 
         // MARK: Operations
 
+        @inlinable
         public func inset(by amount: CGFloat) -> Self {
-            return .init(topLeft: topLeft - amount,
-                         topRight: topRight - amount,
-                         bottomRight: bottomRight - amount,
-                         bottomLeft: bottomLeft - amount)
+            .init(topLeft: topLeft - amount,
+                  topRight: topRight - amount,
+                  bottomRight: bottomRight - amount,
+                  bottomLeft: bottomLeft - amount)
         }
 
 
         public func fitted(in rect: CGRect) -> Self {
-            var radii = self
-
 
             func ScaleIfNeeded(r₁: inout CGFloat, r₂: inout CGFloat, edge: CGFloat) {
                 guard r₁ + r₂ > edge else { return }
@@ -274,6 +275,8 @@ extension KvRoundedRectangle {
             }
 
 
+            var radii = self
+
             ScaleIfNeeded(r₁: &radii.topLeft, r₂: &radii.topRight, edge: rect.width)
             ScaleIfNeeded(r₁: &radii.bottomLeft, r₂: &radii.bottomRight, edge: rect.width)
 
@@ -284,6 +287,7 @@ extension KvRoundedRectangle {
         }
 
 
+        @inlinable
         public func with(minimum: CGFloat) -> Self {
             .init(topLeft: max(minimum, topLeft),
                   topRight: max(minimum, topRight),
