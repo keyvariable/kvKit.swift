@@ -148,18 +148,16 @@ extension KvMath3 where Scalar == Float {
 
     @inlinable
     public static func apply(_ matrix: simd_float4x4, toPosition position: Position) -> Position {
-        let p4 = matrix * .init(position, 1)
+        let p4 = matrix * simd_make_float4(position, 1)
 
-        return .init(p4.x, p4.y, p4.z) / p4.w
+        return simd_make_float3(p4) / p4.w
     }
 
 
 
     @inlinable
     public static func apply(_ matrix: simd_float4x4, toVector vector: Vector) -> Vector {
-        let p4 = matrix * .init(vector, 0)
-
-        return .init(p4.x, p4.y, p4.z)
+        simd_make_float3(matrix * simd_make_float4(vector))
     }
 
 
@@ -168,20 +166,22 @@ extension KvMath3 where Scalar == Float {
     public static func translation(from matrix: simd_float4x4) -> Vector {
         let c4 = matrix[3]
 
-        return .init(c4.x, c4.y, c4.z) / c4.w
+        return simd_make_float3(c4) / c4.w
     }
 
 
 
     @inlinable
     public static func setTranslation(_ translation: Vector, to matrix: inout simd_float4x4) {
-        matrix[3] = { w in .init(translation * w, w) }(matrix[3].w)
+        let w = matrix[3, 3]
+
+        matrix[3] = simd_make_float4(translation * w, w)
     }
 
 
 
     @inlinable
-    public static func scale(from matrix: simd_float4x4) -> simd_float3 {
+    public static func scale(from matrix: simd_float4x4) -> Vector {
         // Assuming .w == 0 for columns 0...2
         .init(x: simd.length(matrix[0]),
               y: simd.length(matrix[1]),
@@ -191,7 +191,7 @@ extension KvMath3 where Scalar == Float {
 
 
     @inlinable
-    public static func scale²(from matrix: simd_float4x4) -> simd_float3 {
+    public static func scale²(from matrix: simd_float4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]),
               z: simd.length_squared(matrix[2]))
@@ -200,33 +200,34 @@ extension KvMath3 where Scalar == Float {
 
 
     @inlinable
-    public static func setScale(_ scale: simd_float3, to matrix: inout simd_float4x4) {
-        let oldScale = self.scale(from: matrix)
+    public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= .init(.init(repeating: scale.x / oldScale.x), 1)
-        matrix[1] *= .init(.init(repeating: scale.y / oldScale.y), 1)
-        matrix[2] *= .init(.init(repeating: scale.z / oldScale.z), 1)
+        matrix[0] *= simd_make_float4(s.x, s.x, s.x, 1)
+        matrix[1] *= simd_make_float4(s.y, s.y, s.y, 1)
+        matrix[2] *= simd_make_float4(s.z, s.z, s.z, 1)
     }
 
 
 
+    /// - Returns: Transformed X basis vector.
     @inlinable
-    public static func front(from matrix: simd_float4x4) -> simd_float3 {
-        return { .init($0.x, $0.y, $0.z) }(matrix[2])
+    public static func basisX(from matrix: simd_float4x4) -> Vector {
+        simd_make_float3(matrix[0])
     }
 
 
-
+    /// - Returns: Transformed Y basis vector.
     @inlinable
-    public static func up(from matrix: simd_float4x4) -> simd_float3 {
-        return { .init($0.x, $0.y, $0.z) }(matrix[1])
+    public static func basisY(from matrix: simd_float4x4) -> Vector {
+        simd_make_float3(matrix[1])
     }
 
 
-
+    /// - Returns: Transformed Z basis vector.
     @inlinable
-    public static func right(from matrix: simd_float4x4) -> simd_float3 {
-        return { .init($0.x, $0.y, $0.z) }(matrix[0])
+    public static func basisZ(from matrix: simd_float4x4) -> Vector {
+        simd_make_float3(matrix[2])
     }
 
 }
@@ -239,18 +240,16 @@ extension KvMath3 where Scalar == Double {
 
     @inlinable
     public static func apply(_ matrix: simd_double4x4, toPosition position: Position) -> Position {
-        let p4 = matrix * .init(position, 1)
+        let p4 = matrix * simd_make_double4(position, 1)
 
-        return .init(p4.x, p4.y, p4.z) / p4.w
+        return simd_make_double3(p4) / p4.w
     }
 
 
 
     @inlinable
     public static func apply(_ matrix: simd_double4x4, toVector vector: Vector) -> Vector {
-        let p4 = matrix * .init(vector, 0)
-
-        return .init(p4.x, p4.y, p4.z)
+        simd_make_double3(matrix * simd_make_double4(vector))
     }
 
 
@@ -259,14 +258,68 @@ extension KvMath3 where Scalar == Double {
     public static func translation(from matrix: simd_double4x4) -> Vector {
         let c4 = matrix[3]
 
-        return .init(c4.x, c4.y, c4.z) / c4.w
+        return simd_make_double3(c4) / c4.w
     }
 
 
 
     @inlinable
     public static func setTranslation(_ translation: Vector, to matrix: inout simd_double4x4) {
-        matrix[3] = { w in .init(translation * w, w) }(matrix[3].w)
+        let w = matrix[3, 3]
+
+        matrix[3] = simd_make_double4(translation * w, w)
+    }
+
+
+
+    @inlinable
+    public static func scale(from matrix: simd_double4x4) -> Vector {
+        // Assuming .w == 0 for columns 0...2
+        .init(x: simd.length(matrix[0]),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+
+
+    @inlinable
+    public static func scale²(from matrix: simd_double4x4) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+
+
+    @inlinable
+    public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= simd_make_double4(s.x, s.x, s.x, 1)
+        matrix[1] *= simd_make_double4(s.y, s.y, s.y, 1)
+        matrix[2] *= simd_make_double4(s.z, s.z, s.z, 1)
+    }
+
+
+
+    /// - Returns: Transformed X basis vector.
+    @inlinable
+    public static func basisX(from matrix: simd_double4x4) -> Vector {
+        simd_make_double3(matrix[0])
+    }
+
+
+    /// - Returns: Transformed Y basis vector.
+    @inlinable
+    public static func basisY(from matrix: simd_double4x4) -> Vector {
+        simd_make_double3(matrix[1])
+    }
+
+
+    /// - Returns: Transformed Z basis vector.
+    @inlinable
+    public static func basisZ(from matrix: simd_double4x4) -> Vector {
+        simd_make_double3(matrix[2])
     }
 
 }
@@ -890,9 +943,7 @@ extension KvMath3.AABB where Scalar == Float {
     @inlinable
     public func applying(_ transform: simd_float4x4) -> Self {
         Self(over: Self.pointIndices.lazy.map { index in
-            let p4 = transform * .init(point(at: index), 1)
-
-            return .init(p4.x, p4.y, p4.z) * (1 / p4.w)
+            KvMath3.apply(transform, toPosition: point(at: index))
         })!
     }
 
@@ -907,9 +958,7 @@ extension KvMath3.AABB where Scalar == Double {
     @inlinable
     public func applying(_ transform: simd_double4x4) -> Self {
         Self(over: Self.pointIndices.lazy.map { index in
-            let p4 = transform * .init(point(at: index), 1)
-
-            return .init(p4.x, p4.y, p4.z) * (1 / p4.w)
+            KvMath3.apply(transform, toPosition: point(at: index))
         })!
     }
 
@@ -1571,4 +1620,37 @@ public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, inequalTo rhs: KvMat
 where Scalar : KvMathScalar3
 {
     KvIs(lhs._value, inequalTo: rhs._value)
+}
+
+
+
+// MARK: - Legacy <Float>
+
+extension KvMath3 where Scalar == Float {
+
+    @available(*, renamed: "basisX") @inlinable
+    public static func right(from matrix: simd_float4x4) -> Vector { basisX(from: matrix) }
+
+    @available(*, renamed: "basisY") @inlinable
+    public static func up(from matrix: simd_float4x4) -> Vector { basisY(from: matrix) }
+
+    @available(*, renamed: "basisZ") @inlinable
+    public static func front(from matrix: simd_float4x4) -> Vector { basisZ(from: matrix) }
+
+}
+
+
+// MARK: - Legacy <Double>
+
+extension KvMath3 where Scalar == Double {
+
+    @available(*, renamed: "basisX") @inlinable
+    public static func right(from matrix: simd_double4x4) -> Vector { basisX(from: matrix) }
+
+    @available(*, renamed: "basisY") @inlinable
+    public static func up(from matrix: simd_double4x4) -> Vector { basisY(from: matrix) }
+
+    @available(*, renamed: "basisZ") @inlinable
+    public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
+
 }

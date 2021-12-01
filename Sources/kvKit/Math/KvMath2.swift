@@ -88,6 +88,170 @@ extension KvMath2 where Scalar == Double {
 
 
 
+// MARK: Transformations <Float>
+
+extension KvMath2 where Scalar == Float {
+
+    @inlinable
+    public static func apply(_ matrix: simd_float3x3, toPosition position: Position) -> Position {
+        let p3 = matrix * simd_make_float3(position, 1)
+
+        return simd_make_float2(p3) / p3.z
+    }
+
+
+
+    @inlinable
+    public static func apply(_ matrix: simd_float3x3, toVector vector: Vector) -> Vector {
+        simd_make_float2(matrix * simd_make_float3(vector))
+    }
+
+
+
+    @inlinable
+    public static func translation(from matrix: simd_float3x3) -> Vector {
+        let c3 = matrix[2]
+
+        return simd_make_float2(c3) / c3.z
+    }
+
+
+
+    @inlinable
+    public static func setTranslation(_ translation: Vector, to matrix: inout simd_float3x3) {
+        let z = matrix[2, 2]
+
+        matrix[2] = simd_make_float3(translation * z, z)
+    }
+
+
+
+    @inlinable
+    public static func scale(from matrix: simd_float3x3) -> Vector {
+        // Assuming .z == 0 for columns 0...1
+        .init(x: simd.length(matrix[0]),
+              y: simd.length(matrix[1]))
+    }
+
+
+
+    @inlinable
+    public static func scale²(from matrix: simd_float3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]))
+    }
+
+
+
+    @inlinable
+    public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= simd_make_float3(s.x, s.x, 1)
+        matrix[1] *= simd_make_float3(s.y, s.y, 1)
+    }
+
+
+
+    /// - Returns: Transformed X basis vector.
+    @inlinable
+    public static func basisX(from matrix: simd_float3x3) -> Vector {
+        simd_make_float2(matrix[0])
+    }
+
+
+    /// - Returns: Transformed Y basis vector.
+    @inlinable
+    public static func basisY(from matrix: simd_float3x3) -> Vector {
+        simd_make_float2(matrix[1])
+    }
+
+}
+
+
+
+// MARK: Transformations <Double>
+
+extension KvMath2 where Scalar == Double {
+
+    @inlinable
+    public static func apply(_ matrix: simd_double3x3, toPosition position: Position) -> Position {
+        let p3 = matrix * simd_make_double3(position, 1)
+
+        return simd_make_double2(p3) / p3.z
+    }
+
+
+
+    @inlinable
+    public static func apply(_ matrix: simd_double3x3, toVector vector: Vector) -> Vector {
+        simd_make_double2(matrix * simd_make_double3(vector))
+    }
+
+
+
+    @inlinable
+    public static func translation(from matrix: simd_double3x3) -> Vector {
+        let c3 = matrix[2]
+
+        return simd_make_double2(c3) / c3.z
+    }
+
+
+
+    @inlinable
+    public static func setTranslation(_ translation: Vector, to matrix: inout simd_double3x3) {
+        let z = matrix[2, 2]
+
+        matrix[2] = simd_make_double3(translation * z, z)
+    }
+
+
+
+    @inlinable
+    public static func scale(from matrix: simd_double3x3) -> Vector {
+        // Assuming .z == 0 for columns 0...1
+        .init(x: simd.length(matrix[0]),
+              y: simd.length(matrix[1]))
+    }
+
+
+
+    @inlinable
+    public static func scale²(from matrix: simd_double3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]))
+    }
+
+
+
+    @inlinable
+    public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= simd_make_double3(s.x, s.x, 1)
+        matrix[1] *= simd_make_double3(s.y, s.y, 1)
+    }
+
+
+
+    /// - Returns: Transformed X basis vector.
+    @inlinable
+    public static func basisX(from matrix: simd_double3x3) -> Vector {
+        simd_make_double2(matrix[0])
+    }
+
+
+    /// - Returns: Transformed Y basis vector.
+    @inlinable
+    public static func basisY(from matrix: simd_double3x3) -> Vector {
+        simd_make_double2(matrix[1])
+    }
+
+}
+
+
+
 // MARK: .Line
 
 extension KvMath2 {
@@ -306,9 +470,7 @@ extension KvMath2.AABR where Scalar == Float {
     @inlinable
     public func applying(_ transform: simd_float3x3) -> Self {
         Self(over: Self.pointIndices.lazy.map { index in
-            let p3 = transform * .init(point(at: index), 1)
-
-            return .init(p3.x, p3.y) * (1 / p3.z)
+            KvMath2.apply(transform, toPosition: point(at: index))
         })!
     }
 
@@ -323,9 +485,7 @@ extension KvMath2.AABR where Scalar == Double {
     @inlinable
     public func applying(_ transform: simd_double3x3) -> Self {
         Self(over: Self.pointIndices.lazy.map { index in
-            let p3 = transform * .init(point(at: index), 1)
-
-            return .init(p3.x, p3.y) * (1 / p3.z)
+            KvMath2.apply(transform, toPosition: point(at: index))
         })!
     }
 
