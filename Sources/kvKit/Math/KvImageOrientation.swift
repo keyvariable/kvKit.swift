@@ -112,6 +112,11 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible {
             /// Shortcut for mirroring matrix.
             public static let m: simd_float2x2 = .init(diagonal: [ -1, 1 ])
 
+            /// Shortcut for translation by (–0.5, –0.5).
+            public static let t₋: simd_float3x3 = .init([ 1, 0, 0 ], [ 0, 1, 0 ], [ -0.5, -0.5, 1 ])
+            /// Shortcut for translation by (+0.5, +0.5).
+            public static let t₊: simd_float3x3 = .init([ 1, 0, 0 ], [ 0, 1, 0 ], [ 0.5, 0.5, 1 ])
+
         }
 
     }
@@ -193,15 +198,50 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible {
     }
 
 
+    /// - Returns: Transformation 2×2 matrix for the receiver.
+    ///
+    /// - Note: It's applicable to vectors.
     @inlinable
-    public func transform() -> simd_float2x2 {
+    public func transform2() -> simd_float2x2 {
         (isMirrored ? Constants.Matrices.m : Constants.Matrices.i) * rotation.transform()
     }
 
+    /// - Returns: Inverse transformation 2×2 matrix for the receiver.
+    ///
+    /// - Note: It's applicable to vectors.
     @inlinable
-    public func transform⁻¹() -> simd_float2x2 {
+    public func transform2⁻¹() -> simd_float2x2 {
         rotation.transform⁻¹() * (isMirrored ? Constants.Matrices.m : Constants.Matrices.i)
     }
+
+    /// - Returns: Inverse transformation 2×2 matrix for the receiver.
+    ///
+    /// - Note: It's applicable to vectors.
+    @inlinable
+    public func inverseTransform2() -> simd_float2x2 { transform2⁻¹() }
+
+
+    /// - Returns: 3×3 matrix reprentation of the receiver.
+    ///
+    /// - Note: It's applicable to normalized positons on images. Normalized position components are in 0...1.
+    @inlinable
+    public func transform() -> simd_float3x3 {
+        Constants.Matrices.t₊ * KvMath3.supplemented(transform2()) * Constants.Matrices.t₋
+    }
+
+    /// - Returns: Inverse 3×3 matrix reprentation of the receiver.
+    ///
+    /// - Note: It's applicable to normalized positons on images. Normalized position components are in 0...1.
+    @inlinable
+    public func transform⁻¹() -> simd_float3x3 {
+        Constants.Matrices.t₊ * KvMath3.supplemented(transform2⁻¹()) * Constants.Matrices.t₋
+    }
+
+    /// - Returns: Inverse 3×3 matrix reprentation of the receiver.
+    ///
+    /// - Note: It's applicable to normalized positons on images. Normalized position components are in 0...1.
+    @inlinable
+    public func inverseTransform() -> simd_float3x3 { transform⁻¹() }
 
 
     @inlinable
@@ -299,6 +339,7 @@ extension KvImageOrientation {
         }
 
 
+        /// - Returns: Transformation matrix for the receiver.
         @inlinable
         public func transform() -> simd_float2x2 {
             switch self {
@@ -313,7 +354,7 @@ extension KvImageOrientation {
             }
         }
 
-
+        /// - Returns: Inverse transformation matrix for the receiver.
         @inlinable
         public func transform⁻¹() -> simd_float2x2 {
             switch self {
@@ -327,6 +368,10 @@ extension KvImageOrientation {
                 return Constants.Matrices.d90
             }
         }
+
+        /// - Returns: Inverse transformation matrix for the receiver.
+        @inlinable
+        public func inverseTransform() -> simd_float2x2 { transform⁻¹() }
 
 
         @inlinable
