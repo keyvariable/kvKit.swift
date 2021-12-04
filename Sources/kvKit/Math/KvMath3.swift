@@ -1628,13 +1628,13 @@ where Scalar : KvMathScalar3
 
 extension KvMath3 where Scalar == Float {
 
-    @available(*, renamed: "basisX") @inlinable
+    @available(*, deprecated, renamed: "basisX") @inlinable
     public static func right(from matrix: simd_float4x4) -> Vector { basisX(from: matrix) }
 
-    @available(*, renamed: "basisY") @inlinable
+    @available(*, deprecated, renamed: "basisY") @inlinable
     public static func up(from matrix: simd_float4x4) -> Vector { basisY(from: matrix) }
 
-    @available(*, renamed: "basisZ") @inlinable
+    @available(*, deprecated, renamed: "basisZ") @inlinable
     public static func front(from matrix: simd_float4x4) -> Vector { basisZ(from: matrix) }
 
 }
@@ -1644,13 +1644,13 @@ extension KvMath3 where Scalar == Float {
 
 extension KvMath3 where Scalar == Double {
 
-    @available(*, renamed: "basisX") @inlinable
+    @available(*, deprecated, renamed: "basisX") @inlinable
     public static func right(from matrix: simd_double4x4) -> Vector { basisX(from: matrix) }
 
-    @available(*, renamed: "basisY") @inlinable
+    @available(*, deprecated, renamed: "basisY") @inlinable
     public static func up(from matrix: simd_double4x4) -> Vector { basisY(from: matrix) }
 
-    @available(*, renamed: "basisZ") @inlinable
+    @available(*, deprecated, renamed: "basisZ") @inlinable
     public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
 
 }
