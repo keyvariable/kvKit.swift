@@ -286,26 +286,6 @@ extension KvImageOrientation {
         case deg0, deg90, deg180, deg270
 
 
-        // MARK: Fabrics
-
-        /// - Returns: Transformation from the portraint orientatoin (Y+ is up, X+ is right) to given UI orientation.
-        @inlinable
-        public static func to(_ orientation: UIInterfaceOrientation) -> Self {
-            switch orientation {
-            case .landscapeLeft:
-                return .deg90
-            case .landscapeRight:
-                return .deg270
-            case .portrait, .unknown:
-                return .deg0
-            case .portraitUpsideDown:
-                return .deg180
-            @unknown default:
-                return .deg0
-            }
-        }
-
-
         // MARK: : CustomStringConvertible
 
         public var description: String {
@@ -531,6 +511,28 @@ extension KvImageOrientation {
         }
     }
 
+}
+
+
+extension KvImageOrientation.Rotation {
+
+    /// - Returns: Transformation from the portraint orientatoin (Y+ is up, X+ is right) to given UI orientation.
+    @inlinable
+    public static func to(_ orientation: UIInterfaceOrientation) -> Self {
+        switch orientation {
+        case .landscapeLeft:
+            return .deg90
+        case .landscapeRight:
+            return .deg270
+        case .portrait, .unknown:
+            return .deg0
+        case .portraitUpsideDown:
+            return .deg180
+        @unknown default:
+            return .deg0
+        }
+    }
+    
 }
 
 #endif // canImport(UIKit)
