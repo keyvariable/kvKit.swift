@@ -24,7 +24,7 @@
 
 
 /// Rotation followed by horizontal mirroring.
-public enum KvImageOrientation : Hashable, CustomStringConvertible {
+public enum KvImageOrientation : Hashable, CustomStringConvertible, CaseIterable {
 
     /// No rotation, no horizontal mirroring. (X', Y') = (X+, Y+).
     case deg0
@@ -281,7 +281,7 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible {
 
 extension KvImageOrientation {
 
-    public enum Rotation : Hashable, CustomStringConvertible {
+    public enum Rotation : Hashable, CustomStringConvertible, CaseIterable {
 
         case deg0, deg90, deg180, deg270
 
