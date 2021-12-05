@@ -172,7 +172,7 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible, CaseIterable
 
 
     @inlinable
-    public func inverted() -> Self {
+    public var inverse: Self {
         switch self {
         case .deg0, .deg0m, .deg90m, .deg180, .deg180m, .deg270m:
             return self
@@ -325,7 +325,7 @@ extension KvImageOrientation {
         // MARK: Operations
 
         @inlinable
-        public func inverted() -> Self {
+        public var inverse: Self {
             switch self {
             case .deg0:
                 return .deg0
