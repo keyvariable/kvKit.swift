@@ -99,8 +99,6 @@ extension KvMath2 where Scalar == Float {
         return simd_make_float2(p3) / p3.z
     }
 
-
-
     @inlinable
     public static func apply(_ matrix: simd_float3x3, toVector vector: Vector) -> Vector {
         simd_make_float2(matrix * simd_make_float3(vector))
@@ -109,13 +107,16 @@ extension KvMath2 where Scalar == Float {
 
 
     @inlinable
+    public static func translationMatrix(by translation: Vector) -> simd_float3x3 {
+        simd_matrix([ 1, 0, 0 ], [ 0, 1, 0 ], simd_make_float3(translation, 1))
+    }
+
+    @inlinable
     public static func translation(from matrix: simd_float3x3) -> Vector {
         let c3 = matrix[2]
 
         return simd_make_float2(c3) / c3.z
     }
-
-
 
     @inlinable
     public static func setTranslation(_ translation: Vector, to matrix: inout simd_float3x3) {
@@ -133,15 +134,11 @@ extension KvMath2 where Scalar == Float {
               y: simd.length(matrix[1]))
     }
 
-
-
     @inlinable
     public static func scale²(from matrix: simd_float3x3) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]))
     }
-
-
 
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
@@ -153,12 +150,21 @@ extension KvMath2 where Scalar == Float {
 
 
 
+    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
+    @inlinable
+    public static func transformation(_ transform: simd_float2x2, relativeTo position: Vector) -> simd_float3x3 {
+        simd_matrix(simd_make_float3(transform[0]),
+                    simd_make_float3(transform[1]),
+                    simd_make_float3(position - transform * position, 1))
+    }
+
+
+
     /// - Returns: Transformed X basis vector.
     @inlinable
     public static func basisX(from matrix: simd_float3x3) -> Vector {
         simd_make_float2(matrix[0])
     }
-
 
     /// - Returns: Transformed Y basis vector.
     @inlinable
@@ -181,8 +187,6 @@ extension KvMath2 where Scalar == Double {
         return simd_make_double2(p3) / p3.z
     }
 
-
-
     @inlinable
     public static func apply(_ matrix: simd_double3x3, toVector vector: Vector) -> Vector {
         simd_make_double2(matrix * simd_make_double3(vector))
@@ -191,13 +195,16 @@ extension KvMath2 where Scalar == Double {
 
 
     @inlinable
+    public static func translationMatrix(by translation: Vector) -> simd_double3x3 {
+        simd_matrix([ 1, 0, 0 ], [ 0, 1, 0 ], simd_make_double3(translation, 1))
+    }
+
+    @inlinable
     public static func translation(from matrix: simd_double3x3) -> Vector {
         let c3 = matrix[2]
 
         return simd_make_double2(c3) / c3.z
     }
-
-
 
     @inlinable
     public static func setTranslation(_ translation: Vector, to matrix: inout simd_double3x3) {
@@ -215,15 +222,11 @@ extension KvMath2 where Scalar == Double {
               y: simd.length(matrix[1]))
     }
 
-
-
     @inlinable
     public static func scale²(from matrix: simd_double3x3) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]))
     }
-
-
 
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
@@ -235,12 +238,21 @@ extension KvMath2 where Scalar == Double {
 
 
 
+    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
+    @inlinable
+    public static func transformation(_ transform: simd_double2x2, relativeTo position: Vector) -> simd_double3x3 {
+        simd_matrix(simd_make_double3(transform[0]),
+                    simd_make_double3(transform[1]),
+                    simd_make_double3(position - transform * position, 1))
+    }
+
+
+
     /// - Returns: Transformed X basis vector.
     @inlinable
     public static func basisX(from matrix: simd_double3x3) -> Vector {
         simd_make_double2(matrix[0])
     }
-
 
     /// - Returns: Transformed Y basis vector.
     @inlinable
