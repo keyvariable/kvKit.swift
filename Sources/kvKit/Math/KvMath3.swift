@@ -153,8 +153,6 @@ extension KvMath3 where Scalar == Float {
         return simd_make_float3(p4) / p4.w
     }
 
-
-
     @inlinable
     public static func apply(_ matrix: simd_float4x4, toVector vector: Vector) -> Vector {
         simd_make_float3(matrix * simd_make_float4(vector))
@@ -163,13 +161,16 @@ extension KvMath3 where Scalar == Float {
 
 
     @inlinable
+    public static func translationMatrix(by translation: Vector) -> simd_float4x4 {
+        simd_matrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0], simd_make_float4(translation, 1))
+    }
+
+    @inlinable
     public static func translation(from matrix: simd_float4x4) -> Vector {
         let c4 = matrix[3]
 
         return simd_make_float3(c4) / c4.w
     }
-
-
 
     @inlinable
     public static func setTranslation(_ translation: Vector, to matrix: inout simd_float4x4) {
@@ -181,6 +182,11 @@ extension KvMath3 where Scalar == Float {
 
 
     @inlinable
+    public static func scaleMatrix(by scale: Vector) -> simd_float4x4 {
+        simd_diagonal_matrix(simd_make_float4(scale, 1))
+    }
+
+    @inlinable
     public static func scale(from matrix: simd_float4x4) -> Vector {
         // Assuming .w == 0 for columns 0...2
         .init(x: simd.length(matrix[0]),
@@ -188,16 +194,12 @@ extension KvMath3 where Scalar == Float {
               z: simd.length(matrix[2]))
     }
 
-
-
     @inlinable
     public static func scale²(from matrix: simd_float4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]),
               z: simd.length_squared(matrix[2]))
     }
-
-
 
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
@@ -210,19 +212,28 @@ extension KvMath3 where Scalar == Float {
 
 
 
+    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
+    @inlinable
+    public static func transformation(_ transform: simd_float3x3, relativeTo position: Vector) -> simd_float4x4 {
+        simd_matrix(simd_make_float4(transform[0]),
+                    simd_make_float4(transform[1]),
+                    simd_make_float4(transform[2]),
+                    simd_make_float4(position - transform * position, 1))
+    }
+
+
+
     /// - Returns: Transformed X basis vector.
     @inlinable
     public static func basisX(from matrix: simd_float4x4) -> Vector {
         simd_make_float3(matrix[0])
     }
 
-
     /// - Returns: Transformed Y basis vector.
     @inlinable
     public static func basisY(from matrix: simd_float4x4) -> Vector {
         simd_make_float3(matrix[1])
     }
-
 
     /// - Returns: Transformed Z basis vector.
     @inlinable
@@ -245,8 +256,6 @@ extension KvMath3 where Scalar == Double {
         return simd_make_double3(p4) / p4.w
     }
 
-
-
     @inlinable
     public static func apply(_ matrix: simd_double4x4, toVector vector: Vector) -> Vector {
         simd_make_double3(matrix * simd_make_double4(vector))
@@ -255,13 +264,16 @@ extension KvMath3 where Scalar == Double {
 
 
     @inlinable
+    public static func translationMatrix(by translation: Vector) -> simd_double4x4 {
+        simd_matrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0], simd_make_double4(translation, 1))
+    }
+
+    @inlinable
     public static func translation(from matrix: simd_double4x4) -> Vector {
         let c4 = matrix[3]
 
         return simd_make_double3(c4) / c4.w
     }
-
-
 
     @inlinable
     public static func setTranslation(_ translation: Vector, to matrix: inout simd_double4x4) {
@@ -273,6 +285,11 @@ extension KvMath3 where Scalar == Double {
 
 
     @inlinable
+    public static func scaleMatrix(by scale: Vector) -> simd_double4x4 {
+        simd_diagonal_matrix(simd_make_double4(scale, 1))
+    }
+
+    @inlinable
     public static func scale(from matrix: simd_double4x4) -> Vector {
         // Assuming .w == 0 for columns 0...2
         .init(x: simd.length(matrix[0]),
@@ -280,16 +297,12 @@ extension KvMath3 where Scalar == Double {
               z: simd.length(matrix[2]))
     }
 
-
-
     @inlinable
     public static func scale²(from matrix: simd_double4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]),
               z: simd.length_squared(matrix[2]))
     }
-
-
 
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
@@ -302,12 +315,22 @@ extension KvMath3 where Scalar == Double {
 
 
 
+    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
+    @inlinable
+    public static func transformation(_ matrix: simd_double3x3, relativeTo position: Vector) -> simd_double4x4 {
+        simd_matrix(simd_make_double4(matrix[0]),
+                    simd_make_double4(matrix[1]),
+                    simd_make_double4(matrix[2]),
+                    simd_make_double4(position - matrix * position, 1))
+    }
+
+
+
     /// - Returns: Transformed X basis vector.
     @inlinable
     public static func basisX(from matrix: simd_double4x4) -> Vector {
         simd_make_double3(matrix[0])
     }
-
 
     /// - Returns: Transformed Y basis vector.
     @inlinable
@@ -315,11 +338,116 @@ extension KvMath3 where Scalar == Double {
         simd_make_double3(matrix[1])
     }
 
-
     /// - Returns: Transformed Z basis vector.
     @inlinable
     public static func basisZ(from matrix: simd_double4x4) -> Vector {
         simd_make_double3(matrix[2])
+    }
+
+}
+
+
+
+// MARK: Projections <Float>
+
+extension KvMath3 where Scalar == Float {
+
+    /// - Returns: Matrix of standard orthogonal projection.
+    @inlinable
+    public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> simd_float4x4 {
+        // - Note: Single SIMD division seems faster.
+        simd_float4x4(diagonal: .one / simd_float4(left - right, bottom - top, near - far, 1))
+        * simd_float4x4([ -2,  0, 0, 0 ],
+                        [  0, -2, 0, 0 ],
+                        [  0,  0, 2, 0 ],
+                        .init(right + left, top + bottom, far + near, 1))
+    }
+
+
+    /// - Parameter aspect: Ratio of Viewport width to viewport height.
+    /// - Parameter fof: Vertical camera angle.
+    ///
+    /// - Returns: Projection matrix for a centered rectangular pinhole camera.
+    @inlinable
+    public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> simd_float4x4 {
+        let tg = tan(0.5 * fov)
+
+        // - Note: Single SIMD division seems faster.
+        return (simd_float4x4(diagonal: .one / simd_float4(aspect * tg, tg, near - far, 1))
+                * simd_float4x4([ 1, 0, 0, 0 ],
+                                [ 0, 1, 0, 0 ],
+                                .init(0,  0,  (far + near)  , -1),
+                                .init(0,  0,  2 * far * near,  0)))
+    }
+
+
+    /// - Parameter k: Calibration matrix K (intrinsic matrix) of pinhole camera.
+    ///
+    /// - Returns: Projective matrix for pinhole camera.
+    ///
+    /// - Note: The perspective projection matrix is a combination of orthogonal projection matrix in the frame image units and the camera projective matrix.
+    /// - Note: See details [here](http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/).
+    @inlinable
+    public static func projectiveCameraMatrix(k: simd_float3x3, near: Scalar, far: Scalar) -> simd_float4x4 {
+        // - Note: Implementation below uses full K matrix. It seems better then picking some elements if K.
+        simd_float4x4([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
+        * simd_float4x4(simd_make_float4(k[0]),
+                        simd_make_float4(k[1]),
+                        simd_make_float4(-k[2], near + far),
+                        .init(0, 0, 0, near * far))
+    }
+
+}
+
+
+
+// MARK: Projections <Double>
+
+extension KvMath3 where Scalar == Double {
+
+    /// - Returns: Matrix of standard orthogonal projection.
+    @inlinable
+    public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> simd_double4x4 {
+        // - Note: Single SIMD division seems faster.
+        simd_double4x4(diagonal: .one / simd_double4(left - right, bottom - top, near - far, 1))
+        * simd_double4x4([ -2,  0, 0, 0 ],
+                         [  0, -2, 0, 0 ],
+                         [  0,  0, 2, 0 ],
+                         .init(right + left, top + bottom, far + near, 1))
+    }
+
+
+    /// - Parameter aspect: Ratio of Viewport width to viewport height.
+    /// - Parameter fof: Vertical camera angle.
+    ///
+    /// - Returns: Projection matrix for a centered rectangular pinhole camera.
+    @inlinable
+    public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> simd_double4x4 {
+        let tg = tan(0.5 * fov)
+
+        // - Note: Single SIMD division seems faster.
+        return (simd_double4x4(diagonal: .one / simd_double4(aspect * tg, tg, near - far, 1))
+                * simd_double4x4([ 1, 0, 0, 0 ],
+                                 [ 0, 1, 0, 0 ],
+                                 .init(0,  0,  (far + near)  , -1),
+                                 .init(0,  0,  2 * far * near,  0)))
+    }
+
+
+    /// - Parameter k: Calibration matrix K (intrinsic matrix) of pinhole camera.
+    ///
+    /// - Returns: Projective matrix for pinhole camera.
+    ///
+    /// - Note: The perspective projection matrix is a combination of orthogonal projection matrix in the frame image units and the camera projective matrix.
+    /// - Note: See details [here](http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/).
+    @inlinable
+    public static func projectiveCameraMatrix(k: simd_double3x3, near: Scalar, far: Scalar) -> simd_double4x4 {
+        // - Note: Implementation below uses full K matrix. It seems better then picking some elements if K.
+        simd_double4x4([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
+        * simd_double4x4(simd_make_double4(k[0]),
+                         simd_make_double4(k[1]),
+                         simd_make_double4(-k[2], near + far),
+                         .init(0, 0, 0, near * far))
     }
 
 }
