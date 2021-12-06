@@ -182,11 +182,6 @@ extension KvMath3 where Scalar == Float {
 
 
     @inlinable
-    public static func scaleMatrix(by scale: Vector) -> simd_float4x4 {
-        simd_diagonal_matrix(simd_make_float4(scale, 1))
-    }
-
-    @inlinable
     public static func scale(from matrix: simd_float4x4) -> Vector {
         // Assuming .w == 0 for columns 0...2
         .init(x: simd.length(matrix[0]),
@@ -283,11 +278,6 @@ extension KvMath3 where Scalar == Double {
     }
 
 
-
-    @inlinable
-    public static func scaleMatrix(by scale: Vector) -> simd_double4x4 {
-        simd_diagonal_matrix(simd_make_double4(scale, 1))
-    }
 
     @inlinable
     public static func scale(from matrix: simd_double4x4) -> Vector {
