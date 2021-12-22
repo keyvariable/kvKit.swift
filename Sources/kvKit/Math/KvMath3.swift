@@ -1104,6 +1104,20 @@ extension KvMath3 {
         }
 
 
+        /// The zero frustum, containing zero point only.
+        public static var zero: Self { .init(left:   .init([ 1, 0, 0, 0 ])!, right: .init([ -1, 0, 0, 0 ])!,
+                                             bottom: .init([ 0, 1, 0, 0 ])!, top:   .init([ 0, -1, 0, 0 ])!,
+                                             near:   .init([ 0, 0, 1, 0 ])!, far:   .init([ 0, 0, -1, 0 ])!) }
+        /// The null frustum, containing nothing.
+        public static var null: Self { .init(left:   .init([ 1, 0, 0, -1 ])!, right: .init([ -1, 0, 0, -1 ])!,
+                                             bottom: .init([ 0, 1, 0, -1 ])!, top:   .init([ 0, -1, 0, -1 ])!,
+                                             near:   .init([ 0, 0, 1, -1 ])!, far:   .init([ 0, 0, -1, -1 ])!) }
+        /// Frustum, containing all the space.
+        public static var infinite: Self { .init(left:   .init([ 1, 0, 0, .infinity ])!, right: .init([ -1, 0, 0, .infinity ])!,
+                                                 bottom: .init([ 0, 1, 0, .infinity ])!, top:   .init([ 0, -1, 0, .infinity ])!,
+                                                 near:   .init([ 0, 0, 1, .infinity ])!, far:   .init([ 0, 0, -1, .infinity ])!) }
+
+
         /// - Returns: Minimum of signed distances to the receiver's planes.
         ///
         /// - Note: The result is positive whether given point is inside the receiver.
@@ -1243,6 +1257,20 @@ extension KvMath3 {
             self.near = near
             self.far = far
         }
+
+
+        /// The zero frustum, containing zero point only.
+        public static var zero: Self { .init(left:   .init([ 1, 0, 0, 0 ]), right: .init([ -1, 0, 0, 0 ]),
+                                             bottom: .init([ 0, 1, 0, 0 ]), top:   .init([ 0, -1, 0, 0 ]),
+                                             near:   .init([ 0, 0, 1, 0 ]), far:   .init([ 0, 0, -1, 0 ])) }
+        /// The null frustum, containing nothing.
+        public static var null: Self { .init(left:   .init([ 1, 0, 0, -1 ]), right: .init([ -1, 0, 0, -1 ]),
+                                             bottom: .init([ 0, 1, 0, -1 ]), top:   .init([ 0, -1, 0, -1 ]),
+                                             near:   .init([ 0, 0, 1, -1 ]), far:   .init([ 0, 0, -1, -1 ])) }
+        /// Frustum, containing all the space.
+        public static var infinite: Self { .init(left:   .init([ 1, 0, 0, .infinity ]), right: .init([ -1, 0, 0, .infinity ]),
+                                                 bottom: .init([ 0, 1, 0, .infinity ]), top:   .init([ 0, -1, 0, .infinity ]),
+                                                 near:   .init([ 0, 0, 1, .infinity ]), far:   .init([ 0, 0, -1, .infinity ])) }
 
 
         @inlinable
