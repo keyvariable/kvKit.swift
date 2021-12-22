@@ -851,7 +851,7 @@ extension KvMath3 {
     /// A plane with neither normalization nor normal validation.
     ///
     /// Plane equation: *normal* · *x* + *d* = 0, where *x* in on the plane.
-    public struct FastPlane {
+    public struct FastPlane : Hashable {
 
         public let normal: Vector
         public let d: Scalar
@@ -1243,7 +1243,7 @@ extension KvMath3.Frustum where Scalar == Double {
 
 extension KvMath3 {
 
-    public struct FastFrustum {
+    public struct FastFrustum : Hashable {
 
         public let left, right, bottom, top, near, far: FastPlane
 
