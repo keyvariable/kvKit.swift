@@ -31,27 +31,23 @@ import Foundation
 
 
 /// High-level wrapper for *Compression* framework.
-public class KvCompressionKit { }
+@available(iOS 13.0, macOS 10.15, *)
+public enum KvCompressionKit {
+
+    // MARK: .Constants
+
+    public struct Constants {
+
+        /// Byte size of internal buffers.
+        public static let bufferSize = 32 << 10
+
+    }
 
 
 
-// MARK: Constants
-
-extension KvCompressionKit {
-
-    /// Byte size of internal buffers.
-    public static let bufferSize = 32 << 10
-
-}
-
-
-
-// MARK: Compression
-
-extension KvCompressionKit {
+    // MARK: Operations
 
     /// Performs *operation* using *algorithm* reading data from *input* and writting the result to *output*.
-    @available(iOS 13.0, macOS 10.15, *)
     public static func run(_ operation: FilterOperation, using algorithm: Algorithm, input: Input, output: Output) throws {
 
         /// - Returns: Opens given *stream* when it's status is `.notOpen` and returns a RAII token closing the stream. Otherwise `nil` is returned.
@@ -63,7 +59,7 @@ extension KvCompressionKit {
                 throw KvError("Unable to open \(stream) stream")
             }
 
-            return KvRAII.Token { (_, _) in
+            return KvRAII.Token { _ in
                 stream.close()
             }
         }
@@ -120,8 +116,8 @@ extension KvCompressionKit {
 
                         do {
                             overwriteFlag
-                                ? (_ = try fileManager.replaceItemAt(url, withItemAt: temporaryFileURL))
-                                : try fileManager.moveItem(at: temporaryFileURL, to: url)
+                            ? (_ = try fileManager.replaceItemAt(url, withItemAt: temporaryFileURL))
+                            : try fileManager.moveItem(at: temporaryFileURL, to: url)
 
                         } catch {
                             do {
@@ -155,15 +151,15 @@ extension KvCompressionKit {
         case .stream(let inputStream):
             tokens.input = try OpenOfNotOpen(inputStream)
 
-            let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+            let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Constants.bufferSize)
             defer { buffer.deallocate() }
 
             while true {
-                let bytesRead = inputStream.read(buffer, maxLength: bufferSize)
+                let bytesRead = inputStream.read(buffer, maxLength: Constants.bufferSize)
 
                 guard bytesRead > 0 else { break }
 
-                try outputFilter.write(UnsafeRawBufferPointer(start: buffer, count: bufferSize))
+                try outputFilter.write(UnsafeRawBufferPointer(start: buffer, count: Constants.bufferSize))
             }
         }
 
@@ -182,18 +178,13 @@ extension KvCompressionKit {
         return memoryStream.property(forKey: .dataWrittenToMemoryStreamKey) as! Data
     }
 
-}
 
 
-
-// MARK: .Input
-
-extension KvCompressionKit {
+    // MARK: .Input
 
     public enum Input {
 
         /// This block is invoked at appropriate moment. This block should pass all the data to given interface.
-        @available(iOS 13.0, macOS 10.15, *)
         case block((Interface) throws -> Void)
 
         /// Data to be proceeded.
@@ -209,7 +200,6 @@ extension KvCompressionKit {
 
         // MARK: .Interface
 
-        @available(iOS 13.0, macOS 10.15, *)
         public struct Interface {
 
             fileprivate init(for outputFilter: OutputFilter) {
@@ -220,7 +210,7 @@ extension KvCompressionKit {
             private let outputFilter: OutputFilter
 
 
-            // MARK: Output
+            // MARK: Operations
 
             /// Writes bytes of *value* to the output.
             public func write<T>(value: T) throws { try withUnsafeBytes(of: value) { try outputFilter.write($0) } }
@@ -233,13 +223,9 @@ extension KvCompressionKit {
 
     }
 
-}
 
 
-
-// MARK: .Output
-
-extension KvCompressionKit {
+    // MARK: .Output
 
     public enum Output {
 
@@ -253,6 +239,13 @@ extension KvCompressionKit {
         case url(url: URL, overwriting: Bool)
 
     }
+
+
+
+    // MARK: Legacy
+
+    @available(*, deprecated, renamed: "Constants.bufferSize")
+    public static let bufferSize = 32 << 10
 
 }
 
