@@ -724,7 +724,7 @@ extension KvMath3 {
         }
 
 
-        /// Initialize a plane where a, b, c and d coeficients are scalatrs of given vector.
+        /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
         @inlinable
         public init?(_ abcd: SIMD4<Scalar>) {
             self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
@@ -756,12 +756,12 @@ extension KvMath3 {
         public func signedDistance(to point: Position) -> Scalar { at(point) }
 
 
-        /// - Retuens: A boolean value indicating whether the receiver is above the point. In other words *point* is below the receiver.
+        /// - Returns: A boolean value indicating whether the receiver is above the point. In other words *point* is below the receiver.
         @inlinable
         public func isAbove(_ point: Position) -> Bool { KvIsNegative(at(point)) }
 
 
-        /// - Retuens: A boolean value indicating whether the receiver is below the point. In other words *point* is above the receiver.
+        /// - Returns: A boolean value indicating whether the receiver is below the point. In other words *point* is above the receiver.
         @inlinable
         public func isBelow(_ point: Position) -> Bool { KvIsPositive(at(point)) }
 
@@ -872,7 +872,7 @@ extension KvMath3 {
         }
 
 
-        /// Initialize a plane where a, b, c and d coeficients are scalatrs of given vector.
+        /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
         @inlinable
         public init(_ abcd: SIMD4<Scalar>) {
             self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
@@ -889,12 +889,12 @@ extension KvMath3 {
         public func at(_ x: Position) -> Scalar { KvMath3.dot(normal, x) + d }
 
 
-        /// - Retuens: A boolean value indicating whether the receiver is above the point. In other words *point* is below the receiver.
+        /// - Returns: A boolean value indicating whether the receiver is above the point. In other words *point* is below the receiver.
         @inlinable
         public func isAbove(_ point: Position) -> Bool { KvIsNegative(at(point)) }
 
 
-        /// - Retuens: A boolean value indicating whether the receiver is below the point. In other words *point* is above the receiver.
+        /// - Returns: A boolean value indicating whether the receiver is below the point. In other words *point* is above the receiver.
         @inlinable
         public func isBelow(_ point: Position) -> Bool { KvIsPositive(at(point)) }
 
@@ -1159,7 +1159,7 @@ extension KvMath3 {
 
 extension KvMath3.Frustum where Scalar == Float {
 
-    /// Initializes a frustum with a perspective projecoin matrix.
+    /// Initializes a frustum with a perspective projection matrix.
     public init?(_ projectionMatrix: simd_float4x4) {
         let m = projectionMatrix.transpose
 
@@ -1176,7 +1176,7 @@ extension KvMath3.Frustum where Scalar == Float {
 
 
 
-    /// Initializes a frustum with a perspective projecoin matrix overriding Z planes.
+    /// Initializes a frustum with a perspective projection matrix overriding Z planes.
     public init?(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
         let m = projectionMatrix.transpose
 
@@ -1201,7 +1201,7 @@ extension KvMath3.Frustum where Scalar == Float {
 
 extension KvMath3.Frustum where Scalar == Double {
 
-    /// Initializes a frustum with a perspective projecoin matrix.
+    /// Initializes a frustum with a perspective projection matrix.
     public init?(_ projectionMatrix: simd_double4x4) {
         let m = projectionMatrix.transpose
 
@@ -1218,7 +1218,7 @@ extension KvMath3.Frustum where Scalar == Double {
 
 
 
-    /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
+    /// Initializes a frustum with a perspective projection matrix overriding Z range.
     public init?(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
         let m = projectionMatrix.transpose
 
@@ -1290,7 +1290,7 @@ extension KvMath3 {
 
 extension KvMath3.FastFrustum where Scalar == Float {
 
-    /// Initializes a frustum with a perspective projecoin matrix.
+    /// Initializes a frustum with a perspective projection matrix.
     @inlinable
     public init(_ projectionMatrix: simd_float4x4) {
         let m = projectionMatrix.transpose
@@ -1305,7 +1305,7 @@ extension KvMath3.FastFrustum where Scalar == Float {
 
 
 
-    /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
+    /// Initializes a frustum with a perspective projection matrix overriding Z range.
     @inlinable
     public init(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
         let m = projectionMatrix.transpose
@@ -1329,7 +1329,7 @@ extension KvMath3.FastFrustum where Scalar == Float {
 
 extension KvMath3.FastFrustum where Scalar == Double {
 
-    /// Initializes a frustum with a perspective projecoin matrix.
+    /// Initializes a frustum with a perspective projection matrix.
     @inlinable
     public init(_ projectionMatrix: simd_double4x4) {
         let m = projectionMatrix.transpose
@@ -1344,7 +1344,7 @@ extension KvMath3.FastFrustum where Scalar == Double {
 
 
 
-    /// Initializes a frustum with a perspective projecoin matrix overriding Z range.
+    /// Initializes a frustum with a perspective projection matrix overriding Z range.
     @inlinable
     public init(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
         let m = projectionMatrix.transpose
