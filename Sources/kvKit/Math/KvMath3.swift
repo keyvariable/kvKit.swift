@@ -181,14 +181,43 @@ extension KvMath3 where Scalar == Float {
 
 
 
+    /// - Returns: Scale component from given 3×3 matrix.
     @inlinable
-    public static func scale(from matrix: simd_float4x4) -> Vector {
-        // Assuming .w == 0 for columns 0...2
+    public static func scale(from matrix: simd_float3x3) -> Vector {
         .init(x: simd.length(matrix[0]),
               y: simd.length(matrix[1]),
               z: simd.length(matrix[2]))
     }
 
+    /// - Returns: Sqaured scale component from given 3×3 matrix.
+    @inlinable
+    public static func scale²(from matrix: simd_float3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+    /// Changes scale component of given 3×3 matrix to given value. If a column is zero then the result is undefined.
+    @inlinable
+    public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= s.x
+        matrix[1] *= s.y
+        matrix[2] *= s.z
+    }
+
+
+
+    /// - Returns: Scale component from given 4×4 projective matrix where .w == 0 for columns 0...2.
+    @inlinable
+    public static func scale(from matrix: simd_float4x4) -> Vector {
+        .init(x: simd.length(matrix[0]),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+    /// - Returns: Squared scale component from given 4×4 projective matrix where .w == 0 for columns 0...2.
     @inlinable
     public static func scale²(from matrix: simd_float4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
@@ -196,6 +225,7 @@ extension KvMath3 where Scalar == Float {
               z: simd.length_squared(matrix[2]))
     }
 
+    /// Changes scale component of given projective 4×4 matrix where .w == 0 for columns 0...2 to given value. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
         let s = scale * rsqrt(self.scale²(from: matrix))
@@ -279,14 +309,43 @@ extension KvMath3 where Scalar == Double {
 
 
 
+    /// - Returns: Scale component from given 3×3 matrix.
     @inlinable
-    public static func scale(from matrix: simd_double4x4) -> Vector {
-        // Assuming .w == 0 for columns 0...2
+    public static func scale(from matrix: simd_double3x3) -> Vector {
         .init(x: simd.length(matrix[0]),
               y: simd.length(matrix[1]),
               z: simd.length(matrix[2]))
     }
 
+    /// - Returns: Sqaured scale component from given 3×3 matrix.
+    @inlinable
+    public static func scale²(from matrix: simd_double3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+    /// Changes scale component of given 3×3 matrix to given value. If a column is zero then the result is undefined.
+    @inlinable
+    public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= s.x
+        matrix[1] *= s.y
+        matrix[2] *= s.z
+    }
+
+
+
+    /// - Returns: Scale component from given 4×4 projective matrix where .w == 0 for columns 0...2.
+    @inlinable
+    public static func scale(from matrix: simd_double4x4) -> Vector {
+        .init(x: simd.length(matrix[0]),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+    /// - Returns: Squared scale component from given 4×4 projective matrix where .w == 0 for columns 0...2.
     @inlinable
     public static func scale²(from matrix: simd_double4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
@@ -294,6 +353,7 @@ extension KvMath3 where Scalar == Double {
               z: simd.length_squared(matrix[2]))
     }
 
+    /// Changes scale component of given projective 4×4 matrix where .w == 0 for columns 0...2 to given value. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
         let s = scale * rsqrt(self.scale²(from: matrix))
