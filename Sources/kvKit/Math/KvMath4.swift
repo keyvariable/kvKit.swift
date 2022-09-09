@@ -227,7 +227,7 @@ extension KvMath4 where Scalar == Float {
     /// - Returns: Scale component from given 4×4 matrix.
     @inlinable
     public static func scale(from matrix: simd_float4x4) -> Vector {
-        .init(x: simd.length(matrix[0]),
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]),
               z: simd.length(matrix[2]),
               w: simd.length(matrix[3]))
@@ -247,7 +247,7 @@ extension KvMath4 where Scalar == Float {
     public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= s.x
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= s.y
         matrix[2] *= s.z
         matrix[3] *= s.w
@@ -264,7 +264,7 @@ extension KvMath4 where Scalar == Double {
     /// - Returns: Scale component from given 4×4 matrix.
     @inlinable
     public static func scale(from matrix: simd_double4x4) -> Vector {
-        .init(x: simd.length(matrix[0]),
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]),
               z: simd.length(matrix[2]),
               w: simd.length(matrix[3]))
@@ -284,7 +284,7 @@ extension KvMath4 where Scalar == Double {
     public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= s.x
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= s.y
         matrix[2] *= s.z
         matrix[3] *= s.w

@@ -130,7 +130,7 @@ extension KvMath2 where Scalar == Float {
     /// - Returns: Scale component from given 2×2 matrix.
     @inlinable
     public static func scale(from matrix: simd_float2x2) -> Vector {
-        .init(x: simd.length(matrix[0]),
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]))
     }
 
@@ -146,32 +146,33 @@ extension KvMath2 where Scalar == Float {
     public static func setScale(_ scale: Vector, to matrix: inout simd_float2x2) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= s.x
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= s.y
     }
 
 
 
-    /// - Returns: Scale component from given 3×3 projective matrix where .z == 0 for columns 0...1.
+    /// - Returns: Scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
     public static func scale(from matrix: simd_float3x3) -> Vector {
-        .init(x: simd.length(matrix[0]),
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]))
     }
 
-    /// - Returns: Sqared scale component from given 3×3 projective matrix where .z == 0 for columns 0...1.
+    /// - Returns: Sqared scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
     public static func scale²(from matrix: simd_float3x3) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]))
     }
 
-    /// Changes scale component of given projective 3×3 matrix where .z == 0 for columns 0...1 to given value. If a column is zero then the result is undefined.
+    /// Changes scale component of given projective 3×3 matrix having row[2] == [ 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= simd_make_float3(s.x, s.x, 1)
+        // OK due to matrix[0].z == 0
+        matrix[0] *= simd_make_float3(s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= simd_make_float3(s.y, s.y, 1)
     }
 
@@ -245,7 +246,7 @@ extension KvMath2 where Scalar == Double {
     /// - Returns: Scale component from given 2×2 matrix.
     @inlinable
     public static func scale(from matrix: simd_double2x2) -> Vector {
-        .init(x: simd.length(matrix[0]),
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]))
     }
 
@@ -261,32 +262,33 @@ extension KvMath2 where Scalar == Double {
     public static func setScale(_ scale: Vector, to matrix: inout simd_double2x2) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= s.x
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= s.y
     }
 
 
 
-    /// - Returns: Scale component from given 3×3 projective matrix where .z == 0 for columns 0...1.
+    /// - Returns: Scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
     public static func scale(from matrix: simd_double3x3) -> Vector {
-        .init(x: simd.length(matrix[0]),
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]))
     }
 
-    /// - Returns: Sqared scale component from given 3×3 projective matrix where .z == 0 for columns 0...1.
+    /// - Returns: Sqared scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
     public static func scale²(from matrix: simd_double3x3) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]))
     }
 
-    /// Changes scale component of given projective 3×3 matrix where .z == 0 for columns 0...1 to given value. If a column is zero then the result is undefined.
+    /// Changes scale component of given projective 3×3 matrix having row[2] == [ 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= simd_make_double3(s.x, s.x, 1)
+        // OK due to matrix[0].z == 0
+        matrix[0] *= simd_make_double3(s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= simd_make_double3(s.y, s.y, 1)
     }
 
