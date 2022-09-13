@@ -25,6 +25,10 @@ import simd
 
 
 
+public typealias KvMathFloatingPoint = BinaryFloatingPoint & SIMDScalar
+
+
+
 /// Various math auxiliaries.
 public enum KvMath<Scalar> { }
 
@@ -47,7 +51,7 @@ extension KvMath where Scalar : Comparable {
 
     /// - Returns: The closest value to *x* from *min*...*max* range.
     @inlinable
-    public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar {
+    public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar {
         x < min ? min : (x > max ? max : x)
     }
 
@@ -55,7 +59,7 @@ extension KvMath where Scalar : Comparable {
     /// - Returns: The closest value to *x* from given range.
     @inlinable
     public static func clamp(_ x: Scalar, to range: ClosedRange<Scalar>) -> Scalar {
-        clamp(x, min: range.lowerBound, max: range.upperBound)
+        clamp(x, range.lowerBound, range.upperBound)
     }
 
 }
@@ -223,5 +227,16 @@ extension KvMath where Scalar : Comparable {
     public static func max(_ x: Scalar?, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar? {
         max(max(x, y), rest.reduce(z, max))
     }
+
+}
+
+
+
+// MARK: - Legacy: Comparable
+
+extension KvMath where Scalar : Comparable {
+
+    @available(*, deprecated, renamed: "clamp(_:_:_:)")
+    @inlinable public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar { clamp(x, min, max) }
 
 }

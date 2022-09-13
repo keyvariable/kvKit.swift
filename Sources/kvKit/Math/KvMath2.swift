@@ -25,11 +25,7 @@ import simd
 
 
 
-public typealias KvMathScalar2 = BinaryFloatingPoint & SIMDScalar
-
-
-
-public enum KvMath2<Scalar> where Scalar : KvMathScalar2 {
+public enum KvMath2<Scalar> where Scalar : KvMathFloatingPoint {
 
     public typealias Vector = SIMD2<Scalar>
     public typealias Position = Vector
@@ -332,20 +328,39 @@ extension KvMath2 {
         public let direction: Vector
 
 
+        /// Initializes a line by two points.
         @inlinable
         public init?(_ p0: Position, _ p1: Position) {
             self.init(from: p0, in: p1 - p0)
         }
 
 
+        /// Initializes a line having given *direction* and containg given *point*.
         @inlinable
         public init?(from point: Position, in direction: Vector) {
             guard let direction = normalizedOrNil(direction) else { return nil }
 
-            self.init(origin: point - direction * dot(point, direction), unitDirection: direction)
+            self.init(from: point, unitDirection: direction)
         }
 
 
+        /// Initializes a line having given direction vector and containg given *point*.
+        ///
+        /// - Parameter unitDirection: A unit vector.
+        ///
+        /// - Warning: There is no validation of arguments in performance reasons.
+        @inlinable
+        public init(from point: KvMath2.Position, unitDirection: KvMath2.Vector) {
+            self.init(origin: point - unitDirection * KvMath2.dot(point, unitDirection), unitDirection: unitDirection)
+        }
+
+
+        /// Initializes a line having given direction vector and origin point.
+        ///
+        /// - Parameter origin: The closest point to origin of the coordinate space.
+        /// - Parameter unitDirection: A unit vector.
+        ///
+        /// - Warning: There is no validation of arguments in performance reasons.
         @inlinable
         public init(origin: Position, unitDirection: Vector) {
             self.origin = origin
@@ -708,11 +723,9 @@ extension KvMath2 {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y)) }
 
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
-
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
-        Vector(x: KvMath3.clamp(v.x, min.x, max.x),
-               y: KvMath3.clamp(v.y, min.y, max.y))
+        Vector(x: KvMath.clamp(v.x, min.x, max.x),
+               y: KvMath.clamp(v.y, min.y, max.y))
     }
 
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
@@ -740,6 +753,8 @@ extension KvMath2 {
                       y: x.y * oneMinusT + y.y * t)
     }
 
+    @inlinable public static func normalize(_ v: Vector) -> Vector { v / sqrt(length_squared(v)) }
+
 }
 
 
@@ -749,8 +764,6 @@ extension KvMath2 {
 extension KvMath2 where Scalar == Float {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
-
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
@@ -767,6 +780,8 @@ extension KvMath2 where Scalar == Float {
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
 
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
+
+    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
 
 }
 
@@ -778,8 +793,6 @@ extension KvMath2 where Scalar == Double {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
-
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
@@ -796,6 +809,8 @@ extension KvMath2 where Scalar == Double {
 
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
+    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
 }
 
 
@@ -804,7 +819,7 @@ extension KvMath2 where Scalar == Double {
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, equalTo rhs: KvMath2<Scalar>.Vector) -> Bool
-where Scalar : KvMathScalar2
+where Scalar : KvMathFloatingPoint
 {
     KvIsZero(KvMath2.abs(lhs - rhs).max())
 }
@@ -812,7 +827,7 @@ where Scalar : KvMathScalar2
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, inequalTo rhs: KvMath2<Scalar>.Vector) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIsNonzero(KvMath2.abs(lhs - rhs).max())
 }
@@ -850,7 +865,7 @@ public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, equalTo rhs: KvMath2<Scalar>.Line) -> Bool
-where Scalar : KvMathScalar2
+where Scalar : KvMathFloatingPoint
 {
     lhs.contains(rhs.origin) && KvIs(lhs.standardDirection, equalTo: rhs.standardDirection)
 }
@@ -858,7 +873,7 @@ where Scalar : KvMathScalar2
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, inequalTo rhs: KvMath2<Scalar>.Line) -> Bool
-where Scalar : KvMathScalar2
+where Scalar : KvMathFloatingPoint
 {
     !lhs.contains(rhs.origin) || KvIs(lhs.standardDirection, inequalTo: rhs.standardDirection)
 }
@@ -869,7 +884,7 @@ where Scalar : KvMathScalar2
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, equalTo rhs: KvMath2<Scalar>.AABR) -> Bool
-where Scalar : KvMathScalar2
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.min, equalTo: rhs.min) && KvIs(lhs.max, equalTo: rhs.max)
 }
@@ -877,7 +892,42 @@ where Scalar : KvMathScalar2
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, inequalTo rhs: KvMath2<Scalar>.AABR) -> Bool
-where Scalar : KvMathScalar2
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)
+}
+
+
+
+// MARK: - Legacy
+
+@available(*, deprecated, renamed: "KvMathFloatingPoint")
+public typealias KvMathScalar2 = KvMathFloatingPoint
+
+
+extension KvMath2 {
+
+    @available(*, deprecated, renamed: "BConvex")
+    public typealias Convex = BConvex
+
+
+    @available(*, deprecated, message: "Use KvMath.clamp()")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
+
+}
+
+
+extension KvMath2 where Scalar == Float {
+
+    @available(*, deprecated, message: "Use KvMath.clamp()")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+
+}
+
+
+extension KvMath2 where Scalar == Double {
+
+    @available(*, deprecated, message: "Use KvMath.clamp()")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+
 }

@@ -25,11 +25,7 @@ import simd
 
 
 
-public typealias KvMathScalar4 = BinaryFloatingPoint & SIMDScalar
-
-
-
-public enum KvMath4<Scalar> where Scalar : KvMathScalar4 {
+public enum KvMath4<Scalar> where Scalar : KvMathFloatingPoint {
 
     public typealias Scalar = Scalar
 
@@ -294,6 +290,112 @@ extension KvMath4 where Scalar == Double {
 
 
 
+// MARK: Generalization of SIMD
+
+extension KvMath4 {
+
+    @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z), Swift.abs(v.w)) }
+
+    @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
+        Vector(x: KvMath.clamp(v.x, min.x, max.x),
+               y: KvMath.clamp(v.y, min.y, max.y),
+               z: KvMath.clamp(v.z, min.z, max.z),
+               w: KvMath.clamp(v.w, min.w, max.w))
+    }
+
+    @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
+
+    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y + x.z * y.z + x.w * y.w }
+
+    @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
+
+    @inlinable public static func length_squared(_ v: Vector) -> Scalar { dot(v, v) }
+
+    @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector {
+        Vector(x: Swift.max(x.x, y.x),
+               y: Swift.max(x.y, y.y),
+               z: Swift.max(x.z, y.z),
+               w: Swift.max(x.w, y.w))
+    }
+
+    @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector {
+        Vector(x: Swift.min(x.x, y.x),
+               y: Swift.min(x.y, y.y),
+               z: Swift.min(x.z, y.z),
+               w: Swift.min(x.w, y.w))
+    }
+
+    @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
+        let oneMinusT = 1 - t
+
+        return Vector(x: x.x * oneMinusT + y.x * t,
+                      y: x.y * oneMinusT + y.y * t,
+                      z: x.z * oneMinusT + y.z * t,
+                      w: x.w * oneMinusT + y.w * t)
+    }
+
+    @inlinable public static func normalize(_ v: Vector) -> Vector { v / sqrt(length_squared(v)) }
+
+}
+
+
+
+// MARK: SIMD where Scalar == Float
+
+extension KvMath4 where Scalar == Float {
+
+    @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
+
+    @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
+
+    @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
+
+    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { simd.dot(x, y) }
+
+    @inlinable public static func length(_ v: Vector) -> Scalar { simd.length(v) }
+
+    @inlinable public static func length_squared(_ v: Vector) -> Scalar { simd.length_squared(v) }
+
+    @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector { simd_max(x, y) }
+
+    @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
+
+    @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
+
+    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
+}
+
+
+
+// MARK: SIMD where Scalar == Double
+
+extension KvMath4 where Scalar == Double {
+
+    @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
+
+    @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
+
+    @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
+
+    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { simd.dot(x, y) }
+
+    @inlinable public static func length(_ v: Vector) -> Scalar { simd.length(v) }
+
+    @inlinable public static func length_squared(_ v: Vector) -> Scalar { simd.length_squared(v) }
+
+    @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector { simd_max(x, y) }
+
+    @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
+
+    @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
+
+    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
+}
+
+
+
 // MARK: - Matrix Comparisons
 
 @inlinable
@@ -318,3 +420,10 @@ public func KvIs(_ lhs: simd_float4x4, inequalTo rhs: simd_float4x4) -> Bool {
 public func KvIs(_ lhs: simd_double4x4, inequalTo rhs: simd_double4x4) -> Bool {
     KvIsNonzero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }
+
+
+
+// MARK: - Legacy
+
+@available(*, deprecated, renamed: "KvMathFloatingPoint")
+public typealias KvMathScalar4 = KvMathFloatingPoint

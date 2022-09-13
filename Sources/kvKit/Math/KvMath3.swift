@@ -25,11 +25,7 @@ import simd
 
 
 
-public typealias KvMathScalar3 = BinaryFloatingPoint & SIMDScalar
-
-
-
-public enum KvMath3<Scalar> where Scalar : KvMathScalar3 {
+public enum KvMath3<Scalar> where Scalar : KvMathFloatingPoint {
 
     public typealias Scalar = Scalar
 
@@ -665,7 +661,7 @@ extension KvMath3 {
 
         @inlinable
         public func distance(to point: Position) -> Scalar {
-            let offset = KvMath3.clamp(line.projectionOffset(for: point), range.lowerBound, range.upperBound)
+            let offset = KvMath.clamp(line.projectionOffset(for: point), range.lowerBound, range.upperBound)
 
             return KvMath3.distance(line.at(offset), point)
         }
@@ -677,8 +673,8 @@ extension KvMath3 {
             case .some(let offset1):
                 let offset2 = segment.line.nearbyOffset(for: line)!
 
-                return KvMath3.distance(line.at(KvMath3.clamp(offset1, range.lowerBound, range.upperBound)),
-                                         segment.line.at(KvMath3.clamp(offset2, segment.range.lowerBound, segment.range.upperBound)))
+                return KvMath3.distance(line.at(KvMath.clamp(offset1, range.lowerBound, range.upperBound)),
+                                         segment.line.at(KvMath.clamp(offset2, segment.range.lowerBound, segment.range.upperBound)))
 
             case .none:
                 typealias Projection = (offset: Scalar, point: Position)
@@ -1543,12 +1539,10 @@ extension KvMath3 {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z)) }
 
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
-
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
-        Vector(x: KvMath3.clamp(v.x, min.x, max.x),
-               y: KvMath3.clamp(v.y, min.y, max.y),
-               z: KvMath3.clamp(v.z, min.z, max.z))
+        Vector(x: KvMath.clamp(v.x, min.x, max.x),
+               y: KvMath.clamp(v.y, min.y, max.y),
+               z: KvMath.clamp(v.z, min.z, max.z))
     }
 
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector {
@@ -1585,6 +1579,8 @@ extension KvMath3 {
                       z: x.z * oneMinusT + y.z * t)
     }
 
+    @inlinable public static func normalize(_ v: Vector) -> Vector { v / sqrt(length_squared(v)) }
+
 }
 
 
@@ -1594,8 +1590,6 @@ extension KvMath3 {
 extension KvMath3 where Scalar == Float {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
-
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
@@ -1614,6 +1608,8 @@ extension KvMath3 where Scalar == Float {
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
 
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
+
+    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
 
 }
 
@@ -1625,8 +1621,6 @@ extension KvMath3 where Scalar == Double {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
-
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector { simd.cross(x, y) }
@@ -1645,6 +1639,8 @@ extension KvMath3 where Scalar == Double {
 
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
+    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
 }
 
 
@@ -1653,7 +1649,7 @@ extension KvMath3 where Scalar == Double {
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, equalTo rhs: KvMath3<Scalar>.Vector) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIsZero(KvMath3.abs(lhs - rhs).max())
 }
@@ -1661,7 +1657,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, inequalTo rhs: KvMath3<Scalar>.Vector) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIsNonzero(KvMath3.abs(lhs - rhs).max())
 }
@@ -1699,7 +1695,7 @@ public func KvIs(_ lhs: simd_double3x3, inequalTo rhs: simd_double3x3) -> Bool {
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, equalTo rhs: KvMath3<Scalar>.Line) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     lhs.contains(rhs.origin) && KvIs(lhs.standardDirection, equalTo: rhs.standardDirection)
 }
@@ -1707,7 +1703,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, inequalTo rhs: KvMath3<Scalar>.Line) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     !lhs.contains(rhs.origin) || KvIs(lhs.standardDirection, inequalTo: rhs.standardDirection)
 }
@@ -1718,7 +1714,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, equalTo rhs: KvMath3<Scalar>.Segment) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     let p11 = lhs.p1, p21 = rhs.p1
 
@@ -1728,7 +1724,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, inequalTo rhs: KvMath3<Scalar>.Segment) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     !KvIs(lhs, equalTo: rhs)
 }
@@ -1739,7 +1735,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, equalTo rhs: KvMath3<Scalar>.Plane) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.normal, equalTo: rhs.normal) && KvIs(lhs.d, equalTo: rhs.d)
 }
@@ -1747,7 +1743,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, inequalTo rhs: KvMath3<Scalar>.Plane) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.normal, inequalTo: rhs.normal) || KvIs(lhs.d, inequalTo: rhs.d)
 }
@@ -1758,7 +1754,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, equalTo rhs: KvMath3<Scalar>.AABB) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.min, equalTo: rhs.min) && KvIs(lhs.max, equalTo: rhs.max)
 }
@@ -1766,7 +1762,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, inequalTo rhs: KvMath3<Scalar>.AABB) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)
 }
@@ -1777,7 +1773,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, equalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.left, equalTo: rhs.left) && KvIs(lhs.right, equalTo: rhs.right)
     && KvIs(lhs.bottom, equalTo: rhs.bottom) && KvIs(lhs.top, equalTo: rhs.top)
@@ -1787,7 +1783,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, inequalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     !KvIs(lhs, equalTo: rhs)
 }
@@ -1798,7 +1794,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, equalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.center, equalTo: rhs.center) && KvIs(lhs.radius, equalTo: rhs.radius)
 }
@@ -1806,7 +1802,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, inequalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs.center, inequalTo: rhs.center) || KvIs(lhs.radius, inequalTo: rhs.radius)
 }
@@ -1817,7 +1813,7 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, equalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs._value, equalTo: rhs._value)
 }
@@ -1825,16 +1821,34 @@ where Scalar : KvMathScalar3
 
 @inlinable
 public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, inequalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
-where Scalar : KvMathScalar3
+where Scalar : KvMathFloatingPoint
 {
     KvIs(lhs._value, inequalTo: rhs._value)
 }
 
 
 
-// MARK: - Legacy <Float>
+// MARK: - Legacy
+
+@available(*, deprecated, renamed: "KvMathFloatingPoint")
+public typealias KvMathScalar3 = KvMathFloatingPoint
+
+
+extension KvMath3 {
+
+    @available(*, deprecated, message: "Use KvMath.clamp()")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
+
+}
+
 
 extension KvMath3 where Scalar == Float {
+
+    @available(*, deprecated, message: "Use KvMath.clamp()")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+
+    @available(*, deprecated, renamed: "basisZ") @inlinable
+    public static func front(from matrix: simd_float4x4) -> Vector { basisZ(from: matrix) }
 
     @available(*, deprecated, renamed: "basisX") @inlinable
     public static func right(from matrix: simd_float4x4) -> Vector { basisX(from: matrix) }
@@ -1842,23 +1856,21 @@ extension KvMath3 where Scalar == Float {
     @available(*, deprecated, renamed: "basisY") @inlinable
     public static func up(from matrix: simd_float4x4) -> Vector { basisY(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisZ") @inlinable
-    public static func front(from matrix: simd_float4x4) -> Vector { basisZ(from: matrix) }
-
 }
 
 
-// MARK: - Legacy <Double>
-
 extension KvMath3 where Scalar == Double {
+
+    @available(*, deprecated, message: "Use KvMath.clamp()")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+
+    @available(*, deprecated, renamed: "basisZ") @inlinable
+    public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
 
     @available(*, deprecated, renamed: "basisX") @inlinable
     public static func right(from matrix: simd_double4x4) -> Vector { basisX(from: matrix) }
 
     @available(*, deprecated, renamed: "basisY") @inlinable
     public static func up(from matrix: simd_double4x4) -> Vector { basisY(from: matrix) }
-
-    @available(*, deprecated, renamed: "basisZ") @inlinable
-    public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
 
 }
