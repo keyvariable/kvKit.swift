@@ -27,31 +27,40 @@ import simd
 
 public enum KvMath2<Scalar> where Scalar : KvMathFloatingPoint {
 
+    public typealias Scalar = Scalar
+
     public typealias Vector = SIMD2<Scalar>
     public typealias Position = Vector
 
+    public typealias Matrix = KvSimdMatrix2x2<Scalar>
+    public typealias ProjectiveMatrix = KvSimdMatrix3x3<Scalar>
+
 }
 
 
+public typealias KvMath2F = KvMath2<Float>
+public typealias KvMath2D = KvMath2<Double>
 
-// MARK: Martix Operations <Float>
 
-extension KvMath2 where Scalar == Float {
+
+// MARK: Matrix Operations
+
+extension KvMath2 {
 
     @inlinable
-    public static func abs(_ matrix: simd_float2x2) -> simd_float2x2 {
-        .init(simd.abs(matrix[0]), simd.abs(matrix[1]))
+    public static func abs(_ matrix: Matrix) -> Matrix {
+        .init(abs(matrix[0]), abs(matrix[1]))
     }
 
 
     @inlinable
-    public static func min(_ matrix: simd_float2x2) -> Scalar {
+    public static func min(_ matrix: Matrix) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min())
     }
 
 
     @inlinable
-    public static func max(_ matrix: simd_float2x2) -> Scalar {
+    public static func max(_ matrix: Matrix) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max())
     }
 
@@ -59,257 +68,131 @@ extension KvMath2 where Scalar == Float {
 
 
 
-// MARK: Martix Operations <Double>
+// MARK: Transformations
 
-extension KvMath2 where Scalar == Double {
+extension KvMath2 {
 
     @inlinable
-    public static func abs(_ matrix: simd_double2x2) -> simd_double2x2 {
-        .init(simd.abs(matrix[0]), simd.abs(matrix[1]))
+    public static func apply(_ matrix: ProjectiveMatrix, toPosition position: Position) -> Position {
+        let p3 = matrix * ProjectiveMatrix.Row(position, 1)
+
+        return p3[[ 0, 1 ] as simd_long2] / p3.z
+    }
+
+    @inlinable
+    public static func apply(_ matrix: ProjectiveMatrix, toVector vector: Vector) -> Vector {
+        let v3 = matrix * ProjectiveMatrix.Row(vector, 0)
+
+        return v3[[ 0, 1 ] as simd_long2]
     }
 
 
     @inlinable
-    public static func min(_ matrix: simd_double2x2) -> Scalar {
-        Swift.min(matrix[0].min(), matrix[1].min())
-    }
-
-
-    @inlinable
-    public static func max(_ matrix: simd_double2x2) -> Scalar {
-        Swift.max(matrix[0].max(), matrix[1].max())
-    }
-
-}
-
-
-
-// MARK: Transformations <Float>
-
-extension KvMath2 where Scalar == Float {
-
-    @inlinable
-    public static func apply(_ matrix: simd_float3x3, toPosition position: Position) -> Position {
-        let p3 = matrix * simd_make_float3(position, 1)
-
-        return simd_make_float2(p3) / p3.z
+    public static func translationMatrix(by translation: Vector) -> ProjectiveMatrix {
+        ProjectiveMatrix([ 1, 0, 0 ], [ 0, 1, 0 ], ProjectiveMatrix.Column(translation, 1))
     }
 
     @inlinable
-    public static func apply(_ matrix: simd_float3x3, toVector vector: Vector) -> Vector {
-        simd_make_float2(matrix * simd_make_float3(vector))
-    }
-
-
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> simd_float3x3 {
-        simd_matrix([ 1, 0, 0 ], [ 0, 1, 0 ], simd_make_float3(translation, 1))
-    }
-
-    @inlinable
-    public static func translation(from matrix: simd_float3x3) -> Vector {
+    public static func translation(from matrix: ProjectiveMatrix) -> Vector {
         let c3 = matrix[2]
 
-        return simd_make_float2(c3) / c3.z
+        return c3[[ 0, 1 ] as simd_long2] / c3.z
     }
 
     @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout simd_float3x3) {
+    public static func setTranslation(_ translation: Vector, to matrix: inout ProjectiveMatrix) {
         let z = matrix[2, 2]
 
-        matrix[2] = simd_make_float3(translation * z, z)
+        matrix[2] = ProjectiveMatrix.Column(translation * z, z)
     }
-
 
 
     /// - Returns: Scale component from given 2×2 matrix.
     @inlinable
-    public static func scale(from matrix: simd_float2x2) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]))
+    public static func scale(from matrix: Matrix) -> Vector {
+        Vector(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
+               y: length(matrix[1]))
     }
 
     /// - Returns: Sqaured scale component from given 2×2 matrix.
     @inlinable
-    public static func scale²(from matrix: simd_float2x2) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]))
+    public static func scale²(from matrix: Matrix) -> Vector {
+        Vector(x: length_squared(matrix[0]),
+               y: length_squared(matrix[1]))
     }
 
     /// Changes scale component of given 2×2 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_float2x2) {
+    public static func setScale(_ scale: Vector, to matrix: inout Matrix) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[0] *= s.x * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
         matrix[1] *= s.y
     }
 
 
-
     /// - Returns: Scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
-    public static func scale(from matrix: simd_float3x3) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]))
+    public static func scale(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(x: KvMath3<Scalar>.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
+               y: KvMath3<Scalar>.length(matrix[1]))
     }
 
     /// - Returns: Sqared scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
-    public static func scale²(from matrix: simd_float3x3) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]))
+    public static func scale²(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(x: KvMath3<Scalar>.length_squared(matrix[0]),
+               y: KvMath3<Scalar>.length_squared(matrix[1]))
     }
 
     /// Changes scale component of given projective 3×3 matrix having row[2] == [ 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+    public static func setScale(_ scale: Vector, to matrix: inout ProjectiveMatrix) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         // OK due to matrix[0].z == 0
-        matrix[0] *= simd_make_float3(s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
-        matrix[1] *= simd_make_float3(s.y, s.y, 1)
+        matrix[0] *= ProjectiveMatrix.Column(s.x, s.x, 1) * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
+        matrix[1] *= ProjectiveMatrix.Column(s.y, s.y, 1)
     }
-
 
 
     /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
     @inlinable
-    public static func transformation(_ transform: simd_float2x2, relativeTo position: Vector) -> simd_float3x3 {
-        simd_matrix(simd_make_float3(transform[0]),
-                    simd_make_float3(transform[1]),
-                    simd_make_float3(position - transform * position, 1))
+    public static func transformation<M2x2>(_ transform: M2x2, relativeTo position: M2x2.Row) -> ProjectiveMatrix
+    where M2x2 : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix,
+          M2x2.Row.SimdView == M2x2.Column.SimdView,
+          M2x2.Scalar == Scalar,
+          M2x2.Column == ProjectiveMatrix.Column.Sample2
+    {
+        ProjectiveMatrix(ProjectiveMatrix.Column(transform[0], 0),
+                         ProjectiveMatrix.Column(transform[1], 0),
+                         ProjectiveMatrix.Column(position - transform * position, 1))
     }
-
 
 
     /// - Returns: Transformed X basis vector.
     @inlinable
-    public static func basisX(from matrix: simd_float3x3) -> Vector {
-        simd_make_float2(matrix[0])
+    public static func basisX(from matrix: Matrix) -> Matrix.Column {
+        matrix[0]
     }
 
     /// - Returns: Transformed Y basis vector.
     @inlinable
-    public static func basisY(from matrix: simd_float3x3) -> Vector {
-        simd_make_float2(matrix[1])
+    public static func basisY(from matrix: Matrix) -> Matrix.Column {
+        matrix[1]
     }
-
-}
-
-
-
-// MARK: Transformations <Double>
-
-extension KvMath2 where Scalar == Double {
-
-    @inlinable
-    public static func apply(_ matrix: simd_double3x3, toPosition position: Position) -> Position {
-        let p3 = matrix * simd_make_double3(position, 1)
-
-        return simd_make_double2(p3) / p3.z
-    }
-
-    @inlinable
-    public static func apply(_ matrix: simd_double3x3, toVector vector: Vector) -> Vector {
-        simd_make_double2(matrix * simd_make_double3(vector))
-    }
-
-
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> simd_double3x3 {
-        simd_matrix([ 1, 0, 0 ], [ 0, 1, 0 ], simd_make_double3(translation, 1))
-    }
-
-    @inlinable
-    public static func translation(from matrix: simd_double3x3) -> Vector {
-        let c3 = matrix[2]
-
-        return simd_make_double2(c3) / c3.z
-    }
-
-    @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout simd_double3x3) {
-        let z = matrix[2, 2]
-
-        matrix[2] = simd_make_double3(translation * z, z)
-    }
-
-
-
-    /// - Returns: Scale component from given 2×2 matrix.
-    @inlinable
-    public static func scale(from matrix: simd_double2x2) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]))
-    }
-
-    /// - Returns: Sqaured scale component from given 2×2 matrix.
-    @inlinable
-    public static func scale²(from matrix: simd_double2x2) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]))
-    }
-
-    /// Changes scale component of given 2×2 matrix to given value. If a column is zero then the result is undefined.
-    @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_double2x2) {
-        let s = scale * rsqrt(self.scale²(from: matrix))
-
-        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
-        matrix[1] *= s.y
-    }
-
-
-
-    /// - Returns: Scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
-    @inlinable
-    public static func scale(from matrix: simd_double3x3) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]))
-    }
-
-    /// - Returns: Sqared scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
-    @inlinable
-    public static func scale²(from matrix: simd_double3x3) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]))
-    }
-
-    /// Changes scale component of given projective 3×3 matrix having row[2] == [ 0, 0, 1 ]. If a column is zero then the result is undefined.
-    @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
-        let s = scale * rsqrt(self.scale²(from: matrix))
-
-        // OK due to matrix[0].z == 0
-        matrix[0] *= simd_make_double3(s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
-        matrix[1] *= simd_make_double3(s.y, s.y, 1)
-    }
-
-
-
-    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
-    @inlinable
-    public static func transformation(_ transform: simd_double2x2, relativeTo position: Vector) -> simd_double3x3 {
-        simd_matrix(simd_make_double3(transform[0]),
-                    simd_make_double3(transform[1]),
-                    simd_make_double3(position - transform * position, 1))
-    }
-
 
 
     /// - Returns: Transformed X basis vector.
     @inlinable
-    public static func basisX(from matrix: simd_double3x3) -> Vector {
-        simd_make_double2(matrix[0])
+    public static func basisX(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(simdView: (matrix[0])[[ 0, 1 ] as simd_long2])
     }
 
     /// - Returns: Transformed Y basis vector.
     @inlinable
-    public static func basisY(from matrix: simd_double3x3) -> Vector {
-        simd_make_double2(matrix[1])
+    public static func basisY(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(simdView: (matrix[1])[[ 0, 1 ] as simd_long2])
     }
 
 }
@@ -540,36 +423,14 @@ extension KvMath2 {
         @inlinable
         public func translated(by translation: Vector) -> Self { .init(min: min + translation, max: max + translation) }
 
-    }
 
-}
+        @inlinable
+        public func applying(_ transform: ProjectiveMatrix) -> Self {
+            Self(over: Self.pointIndices.lazy.map { index in
+                apply(transform, toPosition: point(at: index))
+            })!
+        }
 
-
-
-// MARK: <Float>.AABR
-
-extension KvMath2.AABR where Scalar == Float {
-
-    @inlinable
-    public func applying(_ transform: simd_float3x3) -> Self {
-        Self(over: Self.pointIndices.lazy.map { index in
-            KvMath2.apply(transform, toPosition: point(at: index))
-        })!
-    }
-
-}
-
-
-
-// MARK: <Double>.AABR
-
-extension KvMath2.AABR where Scalar == Double {
-
-    @inlinable
-    public func applying(_ transform: simd_double3x3) -> Self {
-        Self(over: Self.pointIndices.lazy.map { index in
-            KvMath2.apply(transform, toPosition: point(at: index))
-        })!
     }
 
 }
@@ -736,6 +597,18 @@ extension KvMath2 {
 
             if Self.willReverseOnScale(scale) {
                 isReversed.toggle()
+            }
+        }
+
+
+        /// Applies given 3x3 projective matrix having row[2] == [ 0, 0, 1 ]  to all the receiver's vertices.
+        public mutating func apply(_ transform: ProjectiveMatrix) {
+            if KvIsNegative(transform.determinant) {
+                isReversed.toggle()
+            }
+
+            vertices.indices.forEach {
+                vertices[$0] = KvMath2.apply(transform, toPosition: vertices[$0])
             }
         }
 
@@ -1236,50 +1109,6 @@ extension KvMath2 {
 }
 
 
-// MARK: <Float>.ConvexPolygon
-
-extension KvMath2.ConvexPolygon where Scalar == Float {
-
-    /// Applies given 2×2 matrix to all the receiver's vertices.
-    public mutating func apply(_ transform: simd_float2x2) {
-        if KvIsNegative(simd_determinant(transform)) {
-            isReversed.toggle()
-        }
-    }
-
-
-    /// Applies given 3x3 projective matrix having row[2] == [ 0, 0, 1 ]  to all the receiver's vertices.
-    public mutating func apply(_ transform: simd_float3x3) {
-        if KvIsNegative(simd_determinant(transform)) {
-            isReversed.toggle()
-        }
-    }
-
-}
-
-
-// MARK: <Double>.ConvexPolygon
-
-extension KvMath2.ConvexPolygon where Scalar == Double {
-
-    /// Applies given 2×2 matrix to all the receiver's vertices.
-    public mutating func apply(_ transform: simd_double2x2) {
-        if KvIsNegative(simd_determinant(transform)) {
-            isReversed.toggle()
-        }
-    }
-
-
-    /// Applies given 3x3 projective matrix having row[2] == [ 0, 0, 1 ]  to all the receiver's vertices.
-    public mutating func apply(_ transform: simd_double3x3) {
-        if KvIsNegative(simd_determinant(transform)) {
-            isReversed.toggle()
-        }
-    }
-
-}
-
-
 
 // MARK: .BConvex
 
@@ -1462,39 +1291,96 @@ extension KvMath2 {
 
 extension KvMath2 {
 
-    @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y)) }
-
-    @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
-        Vector(x: KvMath.clamp(v.x, min.x, max.x),
-               y: KvMath.clamp(v.y, min.y, max.y))
+    @inlinable
+    public static func abs<V>(_ v: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        V(Swift.abs(v.x), Swift.abs(v.y))
     }
 
-    @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
+    @inlinable
+    public static func acos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
-    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y }
+    @inlinable
+    public static func asin(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
-    @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
+    @inlinable
+    public static func atan(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
-    @inlinable public static func length_squared(_ v: Vector) -> Scalar { dot(v, v) }
+    @inlinable
+    public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
-    @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector {
-        Vector(x: Swift.max(x.x, y.x),
-               y: Swift.max(x.y, y.y))
+    @inlinable
+    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        V(x: KvMath.clamp(v.x, min.x, max.x),
+          y: KvMath.clamp(v.y, min.y, max.y))
     }
 
-    @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector {
-        Vector(x: Swift.min(x.x, y.x),
-               y: Swift.min(x.y, y.y))
+    @inlinable
+    public static func cos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func cospi(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+        length(y - x)
     }
 
-    @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
-        let oneMinusT = 1 - t
-
-        return Vector(x: x.x * oneMinusT + y.x * t,
-                      y: x.y * oneMinusT + y.y * t)
+    @inlinable
+    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+        x.x * y.x + x.y * y.y
     }
 
-    @inlinable public static func normalize(_ v: Vector) -> Vector { v / sqrt(length_squared(v)) }
+    @inlinable
+    public static func length<V>(_ v: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+        dot(v, v).squareRoot()
+    }
+
+    @inlinable
+    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+        dot(v, v)
+    }
+
+    @inlinable
+    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        V(x: Swift.max(x.x, y.x),
+          y: Swift.max(x.y, y.y))
+    }
+
+    @inlinable
+    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        .init(x: Swift.min(x.x, y.x),
+              y: Swift.min(x.y, y.y))
+    }
+
+    @inlinable
+    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        let oneMinusT: Scalar = 1 - t
+
+        return V(x: x.x * oneMinusT + y.x * t,
+                 y: x.y * oneMinusT + y.y * t)
+    }
+
+    @inlinable
+    public static func normalize<V>(_ v: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        v / length(v)
+    }
+
+    @inlinable
+    public static func rsqrt<V>(_ v: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+        1 / (v * v).squareRoot()
+    }
+
+    @inlinable
+    public static func sin(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func sinpi(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func tan(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func tanpi(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
 
 }
 
@@ -1506,7 +1392,25 @@ extension KvMath2 where Scalar == Float {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func acos(_ x: Vector) -> Vector { simd.acos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func asin(_ x: Vector) -> Vector { simd.asin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan(_ x: Vector) -> Vector { simd.atan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan2(_ x: Vector, _ y: Vector) -> Vector { simd.atan2(x, y) }
+
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cos(_ x: Vector) -> Vector { simd.cos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cospi(_ x: Vector) -> Vector { simd.cospi(x) }
 
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
 
@@ -1523,6 +1427,20 @@ extension KvMath2 where Scalar == Float {
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
     @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
+    @inlinable public static func rsqrt(_ v: Vector) -> Vector { simd.rsqrt(v) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sin(_ x: Vector) -> Vector { simd.sin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sinpi(_ x: Vector) -> Vector { simd.sinpi(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tan(_ x: Vector) -> Vector { simd.tan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tanpi(_ x: Vector) -> Vector { simd.tanpi(x) }
 
 }
 
@@ -1534,7 +1452,25 @@ extension KvMath2 where Scalar == Double {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func acos(_ x: Vector) -> Vector { simd.acos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func asin(_ x: Vector) -> Vector { simd.asin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan(_ x: Vector) -> Vector { simd.atan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan2(_ x: Vector, _ y: Vector) -> Vector { simd.atan2(x, y) }
+
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cos(_ x: Vector) -> Vector { simd.cos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cospi(_ x: Vector) -> Vector { simd.cospi(x) }
 
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
 
@@ -1551,6 +1487,20 @@ extension KvMath2 where Scalar == Double {
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
     @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
+    @inlinable public static func rsqrt(_ v: Vector) -> Vector { simd.rsqrt(v) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sin(_ x: Vector) -> Vector { simd.sin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sinpi(_ x: Vector) -> Vector { simd.sinpi(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tan(_ x: Vector) -> Vector { simd.tan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tanpi(_ x: Vector) -> Vector { simd.tanpi(x) }
 
 }
 
@@ -1578,25 +1528,17 @@ where Scalar : KvMathFloatingPoint
 // MARK: - Matrix Comparisons
 
 @inlinable
-public func KvIs(_ lhs: simd_float2x2, equalTo rhs: simd_float2x2) -> Bool {
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Matrix, equalTo rhs: KvMath2<Scalar>.Matrix) -> Bool
+where Scalar : KvMathFloatingPoint
+{
     KvIsZero(KvMath2.max(KvMath2.abs(lhs - rhs)))
 }
 
 
 @inlinable
-public func KvIs(_ lhs: simd_double2x2, equalTo rhs: simd_double2x2) -> Bool {
-    KvIsZero(KvMath2.max(KvMath2.abs(lhs - rhs)))
-}
-
-
-@inlinable
-public func KvIs(_ lhs: simd_float2x2, inequalTo rhs: simd_float2x2) -> Bool {
-    KvIsNonzero(KvMath2.max(KvMath2.abs(lhs - rhs)))
-}
-
-
-@inlinable
-public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
+public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Matrix, inequalTo rhs: KvMath2<Scalar>.Matrix) -> Bool
+where Scalar : KvMathFloatingPoint
+{
     KvIsNonzero(KvMath2.max(KvMath2.abs(lhs - rhs)))
 }
 

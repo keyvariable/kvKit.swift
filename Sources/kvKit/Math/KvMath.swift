@@ -21,11 +21,12 @@
 //  Created by Svyatoslav Popov on 11.12.2019.
 //
 
+import Foundation
 import simd
 
 
 
-public typealias KvMathFloatingPoint = BinaryFloatingPoint & SIMDScalar
+public typealias KvMathFloatingPoint = KvSimdMatrixScalar & KvSimdVectorScalar
 
 
 
@@ -95,6 +96,32 @@ extension KvMath where Scalar : BinaryInteger {
 
 extension KvMath where Scalar : BinaryFloatingPoint {
 
+    /// - Returns: Returns the arccosine of given value.
+    @inlinable
+    public static func acos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    /// - Returns: Returns the arcsine of given value.
+    @inlinable
+    public static func asin(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    /// - Returns: Returns the arctangent of given value.
+    @inlinable
+    public static func atan(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    /// - Returns: Returns the arctangent of given pair of values.
+    @inlinable
+    public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    /// - Returns: Returns the cosine of given angle.
+    @inlinable
+    public static func cos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
+    @inlinable
+    public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar {
+        (1 - t) * a + t * b
+    }
+
     /// - Returns: One of `[ -1, 0, 1]`  depending on sign of the argument.
     @inlinable
     public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar) -> Sign {
@@ -103,12 +130,13 @@ extension KvMath where Scalar : BinaryFloatingPoint {
         return KvIsZero(x, alsoIsPositive: &isPositive) ? 0 : (isPositive ? 1 : -1)
     }
 
-
-    /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
+    /// - Returns: Returns the sine of given angle.
     @inlinable
-    public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar {
-        (1 - t) * a + t * b
-    }
+    public static func sin(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    /// - Returns: The tangent of given angle.
+    @inlinable
+    public static func tan(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
 }
 
@@ -129,11 +157,32 @@ extension KvMath where Scalar : FixedWidthInteger {
 
 extension KvMath where Scalar == Float {
 
+    /// - Returns: Returns the arccosine of given value.
+    @inlinable public static func acos(_ x: Scalar) -> Scalar { simd.acos(x) }
+
+    /// - Returns: Returns the arcsine of given value.
+    @inlinable public static func asin(_ x: Scalar) -> Scalar { simd.asin(x) }
+
+    /// - Returns: Returns the arctangent of given value.
+    @inlinable public static func atan(_ x: Scalar) -> Scalar { simd.atan(x) }
+
+    /// - Returns: Returns the arctangent of given pair of values.
+    @inlinable public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { simd.atan2(x, y) }
+
     /// - Returns: The closest value to *x* from *min*...*max* range.
     @inlinable public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
+    /// - Returns: Returns the cosine of given angle.
+    @inlinable public static func cos(_ x: Scalar) -> Scalar { simd.cos(x) }
+
     /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
     @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { simd_mix(a, b, t) }
+
+    /// - Returns: Returns the sine of given angle.
+    @inlinable public static func sin(_ x: Scalar) -> Scalar { simd.sin(x) }
+
+    /// - Returns: The tangent of given angle.
+    @inlinable public static func tan(_ x: Scalar) -> Scalar { simd.tan(x) }
 
 }
 
@@ -142,11 +191,32 @@ extension KvMath where Scalar == Float {
 
 extension KvMath where Scalar == Double {
 
+    /// - Returns: Returns the arccosine of given value.
+    @inlinable public static func acos(_ x: Scalar) -> Scalar { simd.acos(x) }
+
+    /// - Returns: Returns the arcsine of given value.
+    @inlinable public static func asin(_ x: Scalar) -> Scalar { simd.asin(x) }
+
+    /// - Returns: Returns the arctangent of given value.
+    @inlinable public static func atan(_ x: Scalar) -> Scalar { simd.atan(x) }
+
+    /// - Returns: Returns the arctangent of given pair of values.
+    @inlinable public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { simd.atan2(x, y) }
+
     /// - Returns: The closest value to *x* from *min*...*max* range.
     @inlinable public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
+    /// - Returns: Returns the cosine of given angle.
+    @inlinable public static func cos(_ x: Scalar) -> Scalar { simd.cos(x) }
+
     /// - Returns: Value of linear function *f* at *t* where *f* at 0 equals to *a*, *f* at 1 equals to *b*.
     @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { simd_mix(a, b, t) }
+
+    /// - Returns: Returns the sine of given angle.
+    @inlinable public static func sin(_ x: Scalar) -> Scalar { simd.sin(x) }
+
+    /// - Returns: The tangent of given angle.
+    @inlinable public static func tan(_ x: Scalar) -> Scalar { simd.tan(x) }
 
 }
 

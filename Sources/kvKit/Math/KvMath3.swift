@@ -32,80 +32,90 @@ public enum KvMath3<Scalar> where Scalar : KvMathFloatingPoint {
     public typealias Vector = SIMD3<Scalar>
     public typealias Position = Vector
 
-}
-
-
-
-// MARK: Matrix Fabrics <Float>
-
-extension KvMath3 where Scalar == Float {
-
-    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented(_ base: simd_float2x2) -> simd_float3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
-    }
-
-    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented(_ base: simd_float2x3) -> simd_float3x3 {
-        .init(base[0], base[1], [ 0, 0, 1 ])
-    }
-
-    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented(_ base: simd_float3x2) -> simd_float3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
-    }
+    public typealias Matrix = KvSimdMatrix3x3<Scalar>
+    public typealias ProjectiveMatrix = KvSimdMatrix4x4<Scalar>
 
 }
 
 
 
-// MARK: Matrix Fabrics <Float>
+public typealias KvMath3F = KvMath3<Float>
+public typealias KvMath3D = KvMath3<Double>
 
-extension KvMath3 where Scalar == Double {
 
-    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
+
+// MARK: Operations
+
+extension KvMath3 {
+
+    /// - Returns: Normalized vector when source vector has nonzero length. Otherwise *nil* is returned.
     @inlinable
-    public static func supplemented(_ base: simd_double2x2) -> simd_double3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
-    }
+    public static func normalizedOrNil(_ vector: Vector) -> Vector? {
+        let l² = length_squared(vector)
 
-    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented(_ base: simd_double2x3) -> simd_double3x3 {
-        .init(base[0], base[1], [ 0, 0, 1 ])
-    }
+        guard KvIsNonzero(l²) else { return nil }
 
-    /// - Returns: Result of replacement if the left top submatix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented(_ base: simd_double3x2) -> simd_double3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
+        return KvIs(l², inequalTo: 1) ? (vector / sqrt(l²)) : vector
     }
 
 }
 
 
 
-// MARK: Martix Operations <Float>
+// MARK: Matrix Fabrics
 
-extension KvMath3 where Scalar == Float {
+extension KvMath3 {
+
+    /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented<M2x2>(_ base: M2x2) -> Matrix
+    where M2x2 : KvSimdMatrix2xN & KvSimdMatrixNx2, M2x2.Scalar == Scalar, M2x2.Column == Matrix.Column.Sample2
+    {
+        Matrix(Matrix.Column(base[0], 0),
+               Matrix.Column(base[1], 0),
+               [ 0, 0, 1 ])
+    }
+
+    /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented<M2x3>(_ base: M2x3) -> Matrix
+    where M2x3 : KvSimdMatrix2xN & KvSimdMatrixNx3, M2x3.Scalar == Scalar, M2x3.Column == Matrix.Column
+    {
+        Matrix(base[0], base[1], [ 0, 0, 1 ])
+    }
+
+    /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
+    @inlinable
+    public static func supplemented<M3x2>(_ base: M3x2) -> Matrix
+    where M3x2 : KvSimdMatrix3xN & KvSimdMatrixNx2, M3x2.Scalar == Scalar, M3x2.Column == Matrix.Column.Sample2
+    {
+        Matrix(Matrix.Column(base[0], 0),
+               Matrix.Column(base[1], 0),
+               Matrix.Column(base[2], 1))
+    }
+
+}
+
+
+
+// MARK: Matrix Operations
+
+extension KvMath3 {
 
     @inlinable
-    public static func abs(_ matrix: simd_float3x3) -> simd_float3x3 {
-        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]))
+    public static func abs(_ matrix: Matrix) -> Matrix {
+        Matrix(abs(matrix[0]), abs(matrix[1]), abs(matrix[2]))
     }
 
 
     @inlinable
-    public static func min(_ matrix: simd_float3x3) -> Scalar {
+    public static func min(_ matrix: Matrix) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min())
     }
 
 
     @inlinable
-    public static func max(_ matrix: simd_float3x3) -> Scalar {
+    public static func max(_ matrix: Matrix) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max())
     }
 
@@ -113,302 +123,172 @@ extension KvMath3 where Scalar == Float {
 
 
 
-// MARK: Martix Operations <Double>
+// MARK: Transformations
 
-extension KvMath3 where Scalar == Double {
+extension KvMath3 {
 
     @inlinable
-    public static func abs(_ matrix: simd_double3x3) -> simd_double3x3 {
-        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]))
+    public static func apply(_ matrix: ProjectiveMatrix, toPosition position: Position) -> Position {
+        let p4 = matrix * ProjectiveMatrix.Row(position, 1)
+
+        return p4[[ 0, 1, 2] as simd_long3] / p4.w
+    }
+
+    @inlinable
+    public static func apply(_ matrix: ProjectiveMatrix, toVector vector: Vector) -> Vector {
+        let p4 = matrix * ProjectiveMatrix.Row(vector, 0)
+
+        return p4[[ 0, 1, 2] as simd_long3]
     }
 
 
     @inlinable
-    public static func min(_ matrix: simd_double3x3) -> Scalar {
-        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min())
-    }
-
-
-    @inlinable
-    public static func max(_ matrix: simd_double3x3) -> Scalar {
-        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max())
-    }
-
-}
-
-
-
-// MARK: Transformations <Float>
-
-extension KvMath3 where Scalar == Float {
-
-    @inlinable
-    public static func apply(_ matrix: simd_float4x4, toPosition position: Position) -> Position {
-        let p4 = matrix * simd_make_float4(position, 1)
-
-        return simd_make_float3(p4) / p4.w
+    public static func translationMatrix(by translation: Vector) -> ProjectiveMatrix {
+        ProjectiveMatrix([ 1, 0, 0, 0 ],
+                         [ 0, 1, 0, 0 ],
+                         [ 0, 0, 1, 0 ],
+                         ProjectiveMatrix.Column(translation, 1))
     }
 
     @inlinable
-    public static func apply(_ matrix: simd_float4x4, toVector vector: Vector) -> Vector {
-        simd_make_float3(matrix * simd_make_float4(vector))
-    }
-
-
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> simd_float4x4 {
-        simd_matrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0], simd_make_float4(translation, 1))
-    }
-
-    @inlinable
-    public static func translation(from matrix: simd_float4x4) -> Vector {
+    public static func translation(from matrix: ProjectiveMatrix) -> Vector {
         let c4 = matrix[3]
 
-        return simd_make_float3(c4) / c4.w
+        return c4[[ 0, 1, 2] as simd_long3] / c4.w
     }
 
     @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout simd_float4x4) {
+    public static func setTranslation(_ translation: Vector, to matrix: inout ProjectiveMatrix) {
         let w = matrix[3, 3]
 
-        matrix[3] = simd_make_float4(translation * w, w)
+        matrix[3] = ProjectiveMatrix.Column(translation * w, w)
     }
-
 
 
     /// - Returns: Scale component from given 3×3 matrix.
     @inlinable
-    public static func scale(from matrix: simd_float3x3) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]),
-              z: simd.length(matrix[2]))
+    public static func scale(from matrix: Matrix) -> Vector {
+        Vector(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
+               y: length(matrix[1]),
+               z: length(matrix[2]))
     }
 
     /// - Returns: Sqaured scale component from given 3×3 matrix.
     @inlinable
-    public static func scale²(from matrix: simd_float3x3) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]),
-              z: simd.length_squared(matrix[2]))
+    public static func scale²(from matrix: Matrix) -> Vector {
+        .init(x: length_squared(matrix[0]),
+              y: length_squared(matrix[1]),
+              z: length_squared(matrix[2]))
     }
 
     /// Changes scale component of given 3×3 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+    public static func setScale(_ scale: Vector, to matrix: inout Matrix) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[0] *= s.x * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
         matrix[1] *= s.y
         matrix[2] *= s.z
     }
 
 
-
     /// - Returns: Scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
     @inlinable
-    public static func scale(from matrix: simd_float4x4) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]),
-              z: simd.length(matrix[2]))
+    public static func scale(from matrix: ProjectiveMatrix) -> Vector {
+        .init(x: KvMath4<Scalar>.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
+              y: KvMath4<Scalar>.length(matrix[1]),
+              z: KvMath4<Scalar>.length(matrix[2]))
     }
 
     /// - Returns: Squared scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
     @inlinable
-    public static func scale²(from matrix: simd_float4x4) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]),
-              z: simd.length_squared(matrix[2]))
+    public static func scale²(from matrix: ProjectiveMatrix) -> Vector {
+        .init(x: KvMath4<Scalar>.length_squared(matrix[0]),
+              y: KvMath4<Scalar>.length_squared(matrix[1]),
+              z: KvMath4<Scalar>.length_squared(matrix[2]))
     }
 
     /// Changes scale component of given projective 4×4 matrix having row[3] == [ 0, 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
+    public static func setScale(_ scale: Vector, to matrix: inout ProjectiveMatrix) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         // OK due to matrix[0].w == 0
-        matrix[0] *= simd_make_float4(s.x, s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
-        matrix[1] *= simd_make_float4(s.y, s.y, s.y, 1)
-        matrix[2] *= simd_make_float4(s.z, s.z, s.z, 1)
+        matrix[0] *= ProjectiveMatrix.Column(s.x, s.x, s.x, 1) * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
+        matrix[1] *= ProjectiveMatrix.Column(s.y, s.y, s.y, 1)
+        matrix[2] *= ProjectiveMatrix.Column(s.z, s.z, s.z, 1)
     }
-
 
 
     /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
     @inlinable
-    public static func transformation(_ transform: simd_float3x3, relativeTo position: Vector) -> simd_float4x4 {
-        simd_matrix(simd_make_float4(transform[0]),
-                    simd_make_float4(transform[1]),
-                    simd_make_float4(transform[2]),
-                    simd_make_float4(position - transform * position, 1))
+    public static func transformation<M3x3>(_ transform: M3x3, relativeTo position: M3x3.Row) -> ProjectiveMatrix
+    where M3x3 : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix,
+          M3x3.Row.SimdView == M3x3.Column.SimdView,
+          M3x3.Scalar == Scalar,
+          M3x3.Column == ProjectiveMatrix.Column.Sample3
+    {
+        ProjectiveMatrix(ProjectiveMatrix.Column(transform[0], 0),
+                         ProjectiveMatrix.Column(transform[1], 0),
+                         ProjectiveMatrix.Column(transform[2], 0),
+                         ProjectiveMatrix.Column(position - transform * position, 1))
     }
-
 
 
     /// - Returns: Transformed X basis vector.
     @inlinable
-    public static func basisX(from matrix: simd_float4x4) -> Vector {
-        simd_make_float3(matrix[0])
+    public static func basisX(from matrix: Matrix) -> Matrix.Column {
+        matrix[0]
     }
 
     /// - Returns: Transformed Y basis vector.
     @inlinable
-    public static func basisY(from matrix: simd_float4x4) -> Vector {
-        simd_make_float3(matrix[1])
+    public static func basisY(from matrix: Matrix) -> Matrix.Column {
+        matrix[1]
     }
 
     /// - Returns: Transformed Z basis vector.
     @inlinable
-    public static func basisZ(from matrix: simd_float4x4) -> Vector {
-        simd_make_float3(matrix[2])
+    public static func basisZ(from matrix: Matrix) -> Matrix.Column {
+        matrix[2]
+    }
+
+
+    /// - Returns: Transformed X basis vector.
+    @inlinable
+    public static func basisX(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(simdView: (matrix[0])[[ 0, 1, 2] as simd_long3])
+    }
+
+    /// - Returns: Transformed Y basis vector.
+    @inlinable
+    public static func basisY(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(simdView: (matrix[1])[[ 0, 1, 2] as simd_long3])
+    }
+
+    /// - Returns: Transformed Z basis vector.
+    @inlinable
+    public static func basisZ(from matrix: ProjectiveMatrix) -> Vector {
+        Vector(simdView: (matrix[2])[[ 0, 1, 2] as simd_long3])
     }
 
 }
 
 
 
-// MARK: Transformations <Double>
+// MARK: Projections
 
-extension KvMath3 where Scalar == Double {
-
-    @inlinable
-    public static func apply(_ matrix: simd_double4x4, toPosition position: Position) -> Position {
-        let p4 = matrix * simd_make_double4(position, 1)
-
-        return simd_make_double3(p4) / p4.w
-    }
-
-    @inlinable
-    public static func apply(_ matrix: simd_double4x4, toVector vector: Vector) -> Vector {
-        simd_make_double3(matrix * simd_make_double4(vector))
-    }
-
-
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> simd_double4x4 {
-        simd_matrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0], simd_make_double4(translation, 1))
-    }
-
-    @inlinable
-    public static func translation(from matrix: simd_double4x4) -> Vector {
-        let c4 = matrix[3]
-
-        return simd_make_double3(c4) / c4.w
-    }
-
-    @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout simd_double4x4) {
-        let w = matrix[3, 3]
-
-        matrix[3] = simd_make_double4(translation * w, w)
-    }
-
-
-
-    /// - Returns: Scale component from given 3×3 matrix.
-    @inlinable
-    public static func scale(from matrix: simd_double3x3) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]),
-              z: simd.length(matrix[2]))
-    }
-
-    /// - Returns: Sqaured scale component from given 3×3 matrix.
-    @inlinable
-    public static func scale²(from matrix: simd_double3x3) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]),
-              z: simd.length_squared(matrix[2]))
-    }
-
-    /// Changes scale component of given 3×3 matrix to given value. If a column is zero then the result is undefined.
-    @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
-        let s = scale * rsqrt(self.scale²(from: matrix))
-
-        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
-        matrix[1] *= s.y
-        matrix[2] *= s.z
-    }
-
-
-
-    /// - Returns: Scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
-    @inlinable
-    public static func scale(from matrix: simd_double4x4) -> Vector {
-        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
-              y: simd.length(matrix[1]),
-              z: simd.length(matrix[2]))
-    }
-
-    /// - Returns: Squared scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
-    @inlinable
-    public static func scale²(from matrix: simd_double4x4) -> Vector {
-        .init(x: simd.length_squared(matrix[0]),
-              y: simd.length_squared(matrix[1]),
-              z: simd.length_squared(matrix[2]))
-    }
-
-    /// Changes scale component of given projective 4×4 matrix having row[3] == [ 0, 0, 0, 1 ]. If a column is zero then the result is undefined.
-    @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
-        let s = scale * rsqrt(self.scale²(from: matrix))
-
-        // OK due to matrix[0].w == 0
-        matrix[0] *= simd_make_double4(s.x, s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
-        matrix[1] *= simd_make_double4(s.y, s.y, s.y, 1)
-        matrix[2] *= simd_make_double4(s.z, s.z, s.z, 1)
-    }
-
-
-
-    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
-    @inlinable
-    public static func transformation(_ matrix: simd_double3x3, relativeTo position: Vector) -> simd_double4x4 {
-        simd_matrix(simd_make_double4(matrix[0]),
-                    simd_make_double4(matrix[1]),
-                    simd_make_double4(matrix[2]),
-                    simd_make_double4(position - matrix * position, 1))
-    }
-
-
-
-    /// - Returns: Transformed X basis vector.
-    @inlinable
-    public static func basisX(from matrix: simd_double4x4) -> Vector {
-        simd_make_double3(matrix[0])
-    }
-
-    /// - Returns: Transformed Y basis vector.
-    @inlinable
-    public static func basisY(from matrix: simd_double4x4) -> Vector {
-        simd_make_double3(matrix[1])
-    }
-
-    /// - Returns: Transformed Z basis vector.
-    @inlinable
-    public static func basisZ(from matrix: simd_double4x4) -> Vector {
-        simd_make_double3(matrix[2])
-    }
-
-}
-
-
-
-// MARK: Projections <Float>
-
-extension KvMath3 where Scalar == Float {
+extension KvMath3 {
 
     /// - Returns: Matrix of standard orthogonal projection.
     @inlinable
-    public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> simd_float4x4 {
+    public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> ProjectiveMatrix {
         // - Note: Single SIMD division seems faster.
-        simd_float4x4(diagonal: .one / simd_float4(left - right, bottom - top, near - far, 1))
-        * simd_float4x4([ -2,  0, 0, 0 ],
-                        [  0, -2, 0, 0 ],
-                        [  0,  0, 2, 0 ],
-                        .init(right + left, top + bottom, far + near, 1))
+        ProjectiveMatrix(diagonal: .one / ProjectiveMatrix.Diagonal(left - right, bottom - top, near - far, 1))
+        * ProjectiveMatrix([ -2,  0, 0, 0 ],
+                           [  0, -2, 0, 0 ],
+                           [  0,  0, 2, 0 ],
+                           ProjectiveMatrix.Column(right + left, top + bottom, far + near, 1))
     }
 
 
@@ -417,15 +297,15 @@ extension KvMath3 where Scalar == Float {
     ///
     /// - Returns: Projection matrix for a centered rectangular pinhole camera.
     @inlinable
-    public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> simd_float4x4 {
-        let tg = tan(0.5 * fov)
-
+    public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> ProjectiveMatrix {
+        let tg = KvMath.tan(0.5 * fov)
+        
         // - Note: Single SIMD division seems faster.
-        return (simd_float4x4(diagonal: .one / simd_float4(aspect * tg, tg, near - far, 1))
-                * simd_float4x4([ 1, 0, 0, 0 ],
-                                [ 0, 1, 0, 0 ],
-                                .init(0,  0,  (far + near)  , -1),
-                                .init(0,  0,  2 * far * near,  0)))
+        return (ProjectiveMatrix(diagonal: .one / ProjectiveMatrix.Diagonal(aspect * tg, tg, near - far, 1))
+                * ProjectiveMatrix([ 1, 0, 0, 0 ],
+                                   [ 0, 1, 0, 0 ],
+                                   ProjectiveMatrix.Column(0,  0,  (far + near)  , -1),
+                                   ProjectiveMatrix.Column(0,  0,  2 * far * near,  0)))
     }
 
 
@@ -436,66 +316,13 @@ extension KvMath3 where Scalar == Float {
     /// - Note: The perspective projection matrix is a combination of orthogonal projection matrix in the frame image units and the camera projective matrix.
     /// - Note: See details [here](http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/).
     @inlinable
-    public static func projectiveCameraMatrix(k: simd_float3x3, near: Scalar, far: Scalar) -> simd_float4x4 {
+    public static func projectiveCameraMatrix(k: Matrix, near: Scalar, far: Scalar) -> ProjectiveMatrix {
         // - Note: Implementation below uses full K matrix. It seems better then picking some elements if K.
-        simd_float4x4([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
-        * simd_float4x4(simd_make_float4(k[0]),
-                        simd_make_float4(k[1]),
-                        simd_make_float4(-k[2], near + far),
-                        .init(0, 0, 0, near * far))
-    }
-
-}
-
-
-
-// MARK: Projections <Double>
-
-extension KvMath3 where Scalar == Double {
-
-    /// - Returns: Matrix of standard orthogonal projection.
-    @inlinable
-    public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> simd_double4x4 {
-        // - Note: Single SIMD division seems faster.
-        simd_double4x4(diagonal: .one / simd_double4(left - right, bottom - top, near - far, 1))
-        * simd_double4x4([ -2,  0, 0, 0 ],
-                         [  0, -2, 0, 0 ],
-                         [  0,  0, 2, 0 ],
-                         .init(right + left, top + bottom, far + near, 1))
-    }
-
-
-    /// - Parameter aspect: Ratio of Viewport width to viewport height.
-    /// - Parameter fof: Vertical camera angle.
-    ///
-    /// - Returns: Projection matrix for a centered rectangular pinhole camera.
-    @inlinable
-    public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> simd_double4x4 {
-        let tg = tan(0.5 * fov)
-
-        // - Note: Single SIMD division seems faster.
-        return (simd_double4x4(diagonal: .one / simd_double4(aspect * tg, tg, near - far, 1))
-                * simd_double4x4([ 1, 0, 0, 0 ],
-                                 [ 0, 1, 0, 0 ],
-                                 .init(0,  0,  (far + near)  , -1),
-                                 .init(0,  0,  2 * far * near,  0)))
-    }
-
-
-    /// - Parameter k: Calibration matrix K (intrinsic matrix) of pinhole camera.
-    ///
-    /// - Returns: Projective matrix for pinhole camera.
-    ///
-    /// - Note: The perspective projection matrix is a combination of orthogonal projection matrix in the frame image units and the camera projective matrix.
-    /// - Note: See details [here](http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/).
-    @inlinable
-    public static func projectiveCameraMatrix(k: simd_double3x3, near: Scalar, far: Scalar) -> simd_double4x4 {
-        // - Note: Implementation below uses full K matrix. It seems better then picking some elements if K.
-        simd_double4x4([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
-        * simd_double4x4(simd_make_double4(k[0]),
-                         simd_make_double4(k[1]),
-                         simd_make_double4(-k[2], near + far),
-                         .init(0, 0, 0, near * far))
+        ProjectiveMatrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
+        * ProjectiveMatrix(ProjectiveMatrix.Column(k[0], 0),
+                           ProjectiveMatrix.Column(k[1], 0),
+                           ProjectiveMatrix.Column(-k[2], near + far),
+                           ProjectiveMatrix.Column(0, 0, 0, near * far))
     }
 
 }
@@ -788,6 +615,12 @@ extension KvMath3 {
             self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
         }
 
+        /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
+        @inlinable
+        public init?<V4>(_ abcd: V4) where V4 : KvSimdVector4, V4.Scalar == Scalar {
+            self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
+        }
+
 
         /// - Warning: Value of *unitNormal* must be a unit vector.
         @inlinable
@@ -933,6 +766,12 @@ extension KvMath3 {
         /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
         @inlinable
         public init(_ abcd: SIMD4<Scalar>) {
+            self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
+        }
+
+        /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
+        @inlinable
+        public init<V4>(_ abcd: V4) where V4 : KvSimdVector4, V4.Scalar == Scalar {
             self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
         }
 
@@ -1106,36 +945,14 @@ extension KvMath3 {
             .init(min: min + translation, max: max + translation)
         }
 
-    }
 
-}
+        @inlinable
+        public func applying(_ transform: ProjectiveMatrix) -> Self {
+            Self(over: Self.pointIndices.lazy.map { index in
+                apply(transform, toPosition: point(at: index))
+            })!
+        }
 
-
-
-// MARK: <Float>.AABB
-
-extension KvMath3.AABB where Scalar == Float {
-
-    @inlinable
-    public func applying(_ transform: simd_float4x4) -> Self {
-        Self(over: Self.pointIndices.lazy.map { index in
-            KvMath3.apply(transform, toPosition: point(at: index))
-        })!
-    }
-
-}
-
-
-
-// MARK: <Double>.AABB
-
-extension KvMath3.AABB where Scalar == Double {
-
-    @inlinable
-    public func applying(_ transform: simd_double4x4) -> Self {
-        Self(over: Self.pointIndices.lazy.map { index in
-            KvMath3.apply(transform, toPosition: point(at: index))
-        })!
     }
 
 }
@@ -1159,6 +976,41 @@ extension KvMath3 {
             self.top = top
             self.near = near
             self.far = far
+        }
+
+
+        /// Initializes a frustum with a perspective projection matrix.
+        public init?(_ projectionMatrix: ProjectiveMatrix) {
+            let m = projectionMatrix.transpose
+
+            guard let l = Plane(m[3] + m[0]),
+                  let r = Plane(m[3] - m[0]),
+                  let b = Plane(m[3] + m[1]),
+                  let t = Plane(m[3] - m[1]),
+                  let n = Plane(m[3] + m[2]),
+                  let f = Plane(m[3] - m[2])
+            else { return nil }
+
+            self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
+        }
+
+
+
+        /// Initializes a frustum with a perspective projection matrix overriding Z planes.
+        public init?(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) {
+            let m = projectionMatrix.transpose
+
+            guard let l = Plane(m[3] + m[0]),
+                  let r = Plane(m[3] - m[0]),
+                  let b = Plane(m[3] + m[1]),
+                  let t = Plane(m[3] - m[1])
+            else { return nil }
+
+            let (n, f) = (zFar < zNear
+                          ? (Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
+                          : (Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
+
+            self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
         }
 
 
@@ -1213,90 +1065,6 @@ extension KvMath3 {
 
 
 
-// MARK: <Float>.Frustum
-
-extension KvMath3.Frustum where Scalar == Float {
-
-    /// Initializes a frustum with a perspective projection matrix.
-    public init?(_ projectionMatrix: simd_float4x4) {
-        let m = projectionMatrix.transpose
-
-        guard let l = KvMath3.Plane(m[3] + m[0]),
-              let r = KvMath3.Plane(m[3] - m[0]),
-              let b = KvMath3.Plane(m[3] + m[1]),
-              let t = KvMath3.Plane(m[3] - m[1]),
-              let n = KvMath3.Plane(m[3] + m[2]),
-              let f = KvMath3.Plane(m[3] - m[2])
-        else { return nil }
-
-        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
-    }
-
-
-
-    /// Initializes a frustum with a perspective projection matrix overriding Z planes.
-    public init?(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
-        let m = projectionMatrix.transpose
-
-        guard let l = KvMath3.Plane(m[3] + m[0]),
-              let r = KvMath3.Plane(m[3] - m[0]),
-              let b = KvMath3.Plane(m[3] + m[1]),
-              let t = KvMath3.Plane(m[3] - m[1])
-        else { return nil }
-
-        let (n, f) = (zFar < zNear
-                      ? (KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
-                      : (KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
-
-        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
-    }
-
-}
-
-
-
-// MARK: <Double>.Frustum
-
-extension KvMath3.Frustum where Scalar == Double {
-
-    /// Initializes a frustum with a perspective projection matrix.
-    public init?(_ projectionMatrix: simd_double4x4) {
-        let m = projectionMatrix.transpose
-
-        guard let l = KvMath3.Plane(m[3] + m[0]),
-              let r = KvMath3.Plane(m[3] - m[0]),
-              let b = KvMath3.Plane(m[3] + m[1]),
-              let t = KvMath3.Plane(m[3] - m[1]),
-              let n = KvMath3.Plane(m[3] + m[2]),
-              let f = KvMath3.Plane(m[3] - m[2])
-        else { return nil }
-
-        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
-    }
-
-
-
-    /// Initializes a frustum with a perspective projection matrix overriding Z range.
-    public init?(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
-        let m = projectionMatrix.transpose
-
-        guard let l = KvMath3.Plane(m[3] + m[0]),
-              let r = KvMath3.Plane(m[3] - m[0]),
-              let b = KvMath3.Plane(m[3] + m[1]),
-              let t = KvMath3.Plane(m[3] - m[1])
-        else { return nil }
-
-        let (n, f) = (zFar < zNear
-                      ? (KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
-                      : (KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
-
-        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
-    }
-
-}
-
-
-
 // MARK: .FastFrustum
 
 extension KvMath3 {
@@ -1314,6 +1082,38 @@ extension KvMath3 {
             self.top = top
             self.near = near
             self.far = far
+        }
+
+
+        /// Initializes a frustum with a perspective projection matrix.
+        @inlinable
+        public init(_ projectionMatrix: ProjectiveMatrix) {
+            let m = projectionMatrix.transpose
+
+            self.init(left:   FastPlane(m[3] + m[0]),
+                      right:  FastPlane(m[3] - m[0]),
+                      bottom: FastPlane(m[3] + m[1]),
+                      top:    FastPlane(m[3] - m[1]),
+                      near:   FastPlane(m[3] + m[2]),
+                      far:    FastPlane(m[3] - m[2]))
+        }
+
+
+
+        /// Initializes a frustum with a perspective projection matrix overriding Z range.
+        @inlinable
+        public init(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) {
+            let m = projectionMatrix.transpose
+            let (n, f) = (zFar < zNear
+                          ? (FastPlane(normal: [ 0, 0, -1 ], d:  zNear), FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
+                          : (FastPlane(normal: [ 0, 0,  1 ], d: -zNear), FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
+
+            self.init(left:   FastPlane(m[3] + m[0]),
+                      right:  FastPlane(m[3] - m[0]),
+                      bottom: FastPlane(m[3] + m[1]),
+                      top:    FastPlane(m[3] - m[1]),
+                      near:   n,
+                      far:    f)
         }
 
 
@@ -1338,102 +1138,6 @@ extension KvMath3 {
                                       Swift.min(near.at(x), far.at(x))))
         }
 
-    }
-
-}
-
-
-
-// MARK: <Float>.FastFrustum
-
-extension KvMath3.FastFrustum where Scalar == Float {
-
-    /// Initializes a frustum with a perspective projection matrix.
-    @inlinable
-    public init(_ projectionMatrix: simd_float4x4) {
-        let m = projectionMatrix.transpose
-
-        self.init(left:   .init(m[3] + m[0]),
-                  right:  .init(m[3] - m[0]),
-                  bottom: .init(m[3] + m[1]),
-                  top:    .init(m[3] - m[1]),
-                  near:   .init(m[3] + m[2]),
-                  far:    .init(m[3] - m[2]))
-    }
-
-
-
-    /// Initializes a frustum with a perspective projection matrix overriding Z range.
-    @inlinable
-    public init(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
-        let m = projectionMatrix.transpose
-        let (n, f) = (zFar < zNear
-                      ? (KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zNear), KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
-                      : (KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zNear), KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
-
-        self.init(left:   .init(m[3] + m[0]),
-                  right:  .init(m[3] - m[0]),
-                  bottom: .init(m[3] + m[1]),
-                  top:    .init(m[3] - m[1]),
-                  near:   n,
-                  far:    f)
-    }
-
-}
-
-
-
-// MARK: <Double>.FastFrustum
-
-extension KvMath3.FastFrustum where Scalar == Double {
-
-    /// Initializes a frustum with a perspective projection matrix.
-    @inlinable
-    public init(_ projectionMatrix: simd_double4x4) {
-        let m = projectionMatrix.transpose
-
-        self.init(left:   .init(m[3] + m[0]),
-                  right:  .init(m[3] - m[0]),
-                  bottom: .init(m[3] + m[1]),
-                  top:    .init(m[3] - m[1]),
-                  near:   .init(m[3] + m[2]),
-                  far:    .init(m[3] - m[2]))
-    }
-
-
-
-    /// Initializes a frustum with a perspective projection matrix overriding Z range.
-    @inlinable
-    public init(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
-        let m = projectionMatrix.transpose
-        let (n, f) = (zFar < zNear
-                      ? (KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zNear), KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
-                      : (KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zNear), KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
-
-        self.init(left:   .init(m[3] + m[0]),
-                  right:  .init(m[3] - m[0]),
-                  bottom: .init(m[3] + m[1]),
-                  top:    .init(m[3] - m[1]),
-                  near:   n,
-                  far:    f)
-    }
-
-}
-
-
-
-// MARK: Auxiliaries
-
-extension KvMath3 {
-
-    /// - Returns: Normalized vector when source vector has nonzero length. Otherwise *nil* is returned.
-    @inlinable
-    public static func normalizedOrNil(_ vector: Vector) -> Vector? {
-        let l² = length_squared(vector)
-
-        guard KvIsNonzero(l²) else { return nil }
-
-        return KvIs(l², inequalTo: 1) ? (vector / sqrt(l²)) : vector
     }
 
 }
@@ -1537,49 +1241,106 @@ extension KvMath3 {
 
 extension KvMath3 {
 
-    @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z)) }
-
-    @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
-        Vector(x: KvMath.clamp(v.x, min.x, max.x),
-               y: KvMath.clamp(v.y, min.y, max.y),
-               z: KvMath.clamp(v.z, min.z, max.z))
+    @inlinable
+    public static func abs<V>(_ v: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        V(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z))
     }
 
-    @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector {
-        Vector(x: x.y * y.z - x.z * y.y,
-               y: x.z * y.x - x.x * y.z,
-               z: x.x * y.y - x.y * y.x)
+    @inlinable
+    public static func acos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func asin(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func atan(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        V(x: KvMath.clamp(v.x, min.x, max.x),
+          y: KvMath.clamp(v.y, min.y, max.y),
+          z: KvMath.clamp(v.z, min.z, max.z))
     }
 
-    @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
+    @inlinable
+    public static func cos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
-    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y + x.z * y.z }
+    @inlinable
+    public static func cospi(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
-    @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
-
-    @inlinable public static func length_squared(_ v: Vector) -> Scalar { dot(v, v) }
-
-    @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector {
-        Vector(x: Swift.max(x.x, y.x),
-               y: Swift.max(x.y, y.y),
-               z: Swift.max(x.z, y.z))
+    @inlinable public static func cross<V>(_ x: V, _ y: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        V(x: x.y * y.z - x.z * y.y,
+          y: x.z * y.x - x.x * y.z,
+          z: x.x * y.y - x.y * y.x)
     }
 
-    @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector {
-        Vector(x: Swift.min(x.x, y.x),
-               y: Swift.min(x.y, y.y),
-               z: Swift.min(x.z, y.z))
+    @inlinable
+    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector3, V.Scalar == Scalar {
+        length(y - x)
     }
 
-    @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
-        let oneMinusT = 1 - t
-
-        return Vector(x: x.x * oneMinusT + y.x * t,
-                      y: x.y * oneMinusT + y.y * t,
-                      z: x.z * oneMinusT + y.z * t)
+    @inlinable
+    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector3, V.Scalar == Scalar {
+        x.x * y.x + x.y * y.y + x.z * y.z
     }
 
-    @inlinable public static func normalize(_ v: Vector) -> Vector { v / sqrt(length_squared(v)) }
+    @inlinable
+    public static func length<V>(_ v: V) -> Scalar where V : KvSimdVector3, V.Scalar == Scalar {
+        dot(v, v).squareRoot()
+    }
+
+    @inlinable
+    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimdVector3, V.Scalar == Scalar {
+        dot(v, v)
+    }
+
+    @inlinable
+    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        V(x: Swift.max(x.x, y.x),
+          y: Swift.max(x.y, y.y),
+          z: Swift.max(x.z, y.z))
+    }
+
+    @inlinable
+    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        .init(x: Swift.min(x.x, y.x),
+              y: Swift.min(x.y, y.y),
+              z: Swift.min(x.z, y.z))
+    }
+
+    @inlinable
+    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        let oneMinusT: Scalar = 1 - t
+
+        return V(x: x.x * oneMinusT + y.x * t,
+                 y: x.y * oneMinusT + y.y * t,
+                 z: x.z * oneMinusT + y.z * t)
+    }
+
+    @inlinable
+    public static func normalize<V>(_ v: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        v / length(v)
+    }
+
+    @inlinable
+    public static func rsqrt<V>(_ v: V) -> V where V : KvSimdVector3, V.Scalar == Scalar {
+        1 / (v * v).squareRoot()
+    }
+
+    @inlinable
+    public static func sin(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func sinpi(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func tan(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
+
+    @inlinable
+    public static func tanpi(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
 
 }
 
@@ -1591,7 +1352,25 @@ extension KvMath3 where Scalar == Float {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func acos(_ x: Vector) -> Vector { simd.acos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func asin(_ x: Vector) -> Vector { simd.asin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan(_ x: Vector) -> Vector { simd.atan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan2(_ x: Vector, _ y: Vector) -> Vector { simd.atan2(x, y) }
+
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cos(_ x: Vector) -> Vector { simd.cos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cospi(_ x: Vector) -> Vector { simd.cospi(x) }
 
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector { simd.cross(x, y) }
 
@@ -1610,6 +1389,20 @@ extension KvMath3 where Scalar == Float {
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
     @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
+    @inlinable public static func rsqrt(_ v: Vector) -> Vector { simd.rsqrt(v) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sin(_ x: Vector) -> Vector { simd.sin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sinpi(_ x: Vector) -> Vector { simd.sinpi(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tan(_ x: Vector) -> Vector { simd.tan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tanpi(_ x: Vector) -> Vector { simd.tanpi(x) }
 
 }
 
@@ -1621,7 +1414,25 @@ extension KvMath3 where Scalar == Double {
 
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func acos(_ x: Vector) -> Vector { simd.acos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func asin(_ x: Vector) -> Vector { simd.asin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan(_ x: Vector) -> Vector { simd.atan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func atan2(_ x: Vector, _ y: Vector) -> Vector { simd.atan2(x, y) }
+
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cos(_ x: Vector) -> Vector { simd.cos(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func cospi(_ x: Vector) -> Vector { simd.cospi(x) }
 
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector { simd.cross(x, y) }
 
@@ -1640,6 +1451,20 @@ extension KvMath3 where Scalar == Double {
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
     @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
+
+    @inlinable public static func rsqrt(_ v: Vector) -> Vector { simd.rsqrt(v) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sin(_ x: Vector) -> Vector { simd.sin(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func sinpi(_ x: Vector) -> Vector { simd.sinpi(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tan(_ x: Vector) -> Vector { simd.tan(x) }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+    @inlinable public static func tanpi(_ x: Vector) -> Vector { simd.tanpi(x) }
 
 }
 
@@ -1667,25 +1492,17 @@ where Scalar : KvMathFloatingPoint
 // MARK: - Matrix Comparisons
 
 @inlinable
-public func KvIs(_ lhs: simd_float3x3, equalTo rhs: simd_float3x3) -> Bool {
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Matrix, equalTo rhs: KvMath3<Scalar>.Matrix) -> Bool
+where Scalar : KvMathFloatingPoint
+{
     KvIsZero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
 
 @inlinable
-public func KvIs(_ lhs: simd_double3x3, equalTo rhs: simd_double3x3) -> Bool {
-    KvIsZero(KvMath3.max(KvMath3.abs(lhs - rhs)))
-}
-
-
-@inlinable
-public func KvIs(_ lhs: simd_float3x3, inequalTo rhs: simd_float3x3) -> Bool {
-    KvIsNonzero(KvMath3.max(KvMath3.abs(lhs - rhs)))
-}
-
-
-@inlinable
-public func KvIs(_ lhs: simd_double3x3, inequalTo rhs: simd_double3x3) -> Bool {
+public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Matrix, inequalTo rhs: KvMath3<Scalar>.Matrix) -> Bool
+where Scalar : KvMathFloatingPoint
+{
     KvIsNonzero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
@@ -1847,14 +1664,14 @@ extension KvMath3 where Scalar == Float {
     @available(*, deprecated, message: "Use KvMath.clamp()")
     @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
-    @available(*, deprecated, renamed: "basisZ") @inlinable
-    public static func front(from matrix: simd_float4x4) -> Vector { basisZ(from: matrix) }
+    @available(*, deprecated, renamed: "basisZ")
+    @inlinable public static func front(from matrix: ProjectiveMatrix) -> Vector { basisZ(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisX") @inlinable
-    public static func right(from matrix: simd_float4x4) -> Vector { basisX(from: matrix) }
+    @available(*, deprecated, renamed: "basisX")
+    @inlinable public static func right(from matrix: ProjectiveMatrix) -> Vector { basisX(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisY") @inlinable
-    public static func up(from matrix: simd_float4x4) -> Vector { basisY(from: matrix) }
+    @available(*, deprecated, renamed: "basisY")
+    @inlinable public static func up(from matrix: ProjectiveMatrix) -> Vector { basisY(from: matrix) }
 
 }
 
@@ -1864,13 +1681,13 @@ extension KvMath3 where Scalar == Double {
     @available(*, deprecated, message: "Use KvMath.clamp()")
     @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
-    @available(*, deprecated, renamed: "basisZ") @inlinable
-    public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
+    @available(*, deprecated, renamed: "basisZ")
+    @inlinable public static func front(from matrix: ProjectiveMatrix) -> Vector { basisZ(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisX") @inlinable
-    public static func right(from matrix: simd_double4x4) -> Vector { basisX(from: matrix) }
+    @available(*, deprecated, renamed: "basisX")
+    @inlinable public static func right(from matrix: ProjectiveMatrix) -> Vector { basisX(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisY") @inlinable
-    public static func up(from matrix: simd_double4x4) -> Vector { basisY(from: matrix) }
+    @available(*, deprecated, renamed: "basisY")
+    @inlinable public static func up(from matrix: ProjectiveMatrix) -> Vector { basisY(from: matrix) }
 
 }
