@@ -93,14 +93,18 @@ extension KvMath2 {
     }
 
     @inlinable
-    public static func translation(from matrix: ProjectiveMatrix) -> Vector {
+    public static func translation<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
+    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         let c3 = matrix[2]
 
         return c3[[ 0, 1 ] as simd_long2] / c3.z
     }
 
     @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout ProjectiveMatrix) {
+    public static func setTranslation<ProjectiveMatrix>(_ translation: Vector, to matrix: inout ProjectiveMatrix)
+    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         let z = matrix[2, 2]
 
         matrix[2] = ProjectiveMatrix.Column(translation * z, z)
@@ -109,21 +113,27 @@ extension KvMath2 {
 
     /// - Returns: Scale component from given 2×2 matrix.
     @inlinable
-    public static func scale(from matrix: Matrix) -> Vector {
+    public static func scale<Matrix>(from matrix: Matrix) -> Vector
+    where Matrix : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         Vector(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
                y: length(matrix[1]))
     }
 
     /// - Returns: Sqaured scale component from given 2×2 matrix.
     @inlinable
-    public static func scale²(from matrix: Matrix) -> Vector {
+    public static func scale²<Matrix>(from matrix: Matrix) -> Vector
+    where Matrix : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         Vector(x: length_squared(matrix[0]),
                y: length_squared(matrix[1]))
     }
 
     /// Changes scale component of given 2×2 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout Matrix) {
+    public static func setScale<Matrix>(_ scale: Vector, to matrix: inout Matrix)
+    where Matrix : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         matrix[0] *= s.x * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
@@ -133,21 +143,27 @@ extension KvMath2 {
 
     /// - Returns: Scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
-    public static func scale(from matrix: ProjectiveMatrix) -> Vector {
+    public static func scale<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
+    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         Vector(x: KvMath3<Scalar>.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
                y: KvMath3<Scalar>.length(matrix[1]))
     }
 
     /// - Returns: Sqared scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
-    public static func scale²(from matrix: ProjectiveMatrix) -> Vector {
+    public static func scale²<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
+    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         Vector(x: KvMath3<Scalar>.length_squared(matrix[0]),
                y: KvMath3<Scalar>.length_squared(matrix[1]))
     }
 
     /// Changes scale component of given projective 3×3 matrix having row[2] == [ 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout ProjectiveMatrix) {
+    public static func setScale<ProjectiveMatrix>(_ scale: Vector, to matrix: inout ProjectiveMatrix)
+    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         // OK due to matrix[0].z == 0

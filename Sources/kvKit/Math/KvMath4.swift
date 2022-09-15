@@ -170,7 +170,9 @@ extension KvMath4 {
 
     /// - Returns: Scale component from given 4×4 matrix.
     @inlinable
-    public static func scale(from matrix: Matrix) -> Vector {
+    public static func scale<Matrix>(from matrix: Matrix) -> Vector
+    where Matrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         .init(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
               y: length(matrix[1]),
               z: length(matrix[2]),
@@ -179,7 +181,9 @@ extension KvMath4 {
 
     /// - Returns: Sqaured scale component from given 4×4 matrix.
     @inlinable
-    public static func scale²(from matrix: Matrix) -> Vector {
+    public static func scale²<Matrix>(from matrix: Matrix) -> Vector
+    where Matrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         .init(x: length_squared(matrix[0]),
               y: length_squared(matrix[1]),
               z: length_squared(matrix[2]),
@@ -188,7 +192,9 @@ extension KvMath4 {
 
     /// Changes scale component of given 4×4 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout Matrix) {
+    public static func setScale<Matrix>(_ scale: Vector, to matrix: inout Matrix)
+    where Matrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         matrix[0] *= s.x * (KvIsNotNegative(matrix.determinant) ? 1 : -1)

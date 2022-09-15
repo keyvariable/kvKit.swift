@@ -151,14 +151,18 @@ extension KvMath3 {
     }
 
     @inlinable
-    public static func translation(from matrix: ProjectiveMatrix) -> Vector {
+    public static func translation<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
+    where ProjectiveMatrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         let c4 = matrix[3]
 
         return c4[[ 0, 1, 2] as simd_long3] / c4.w
     }
 
     @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout ProjectiveMatrix) {
+    public static func setTranslation<ProjectiveMatrix>(_ translation: Vector, to matrix: inout ProjectiveMatrix)
+    where ProjectiveMatrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         let w = matrix[3, 3]
 
         matrix[3] = ProjectiveMatrix.Column(translation * w, w)
@@ -167,7 +171,9 @@ extension KvMath3 {
 
     /// - Returns: Scale component from given 3×3 matrix.
     @inlinable
-    public static func scale(from matrix: Matrix) -> Vector {
+    public static func scale<Matrix>(from matrix: Matrix) -> Vector
+    where Matrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         Vector(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
                y: length(matrix[1]),
                z: length(matrix[2]))
@@ -175,15 +181,19 @@ extension KvMath3 {
 
     /// - Returns: Sqaured scale component from given 3×3 matrix.
     @inlinable
-    public static func scale²(from matrix: Matrix) -> Vector {
-        .init(x: length_squared(matrix[0]),
-              y: length_squared(matrix[1]),
-              z: length_squared(matrix[2]))
+    public static func scale²<Matrix>(from matrix: Matrix) -> Vector
+    where Matrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
+        Vector(x: length_squared(matrix[0]),
+               y: length_squared(matrix[1]),
+               z: length_squared(matrix[2]))
     }
 
     /// Changes scale component of given 3×3 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout Matrix) {
+    public static func setScale<Matrix>(_ scale: Vector, to matrix: inout Matrix)
+    where Matrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         matrix[0] *= s.x * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
@@ -194,23 +204,29 @@ extension KvMath3 {
 
     /// - Returns: Scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
     @inlinable
-    public static func scale(from matrix: ProjectiveMatrix) -> Vector {
-        .init(x: KvMath4<Scalar>.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
-              y: KvMath4<Scalar>.length(matrix[1]),
-              z: KvMath4<Scalar>.length(matrix[2]))
+    public static func scale<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
+    where ProjectiveMatrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
+        Vector(x: KvMath4.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
+               y: KvMath4.length(matrix[1]),
+               z: KvMath4.length(matrix[2]))
     }
 
     /// - Returns: Squared scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
     @inlinable
-    public static func scale²(from matrix: ProjectiveMatrix) -> Vector {
-        .init(x: KvMath4<Scalar>.length_squared(matrix[0]),
-              y: KvMath4<Scalar>.length_squared(matrix[1]),
-              z: KvMath4<Scalar>.length_squared(matrix[2]))
+    public static func scale²<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
+    where ProjectiveMatrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
+        Vector(x: KvMath4.length_squared(matrix[0]),
+               y: KvMath4.length_squared(matrix[1]),
+               z: KvMath4.length_squared(matrix[2]))
     }
 
     /// Changes scale component of given projective 4×4 matrix having row[3] == [ 0, 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout ProjectiveMatrix) {
+    public static func setScale<ProjectiveMatrix>(_ scale: Vector, to matrix: inout ProjectiveMatrix)
+    where ProjectiveMatrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
         // OK due to matrix[0].w == 0
@@ -222,11 +238,10 @@ extension KvMath3 {
 
     /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
     @inlinable
-    public static func transformation<M3x3>(_ transform: M3x3, relativeTo position: M3x3.Row) -> ProjectiveMatrix
-    where M3x3 : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix,
-          M3x3.Row.SimdView == M3x3.Column.SimdView,
-          M3x3.Scalar == Scalar,
-          M3x3.Column == ProjectiveMatrix.Column.Sample3
+    public static func transformation<Matrix>(_ transform: Matrix, relativeTo position: Matrix.Row) -> ProjectiveMatrix
+    where Matrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, Matrix.Scalar == Scalar,
+          Matrix.Row.SimdView == Matrix.Column.SimdView,
+          Matrix.Column == ProjectiveMatrix.Column.Sample3
     {
         ProjectiveMatrix(ProjectiveMatrix.Column(transform[0], 0),
                          ProjectiveMatrix.Column(transform[1], 0),
