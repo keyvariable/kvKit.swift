@@ -980,7 +980,9 @@ extension KvMath3 {
 
 
         /// Initializes a frustum with a perspective projection matrix.
-        public init?(_ projectionMatrix: ProjectiveMatrix) {
+        public init?<Projection>(_ projectionMatrix: Projection)
+        where Projection : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Projection.Scalar == Scalar
+        {
             let m = projectionMatrix.transpose
 
             guard let l = Plane(m[3] + m[0]),
@@ -994,10 +996,16 @@ extension KvMath3 {
             self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
         }
 
+        /// Initializes a frustum with a perspective projection matrix.
+        @inlinable
+        public init?(_ projectionMatrix: ProjectiveMatrix) { self.init(projectionMatrix.wrapped) }
+
 
 
         /// Initializes a frustum with a perspective projection matrix overriding Z planes.
-        public init?(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) {
+        public init?<Projection>(_ projectionMatrix: Projection, zNear: Scalar, zFar: Scalar)
+        where Projection : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Projection.Scalar == Scalar
+        {
             let m = projectionMatrix.transpose
 
             guard let l = Plane(m[3] + m[0]),
@@ -1012,6 +1020,10 @@ extension KvMath3 {
 
             self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
         }
+
+        /// Initializes a frustum with a perspective projection matrix overriding Z planes.
+        @inlinable
+        public init?(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) { self.init(projectionMatrix.wrapped, zNear: zNear, zFar: zFar) }
 
 
         /// The zero frustum, containing zero point only.
@@ -1086,8 +1098,9 @@ extension KvMath3 {
 
 
         /// Initializes a frustum with a perspective projection matrix.
-        @inlinable
-        public init(_ projectionMatrix: ProjectiveMatrix) {
+        public init<Projection>(_ projectionMatrix: Projection)
+        where Projection : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Projection.Scalar == Scalar
+        {
             let m = projectionMatrix.transpose
 
             self.init(left:   FastPlane(m[3] + m[0]),
@@ -1098,11 +1111,16 @@ extension KvMath3 {
                       far:    FastPlane(m[3] - m[2]))
         }
 
+        /// Initializes a frustum with a perspective projection matrix.
+        @inlinable
+        public init(_ projectionMatrix: ProjectiveMatrix) { self.init(projectionMatrix.wrapped) }
+
 
 
         /// Initializes a frustum with a perspective projection matrix overriding Z range.
-        @inlinable
-        public init(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) {
+        public init<Projection>(_ projectionMatrix: Projection, zNear: Scalar, zFar: Scalar)
+        where Projection : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Projection.Scalar == Scalar
+        {
             let m = projectionMatrix.transpose
             let (n, f) = (zFar < zNear
                           ? (FastPlane(normal: [ 0, 0, -1 ], d:  zNear), FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
@@ -1114,6 +1132,12 @@ extension KvMath3 {
                       top:    FastPlane(m[3] - m[1]),
                       near:   n,
                       far:    f)
+        }
+
+        /// Initializes a frustum with a perspective projection matrix overriding Z range.
+        @inlinable
+        public init(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) {
+            self.init(projectionMatrix.wrapped, zNear: zNear, zFar: zFar)
         }
 
 
