@@ -34,41 +34,32 @@ import simd
 
 public protocol KvSimdMatrixScalar : SIMDScalar, BinaryFloatingPoint, Codable {
 
-    associatedtype Matrix2x2 : KvSimdMatrix2xN, KvSimdMatrixNx2, KvSimdSquareMatrix
-    where Matrix2x2.Scalar == Self, Matrix2x2.Transpose == Matrix2x2,
-          Matrix2x2.Row : KvSimdVector2F, Matrix2x2.Column : KvSimdVector2F, Matrix2x2.Diagonal : KvSimdVector2F
+    associatedtype Matrix2x2 : KvSimd2x2
+    where Matrix2x2.Scalar == Self, Matrix2x2.Transpose == Matrix2x2
 
-    associatedtype Matrix2x3 : KvSimdMatrix2xN, KvSimdMatrixNx3
-    where Matrix2x3.Scalar == Self, Matrix2x3.Transpose == Matrix3x2,
-          Matrix2x3.Row : KvSimdVector2F, Matrix2x3.Column : KvSimdVector3F, Matrix3x2.Diagonal : KvSimdVector2F
+    associatedtype Matrix2x3 : KvSimd2x3
+    where Matrix2x3.Scalar == Self, Matrix2x3.Transpose == Matrix3x2
 
-    associatedtype Matrix2x4 : KvSimdMatrix2xN, KvSimdMatrixNx4
-    where Matrix2x4.Scalar == Self, Matrix2x4.Transpose == Matrix4x2,
-          Matrix2x4.Row : KvSimdVector2F, Matrix2x4.Column : KvSimdVector4F, Matrix4x2.Diagonal : KvSimdVector2F
+    associatedtype Matrix2x4 : KvSimd2x4
+    where Matrix2x4.Scalar == Self, Matrix2x4.Transpose == Matrix4x2
 
-    associatedtype Matrix3x2 : KvSimdMatrix3xN, KvSimdMatrixNx2
-    where Matrix3x2.Scalar == Self, Matrix3x2.Transpose == Matrix2x3,
-          Matrix3x2.Row : KvSimdVector3F, Matrix3x2.Column : KvSimdVector2F, Matrix3x2.Diagonal : KvSimdVector2F
+    associatedtype Matrix3x2 : KvSimd3x2
+    where Matrix3x2.Scalar == Self, Matrix3x2.Transpose == Matrix2x3
 
-    associatedtype Matrix3x3 : KvSimdMatrix3xN, KvSimdMatrixNx3, KvSimdSquareMatrix
-    where Matrix3x3.Scalar == Self, Matrix3x3.Transpose == Matrix3x3,
-          Matrix3x3.Row : KvSimdVector3F, Matrix3x3.Column : KvSimdVector3F, Matrix3x3.Diagonal : KvSimdVector3F
+    associatedtype Matrix3x3 : KvSimd3x3
+    where Matrix3x3.Scalar == Self, Matrix3x3.Transpose == Matrix3x3
 
-    associatedtype Matrix3x4 : KvSimdMatrix3xN, KvSimdMatrixNx4
-    where Matrix3x4.Scalar == Self, Matrix3x4.Transpose == Matrix4x3,
-          Matrix3x4.Row : KvSimdVector3F, Matrix3x4.Column : KvSimdVector4F, Matrix3x4.Diagonal : KvSimdVector3F
+    associatedtype Matrix3x4 : KvSimd3x4
+    where Matrix3x4.Scalar == Self, Matrix3x4.Transpose == Matrix4x3
 
-    associatedtype Matrix4x2 : KvSimdMatrix4xN, KvSimdMatrixNx2
-    where Matrix4x2.Scalar == Self, Matrix4x2.Transpose == Matrix2x4,
-          Matrix4x2.Row : KvSimdVector4F, Matrix4x2.Column : KvSimdVector2F, Matrix4x2.Diagonal : KvSimdVector2F
+    associatedtype Matrix4x2 : KvSimd4x2
+    where Matrix4x2.Scalar == Self, Matrix4x2.Transpose == Matrix2x4
 
-    associatedtype Matrix4x3 : KvSimdMatrix4xN, KvSimdMatrixNx3
-    where Matrix4x3.Scalar == Self, Matrix4x3.Transpose == Matrix3x4,
-          Matrix4x3.Row : KvSimdVector4F, Matrix4x3.Column : KvSimdVector3F, Matrix4x3.Diagonal : KvSimdVector3F
+    associatedtype Matrix4x3 : KvSimd4x3
+    where Matrix4x3.Scalar == Self, Matrix4x3.Transpose == Matrix3x4
 
-    associatedtype Matrix4x4 : KvSimdMatrix4xN, KvSimdMatrixNx4, KvSimdSquareMatrix
-    where Matrix4x4.Scalar == Self, Matrix4x4.Transpose == Matrix4x4,
-          Matrix4x4.Row : KvSimdVector4F, Matrix4x4.Column : KvSimdVector4F, Matrix4x4.Diagonal : KvSimdVector4F
+    associatedtype Matrix4x4 : KvSimd4x4
+    where Matrix4x4.Scalar == Self, Matrix4x4.Transpose == Matrix4x4
 
 }
 
@@ -197,11 +188,11 @@ where Transpose == Self
 
 
 
-// MARK: - KvSimdMatrix2xN
+// MARK: - KvSimd2xN
 
 /// Common protocol for standard SIMD 2×N matrix types.
-public protocol KvSimdMatrix2xN : KvSimdMatrix
-where Row : KvSimdVector2F
+public protocol KvSimd2xN : KvSimdMatrix
+where Row : KvSimd2F
 {
 
     var columns: (Column, Column) { get set }
@@ -217,20 +208,20 @@ where Row : KvSimdVector2F
 
 
 
-// MARK: - KvSimdMatrixNx2
+// MARK: - KvSimdNx2
 
 /// Common protocol for standard SIMD N×2 matrix types.
-public protocol KvSimdMatrixNx2 : KvSimdMatrix
-where Column : KvSimdVector2F
+public protocol KvSimdNx2 : KvSimdMatrix
+where Column : KvSimd2F
 { }
 
 
 
-// MARK: - KvSimdMatrix3xN
+// MARK: - KvSimd3xN
 
 /// Common protocol for standard SIMD 3×N matrix types.
-public protocol KvSimdMatrix3xN : KvSimdMatrix
-where Row : KvSimdVector3F
+public protocol KvSimd3xN : KvSimdMatrix
+where Row : KvSimd3F
 {
 
     var columns: (Column, Column, Column) { get set }
@@ -246,20 +237,20 @@ where Row : KvSimdVector3F
 
 
 
-// MARK: - KvSimdMatrixNx3
+// MARK: - KvSimdNx3
 
 /// Common protocol for standard SIMD N×3 matrix types.
-public protocol KvSimdMatrixNx3 : KvSimdMatrix
-where Column : KvSimdVector3F
+public protocol KvSimdNx3 : KvSimdMatrix
+where Column : KvSimd3F
 { }
 
 
 
-// MARK: - KvSimdMatrix4xN
+// MARK: - KvSimd4xN
 
 /// Common protocol for standard SIMD 4×N matrix types.
-public protocol KvSimdMatrix4xN : KvSimdMatrix
-where Row : KvSimdVector4F
+public protocol KvSimd4xN : KvSimdMatrix
+where Row : KvSimd4F
 {
 
     var columns: (Column, Column, Column, Column) { get set }
@@ -275,18 +266,99 @@ where Row : KvSimdVector4F
 
 
 
-// MARK: - KvSimdMatrixNx4
+// MARK: - KvSimdNx4
 
 /// Common protocol for standard SIMD N×4 matrix types.
-public protocol KvSimdMatrixNx4 : KvSimdMatrix
-where Column : KvSimdVector4F
+public protocol KvSimdNx4 : KvSimdMatrix
+where Column : KvSimd4F
 { }
 
 
 
-// MARK: - KvSimdMatrixWrapper
+// MARK: - KvSimd2x2
 
-public protocol KvSimdMatrixWrapper : Equatable {
+/// Common protocol for standard SIMD 2×2 matrix types.
+public protocol KvSimd2x2 : KvSimd2xN, KvSimdNx2, KvSimdSquareMatrix
+where Diagonal : KvSimd2F, Transpose : KvSimd2x2
+{ }
+
+
+
+// MARK: - KvSimd2x3
+
+/// Common protocol for standard SIMD 2×3 matrix types.
+public protocol KvSimd2x3 : KvSimd2xN, KvSimdNx3
+where Diagonal : KvSimd2F, Transpose : KvSimd3x2
+{ }
+
+
+
+// MARK: - KvSimd2x4
+
+/// Common protocol for standard SIMD 2×4 matrix types.
+public protocol KvSimd2x4 : KvSimd2xN, KvSimdNx4
+where Diagonal : KvSimd2F, Transpose : KvSimd4x2
+{ }
+
+
+
+// MARK: - KvSimd3x2
+
+/// Common protocol for standard SIMD 3×2 matrix types.
+public protocol KvSimd3x2 : KvSimd3xN, KvSimdNx2
+where Diagonal : KvSimd2F, Transpose : KvSimd2x3
+{ }
+
+
+
+// MARK: - KvSimd3x3
+
+/// Common protocol for standard SIMD 3×3 matrix types.
+public protocol KvSimd3x3 : KvSimd3xN, KvSimdNx3, KvSimdSquareMatrix
+where Diagonal : KvSimd3F, Transpose : KvSimd3x3
+{ }
+
+
+
+// MARK: - KvSimd3x4
+
+/// Common protocol for standard SIMD 3×4 matrix types.
+public protocol KvSimd3x4 : KvSimd3xN, KvSimdNx4
+where Diagonal : KvSimd3F, Transpose : KvSimd4x3
+{ }
+
+
+
+// MARK: - KvSimd4x2
+
+/// Common protocol for standard SIMD 4×2 matrix types.
+public protocol KvSimd4x2 : KvSimd4xN, KvSimdNx2
+where Diagonal : KvSimd2F, Transpose : KvSimd2x4
+{ }
+
+
+
+// MARK: - KvSimd4x3
+
+/// Common protocol for standard SIMD 4×3 matrix types.
+public protocol KvSimd4x3 : KvSimd4xN, KvSimdNx3
+where Diagonal : KvSimd3F, Transpose : KvSimd3x4
+{ }
+
+
+
+// MARK: - KvSimd4x4
+
+/// Common protocol for standard SIMD 4×4 matrix types.
+public protocol KvSimd4x4 : KvSimd4xN, KvSimdNx4, KvSimdSquareMatrix
+where Diagonal : KvSimd4F, Transpose : KvSimd4x4
+{ }
+
+
+
+// MARK: - KvSimdAnyMatrix
+
+public protocol KvSimdAnyMatrix : Equatable {
 
     associatedtype Scalar : KvSimdMatrixScalar
 
@@ -296,19 +368,19 @@ public protocol KvSimdMatrixWrapper : Equatable {
     var wrapped: Wrapped { get set }
 
 
-    init(wrapping wrapped: Wrapped)
+    init(_ wrapped: Wrapped)
 
 }
 
 
-extension KvSimdMatrixWrapper {
+extension KvSimdAnyMatrix {
 
     @inlinable
-    public prefix static func -(rhs: Self) -> Self { .init(wrapping: -rhs.wrapped) }
+    public prefix static func -(rhs: Self) -> Self { .init(-rhs.wrapped) }
 
 
     @inlinable
-    public static func +(lhs: Self, rhs: Self) -> Self { .init(wrapping: lhs.wrapped + rhs.wrapped) }
+    public static func +(lhs: Self, rhs: Self) -> Self { .init(lhs.wrapped + rhs.wrapped) }
 
     @inlinable
     public static func +(lhs: Wrapped, rhs: Self) -> Wrapped { lhs + rhs.wrapped }
@@ -318,7 +390,7 @@ extension KvSimdMatrixWrapper {
 
 
     @inlinable
-    public static func -(lhs: Self, rhs: Self) -> Self { .init(wrapping: lhs.wrapped - rhs.wrapped) }
+    public static func -(lhs: Self, rhs: Self) -> Self { .init(lhs.wrapped - rhs.wrapped) }
 
     @inlinable
     public static func -(lhs: Wrapped, rhs: Self) -> Wrapped { lhs - rhs.wrapped }
@@ -347,11 +419,11 @@ extension KvSimdMatrixWrapper {
 
 
     @inlinable
-    public static func *(lhs: Scalar, rhs: Self) -> Self { .init(wrapping: lhs * rhs.wrapped) }
+    public static func *(lhs: Scalar, rhs: Self) -> Self { .init(lhs * rhs.wrapped) }
 
 
     @inlinable
-    public static func *(lhs: Self, rhs: Scalar) -> Self { .init(wrapping: lhs.wrapped * rhs) }
+    public static func *(lhs: Self, rhs: Scalar) -> Self { .init(lhs.wrapped * rhs) }
 
 
     @inlinable
@@ -369,17 +441,17 @@ extension KvSimdMatrixWrapper {
 
 
 
-// MARK: - KvSimdSquareMatrixWrapper
+// MARK: - KvSimdAnySquareMatrix
 
-public protocol KvSimdSquareMatrixWrapper : KvSimdMatrixWrapper
+public protocol KvSimdAnySquareMatrix : KvSimdAnyMatrix
 where Wrapped : KvSimdSquareMatrix
 { }
 
 
-extension KvSimdSquareMatrixWrapper {
+extension KvSimdAnySquareMatrix {
 
     @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self { .init(wrapping: lhs.wrapped * rhs.wrapped) }
+    public static func *(lhs: Self, rhs: Self) -> Self { .init(lhs.wrapped * rhs.wrapped) }
 
     @inlinable
     public static func *(lhs: Wrapped, rhs: Self) -> Wrapped { lhs * rhs.wrapped }
@@ -398,10 +470,10 @@ extension KvSimdSquareMatrixWrapper {
 
 
 
-// MARK: - KvSimdMatrix2x2
+// MARK: - KvSimdAny2x2
 
 /// Lightweight wrapper for standard SIMD 2×2 matrix types.
-public struct KvSimdMatrix2x2<Scalar> : KvSimdMatrix2xN, KvSimdMatrixNx2, KvSimdSquareMatrix, KvSimdSquareMatrixWrapper
+public struct KvSimdAny2x2<Scalar> : KvSimd2x2, KvSimdAnySquareMatrix
 where Scalar : KvSimdMatrixScalar
 {
     public typealias Scalar = Scalar
@@ -423,13 +495,13 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
     @inlinable
     public var determinant: Scalar { wrapped.determinant }
 
     @inlinable
-    public var inverse: Self { .init(wrapping: wrapped.inverse) }
+    public var inverse: Self { .init(wrapped.inverse) }
 
 
     public var wrapped: Wrapped
@@ -439,7 +511,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -483,7 +555,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector2F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd2F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -491,7 +563,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector2F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd2F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -500,10 +572,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix2x3
+// MARK: - KvSimdAny2x3
 
 /// Lightweight wrapper for standard SIMD 2×3 matrix types.
-public struct KvSimdMatrix2x3<Scalar> : KvSimdMatrix2xN, KvSimdMatrixNx3, KvSimdMatrixWrapper
+public struct KvSimdAny2x3<Scalar> : KvSimd2x3, KvSimdAnyMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -513,7 +585,7 @@ where Scalar : KvSimdMatrixScalar
     public typealias Column = Wrapped.Column
     public typealias Diagonal = Wrapped.Diagonal
 
-    public typealias Transpose = KvSimdMatrix3x2<Scalar>
+    public typealias Transpose = KvSimdAny3x2<Scalar>
 
     public typealias Wrapped = Scalar.Matrix2x3
 
@@ -526,7 +598,7 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
 
     public var wrapped: Wrapped
@@ -536,7 +608,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -580,7 +652,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector2F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd2F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -588,7 +660,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector3F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd3F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -597,10 +669,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix2x4
+// MARK: - KvSimdAny2x4
 
 /// Lightweight wrapper for standard SIMD 2×4 matrix types.
-public struct KvSimdMatrix2x4<Scalar> : KvSimdMatrix2xN, KvSimdMatrixNx4, KvSimdMatrixWrapper
+public struct KvSimdAny2x4<Scalar> : KvSimd2x4, KvSimdAnyMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -610,7 +682,7 @@ where Scalar : KvSimdMatrixScalar
     public typealias Column = Wrapped.Column
     public typealias Diagonal = Wrapped.Diagonal
 
-    public typealias Transpose = KvSimdMatrix4x2<Scalar>
+    public typealias Transpose = KvSimdAny4x2<Scalar>
 
     public typealias Wrapped = Scalar.Matrix2x4
 
@@ -623,7 +695,7 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
 
     public var wrapped: Wrapped
@@ -633,7 +705,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -677,7 +749,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector2F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd2F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -685,7 +757,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector4F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd4F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -694,10 +766,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix3x2
+// MARK: - KvSimdAny3x2
 
 /// Lightweight wrapper for standard SIMD 3×2 matrix types.
-public struct KvSimdMatrix3x2<Scalar> : KvSimdMatrix3xN, KvSimdMatrixNx2, KvSimdMatrixWrapper
+public struct KvSimdAny3x2<Scalar> : KvSimd3x2, KvSimdAnyMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -707,7 +779,7 @@ where Scalar : KvSimdMatrixScalar
     public typealias Column = Wrapped.Column
     public typealias Diagonal = Wrapped.Diagonal
 
-    public typealias Transpose = KvSimdMatrix2x3<Scalar>
+    public typealias Transpose = KvSimdAny2x3<Scalar>
 
     public typealias Wrapped = Scalar.Matrix3x2
 
@@ -720,7 +792,7 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
 
     public var wrapped: Wrapped
@@ -730,7 +802,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -774,7 +846,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector3F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd3F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -782,7 +854,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector2F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd2F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -791,10 +863,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix3x3
+// MARK: - KvSimdAny3x3
 
 /// Lightweight wrapper for standard SIMD 3×3 matrix types.
-public struct KvSimdMatrix3x3<Scalar> : KvSimdMatrix3xN, KvSimdMatrixNx3, KvSimdSquareMatrix, KvSimdSquareMatrixWrapper
+public struct KvSimdAny3x3<Scalar> : KvSimd3x3, KvSimdAnySquareMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -817,13 +889,13 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
     @inlinable
     public var determinant: Scalar { wrapped.determinant }
 
     @inlinable
-    public var inverse: Self { .init(wrapping: wrapped.inverse) }
+    public var inverse: Self { .init(wrapped.inverse) }
 
 
     public var wrapped: Wrapped
@@ -833,7 +905,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -877,7 +949,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector3F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd3F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -885,7 +957,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector3F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd3F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -894,10 +966,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix3x4
+// MARK: - KvSimdAny3x4
 
 /// Lightweight wrapper for standard SIMD 3×4 matrix types.
-public struct KvSimdMatrix3x4<Scalar> : KvSimdMatrix3xN, KvSimdMatrixNx4, KvSimdMatrixWrapper
+public struct KvSimdAny3x4<Scalar> : KvSimd3x4, KvSimdAnyMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -907,7 +979,7 @@ where Scalar : KvSimdMatrixScalar
     public typealias Column = Wrapped.Column
     public typealias Diagonal = Wrapped.Diagonal
 
-    public typealias Transpose = KvSimdMatrix4x3<Scalar>
+    public typealias Transpose = KvSimdAny4x3<Scalar>
 
     public typealias Wrapped = Scalar.Matrix3x4
 
@@ -920,7 +992,7 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
 
     public var wrapped: Wrapped
@@ -930,7 +1002,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -974,7 +1046,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector3F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd3F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -982,7 +1054,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector4F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd4F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -991,10 +1063,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix4x2
+// MARK: - KvSimdAny4x2
 
 /// Lightweight wrapper for standard SIMD 4×2 matrix types.
-public struct KvSimdMatrix4x2<Scalar> : KvSimdMatrix4xN, KvSimdMatrixNx2, KvSimdMatrixWrapper
+public struct KvSimdAny4x2<Scalar> : KvSimd4x2, KvSimdAnyMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -1004,7 +1076,7 @@ where Scalar : KvSimdMatrixScalar
     public typealias Column = Wrapped.Column
     public typealias Diagonal = Wrapped.Diagonal
 
-    public typealias Transpose = KvSimdMatrix2x4<Scalar>
+    public typealias Transpose = KvSimdAny2x4<Scalar>
 
     public typealias Wrapped = Scalar.Matrix4x2
 
@@ -1017,7 +1089,7 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
 
     public var wrapped: Wrapped
@@ -1027,7 +1099,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -1071,7 +1143,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector4F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd4F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -1079,7 +1151,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector2F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd2F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -1088,10 +1160,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix4x3
+// MARK: - KvSimdAny4x3
 
 /// Lightweight wrapper for standard SIMD 4×3 matrix types.
-public struct KvSimdMatrix4x3<Scalar> : KvSimdMatrix4xN, KvSimdMatrixNx3, KvSimdMatrixWrapper
+public struct KvSimdAny4x3<Scalar> : KvSimd4x3, KvSimdAnyMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -1101,7 +1173,7 @@ where Scalar : KvSimdMatrixScalar
     public typealias Column = Wrapped.Column
     public typealias Diagonal = Wrapped.Diagonal
 
-    public typealias Transpose = KvSimdMatrix3x4<Scalar>
+    public typealias Transpose = KvSimdAny3x4<Scalar>
 
     public typealias Wrapped = Scalar.Matrix4x3
 
@@ -1114,7 +1186,7 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
 
     public var wrapped: Wrapped
@@ -1124,7 +1196,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -1168,7 +1240,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector4F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd4F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -1176,7 +1248,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector3F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd3F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -1185,10 +1257,10 @@ where Scalar : KvSimdMatrixScalar
 
 
 
-// MARK: - KvSimdMatrix4x4
+// MARK: - KvSimdAny4x4
 
 /// Lightweight wrapper for standard SIMD 4×4 matrix types.
-public struct KvSimdMatrix4x4<Scalar> : KvSimdMatrix4xN, KvSimdMatrixNx4, KvSimdSquareMatrix, KvSimdSquareMatrixWrapper
+public struct KvSimdAny4x4<Scalar> : KvSimd4x4, KvSimdAnySquareMatrix
 where Scalar : KvSimdMatrixScalar
 {
 
@@ -1211,13 +1283,13 @@ where Scalar : KvSimdMatrixScalar
     }
 
     @inlinable
-    public var transpose: Transpose { .init(wrapping: wrapped.transpose) }
+    public var transpose: Transpose { .init(wrapped.transpose) }
 
     @inlinable
     public var determinant: Scalar { wrapped.determinant }
 
     @inlinable
-    public var inverse: Self { .init(wrapping: wrapped.inverse) }
+    public var inverse: Self { .init(wrapped.inverse) }
 
 
     public var wrapped: Wrapped
@@ -1227,7 +1299,7 @@ where Scalar : KvSimdMatrixScalar
     public init() { wrapped = .init() }
 
     @inlinable
-    public init(wrapping wrapped: Wrapped) {
+    public init(_ wrapped: Wrapped) {
         self.wrapped = wrapped
     }
 
@@ -1271,7 +1343,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <RHS>(lhs: Self, rhs: RHS) -> Column
-    where RHS : KvSimdVector4F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
+    where RHS : KvSimd4F, RHS.Scalar == Scalar, RHS.SimdView == Row.SimdView
     {
         lhs.wrapped * Row(simdView: rhs.simdView)
     }
@@ -1279,7 +1351,7 @@ where Scalar : KvSimdMatrixScalar
 
     @inlinable
     public static func * <LHS>(lhs: LHS, rhs: Self) -> Row
-    where LHS : KvSimdVector4F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
+    where LHS : KvSimd4F, LHS.Scalar == Scalar, LHS.SimdView == Column.SimdView
     {
         Column(simdView: lhs.simdView) * rhs.wrapped
     }
@@ -1290,7 +1362,7 @@ where Scalar : KvSimdMatrixScalar
 
 // MARK: - simd_float2x2
 
-extension simd_float2x2 : KvSimdMatrix2xN, KvSimdMatrixNx2, KvSimdSquareMatrix {
+extension simd_float2x2 : KvSimd2x2 {
 
     public typealias Scalar = Float
 
@@ -1303,7 +1375,7 @@ extension simd_float2x2 : KvSimdMatrix2xN, KvSimdMatrixNx2, KvSimdSquareMatrix {
 
 // MARK: - simd_double2x2
 
-extension simd_double2x2 : KvSimdMatrix2xN, KvSimdMatrixNx2, KvSimdSquareMatrix {
+extension simd_double2x2 : KvSimd2x2 {
 
     public typealias Scalar = Double
 
@@ -1316,7 +1388,7 @@ extension simd_double2x2 : KvSimdMatrix2xN, KvSimdMatrixNx2, KvSimdSquareMatrix 
 
 // MARK: - simd_float2x3
 
-extension simd_float2x3 : KvSimdMatrix2xN, KvSimdMatrixNx3 {
+extension simd_float2x3 : KvSimd2x3 {
 
     public typealias Scalar = Float
 
@@ -1329,7 +1401,7 @@ extension simd_float2x3 : KvSimdMatrix2xN, KvSimdMatrixNx3 {
 
 // MARK: - simd_double2x3
 
-extension simd_double2x3 : KvSimdMatrix2xN, KvSimdMatrixNx3 {
+extension simd_double2x3 : KvSimd2x3 {
 
     public typealias Scalar = Double
 
@@ -1342,7 +1414,7 @@ extension simd_double2x3 : KvSimdMatrix2xN, KvSimdMatrixNx3 {
 
 // MARK: - simd_float2x4
 
-extension simd_float2x4 : KvSimdMatrix2xN, KvSimdMatrixNx4 {
+extension simd_float2x4 : KvSimd2x4 {
 
     public typealias Scalar = Float
 
@@ -1355,7 +1427,7 @@ extension simd_float2x4 : KvSimdMatrix2xN, KvSimdMatrixNx4 {
 
 // MARK: - simd_double2x4
 
-extension simd_double2x4 : KvSimdMatrix2xN, KvSimdMatrixNx4 {
+extension simd_double2x4 : KvSimd2x4 {
 
     public typealias Scalar = Double
 
@@ -1368,7 +1440,7 @@ extension simd_double2x4 : KvSimdMatrix2xN, KvSimdMatrixNx4 {
 
 // MARK: - simd_float3x2
 
-extension simd_float3x2 : KvSimdMatrix3xN, KvSimdMatrixNx2 {
+extension simd_float3x2 : KvSimd3x2 {
 
     public typealias Scalar = Float
 
@@ -1381,7 +1453,7 @@ extension simd_float3x2 : KvSimdMatrix3xN, KvSimdMatrixNx2 {
 
 // MARK: - simd_double3x2
 
-extension simd_double3x2 : KvSimdMatrix3xN, KvSimdMatrixNx2 {
+extension simd_double3x2 : KvSimd3x2 {
 
     public typealias Scalar = Double
 
@@ -1394,7 +1466,7 @@ extension simd_double3x2 : KvSimdMatrix3xN, KvSimdMatrixNx2 {
 
 // MARK: - simd_float3x3
 
-extension simd_float3x3 : KvSimdMatrix3xN, KvSimdMatrixNx3, KvSimdSquareMatrix {
+extension simd_float3x3 : KvSimd3x3 {
 
     public typealias Scalar = Float
 
@@ -1409,7 +1481,7 @@ extension simd_float3x3 : KvSimdMatrix3xN, KvSimdMatrixNx3, KvSimdSquareMatrix {
 
 // MARK: - simd_double3x3
 
-extension simd_double3x3 : KvSimdMatrix3xN, KvSimdMatrixNx3, KvSimdSquareMatrix {
+extension simd_double3x3 : KvSimd3x3 {
 
     public typealias Scalar = Double
 
@@ -1424,7 +1496,7 @@ extension simd_double3x3 : KvSimdMatrix3xN, KvSimdMatrixNx3, KvSimdSquareMatrix 
 
 // MARK: - simd_float3x4
 
-extension simd_float3x4 : KvSimdMatrix3xN, KvSimdMatrixNx4 {
+extension simd_float3x4 : KvSimd3x4 {
 
     public typealias Scalar = Float
 
@@ -1437,7 +1509,7 @@ extension simd_float3x4 : KvSimdMatrix3xN, KvSimdMatrixNx4 {
 
 // MARK: - simd_double3x4
 
-extension simd_double3x4 : KvSimdMatrix3xN, KvSimdMatrixNx4 {
+extension simd_double3x4 : KvSimd3x4 {
 
     public typealias Scalar = Double
 
@@ -1450,7 +1522,7 @@ extension simd_double3x4 : KvSimdMatrix3xN, KvSimdMatrixNx4 {
 
 // MARK: - simd_float4x2
 
-extension simd_float4x2 : KvSimdMatrix4xN, KvSimdMatrixNx2 {
+extension simd_float4x2 : KvSimd4x2 {
 
     public typealias Scalar = Float
 
@@ -1463,7 +1535,7 @@ extension simd_float4x2 : KvSimdMatrix4xN, KvSimdMatrixNx2 {
 
 // MARK: - simd_double4x2
 
-extension simd_double4x2 : KvSimdMatrix4xN, KvSimdMatrixNx2 {
+extension simd_double4x2 : KvSimd4x2 {
 
     public typealias Scalar = Double
 
@@ -1476,7 +1548,7 @@ extension simd_double4x2 : KvSimdMatrix4xN, KvSimdMatrixNx2 {
 
 // MARK: - simd_float4x3
 
-extension simd_float4x3 : KvSimdMatrix4xN, KvSimdMatrixNx3 {
+extension simd_float4x3 : KvSimd4x3 {
 
     public typealias Scalar = Float
 
@@ -1489,7 +1561,7 @@ extension simd_float4x3 : KvSimdMatrix4xN, KvSimdMatrixNx3 {
 
 // MARK: - simd_double4x3
 
-extension simd_double4x3 : KvSimdMatrix4xN, KvSimdMatrixNx3 {
+extension simd_double4x3 : KvSimd4x3 {
 
     public typealias Scalar = Double
 
@@ -1502,7 +1574,7 @@ extension simd_double4x3 : KvSimdMatrix4xN, KvSimdMatrixNx3 {
 
 // MARK: - simd_float4x4
 
-extension simd_float4x4 : KvSimdMatrix4xN, KvSimdMatrixNx4, KvSimdSquareMatrix {
+extension simd_float4x4 : KvSimd4x4 {
 
     public typealias Scalar = Float
 
@@ -1517,7 +1589,7 @@ extension simd_float4x4 : KvSimdMatrix4xN, KvSimdMatrixNx4, KvSimdSquareMatrix {
 
 // MARK: - simd_double4x4
 
-extension simd_double4x4 : KvSimdMatrix4xN, KvSimdMatrixNx4, KvSimdSquareMatrix {
+extension simd_double4x4 : KvSimd4x4 {
 
     public typealias Scalar = Double
 

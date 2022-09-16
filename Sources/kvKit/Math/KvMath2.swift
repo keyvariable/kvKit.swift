@@ -32,8 +32,8 @@ public enum KvMath2<Scalar> where Scalar : KvMathFloatingPoint {
     public typealias Vector = SIMD2<Scalar>
     public typealias Position = Vector
 
-    public typealias Matrix = KvSimdMatrix2x2<Scalar>
-    public typealias ProjectiveMatrix = KvSimdMatrix3x3<Scalar>
+    public typealias Matrix = KvSimdAny2x2<Scalar>
+    public typealias ProjectiveMatrix = KvSimdAny3x3<Scalar>
 
 }
 
@@ -94,7 +94,7 @@ extension KvMath2 {
 
     @inlinable
     public static func translation<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
-    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    where ProjectiveMatrix : KvSimd3x3, ProjectiveMatrix.Scalar == Scalar
     {
         let c3 = matrix[2]
 
@@ -103,7 +103,7 @@ extension KvMath2 {
 
     @inlinable
     public static func setTranslation<ProjectiveMatrix>(_ translation: Vector, to matrix: inout ProjectiveMatrix)
-    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    where ProjectiveMatrix : KvSimd3x3, ProjectiveMatrix.Scalar == Scalar
     {
         let z = matrix[2, 2]
 
@@ -114,7 +114,7 @@ extension KvMath2 {
     /// - Returns: Scale component from given 2×2 matrix.
     @inlinable
     public static func scale<Matrix>(from matrix: Matrix) -> Vector
-    where Matrix : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    where Matrix : KvSimd2x2, Matrix.Scalar == Scalar
     {
         Vector(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
                y: length(matrix[1]))
@@ -123,7 +123,7 @@ extension KvMath2 {
     /// - Returns: Sqaured scale component from given 2×2 matrix.
     @inlinable
     public static func scale²<Matrix>(from matrix: Matrix) -> Vector
-    where Matrix : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    where Matrix : KvSimd2x2, Matrix.Scalar == Scalar
     {
         Vector(x: length_squared(matrix[0]),
                y: length_squared(matrix[1]))
@@ -132,7 +132,7 @@ extension KvMath2 {
     /// Changes scale component of given 2×2 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale<Matrix>(_ scale: Vector, to matrix: inout Matrix)
-    where Matrix : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    where Matrix : KvSimd2x2, Matrix.Scalar == Scalar
     {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
@@ -144,7 +144,7 @@ extension KvMath2 {
     /// - Returns: Scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
     public static func scale<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
-    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    where ProjectiveMatrix : KvSimd3x3, ProjectiveMatrix.Scalar == Scalar
     {
         Vector(x: KvMath3<Scalar>.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
                y: KvMath3<Scalar>.length(matrix[1]))
@@ -153,7 +153,7 @@ extension KvMath2 {
     /// - Returns: Sqared scale component from given 3×3 projective matrix having row[2] == [ 0, 0, 1 ].
     @inlinable
     public static func scale²<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
-    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    where ProjectiveMatrix : KvSimd3x3, ProjectiveMatrix.Scalar == Scalar
     {
         Vector(x: KvMath3<Scalar>.length_squared(matrix[0]),
                y: KvMath3<Scalar>.length_squared(matrix[1]))
@@ -162,7 +162,7 @@ extension KvMath2 {
     /// Changes scale component of given projective 3×3 matrix having row[2] == [ 0, 0, 1 ]. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale<ProjectiveMatrix>(_ scale: Vector, to matrix: inout ProjectiveMatrix)
-    where ProjectiveMatrix : KvSimdMatrix3xN & KvSimdMatrixNx3 & KvSimdSquareMatrix, ProjectiveMatrix.Scalar == Scalar
+    where ProjectiveMatrix : KvSimd3x3, ProjectiveMatrix.Scalar == Scalar
     {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
@@ -175,9 +175,7 @@ extension KvMath2 {
     /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
     @inlinable
     public static func transformation<M2x2>(_ transform: M2x2, relativeTo position: M2x2.Row) -> ProjectiveMatrix
-    where M2x2 : KvSimdMatrix2xN & KvSimdMatrixNx2 & KvSimdSquareMatrix,
-          M2x2.Row.SimdView == M2x2.Column.SimdView,
-          M2x2.Scalar == Scalar,
+    where M2x2 : KvSimd2x2, M2x2.Scalar == Scalar, M2x2.Row.SimdView == M2x2.Column.SimdView,
           M2x2.Column == ProjectiveMatrix.Column.Sample2
     {
         ProjectiveMatrix(ProjectiveMatrix.Column(transform[0], 0),
@@ -1308,7 +1306,7 @@ extension KvMath2 {
 extension KvMath2 {
 
     @inlinable
-    public static func abs<V>(_ v: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func abs<V>(_ v: V) -> V where V : KvSimd2, V.Scalar == Scalar {
         V(Swift.abs(v.x), Swift.abs(v.y))
     }
 
@@ -1325,7 +1323,7 @@ extension KvMath2 {
     public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
     @inlinable
-    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimd2, V.Scalar == Scalar {
         V(x: KvMath.clamp(v.x, min.x, max.x),
           y: KvMath.clamp(v.y, min.y, max.y))
     }
@@ -1337,39 +1335,39 @@ extension KvMath2 {
     public static func cospi(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
     @inlinable
-    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimd2, V.Scalar == Scalar {
         length(y - x)
     }
 
     @inlinable
-    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimd2, V.Scalar == Scalar {
         x.x * y.x + x.y * y.y
     }
 
     @inlinable
-    public static func length<V>(_ v: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func length<V>(_ v: V) -> Scalar where V : KvSimd2, V.Scalar == Scalar {
         dot(v, v).squareRoot()
     }
 
     @inlinable
-    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimd2, V.Scalar == Scalar {
         dot(v, v)
     }
 
     @inlinable
-    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimd2, V.Scalar == Scalar {
         V(x: Swift.max(x.x, y.x),
           y: Swift.max(x.y, y.y))
     }
 
     @inlinable
-    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimd2, V.Scalar == Scalar {
         .init(x: Swift.min(x.x, y.x),
               y: Swift.min(x.y, y.y))
     }
 
     @inlinable
-    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimd2, V.Scalar == Scalar {
         let oneMinusT: Scalar = 1 - t
 
         return V(x: x.x * oneMinusT + y.x * t,
@@ -1377,12 +1375,12 @@ extension KvMath2 {
     }
 
     @inlinable
-    public static func normalize<V>(_ v: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func normalize<V>(_ v: V) -> V where V : KvSimd2, V.Scalar == Scalar {
         v / length(v)
     }
 
     @inlinable
-    public static func rsqrt<V>(_ v: V) -> V where V : KvSimdVector2, V.Scalar == Scalar {
+    public static func rsqrt<V>(_ v: V) -> V where V : KvSimd2, V.Scalar == Scalar {
         1 / (v * v).squareRoot()
     }
 

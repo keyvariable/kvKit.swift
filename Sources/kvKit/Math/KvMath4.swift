@@ -32,7 +32,7 @@ public enum KvMath4<Scalar> where Scalar : KvMathFloatingPoint {
     public typealias Vector = SIMD4<Scalar>
     public typealias Position = Vector
 
-    public typealias Matrix = KvSimdMatrix4x4<Scalar>
+    public typealias Matrix = KvSimdAny4x4<Scalar>
 
 }
 
@@ -50,7 +50,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M2x2>(_ base: M2x2) -> Matrix
-    where M2x2 : KvSimdMatrix2xN & KvSimdMatrixNx2, M2x2.Scalar == Scalar, M2x2.Column == Matrix.Column.Sample2
+    where M2x2 : KvSimd2x2, M2x2.Scalar == Scalar, M2x2.Column == Matrix.Column.Sample2
     {
         Matrix(Matrix.Column(lowHalf: base[0], highHalf: M2x2.Column.zero),
                Matrix.Column(lowHalf: base[1], highHalf: M2x2.Column.zero),
@@ -61,7 +61,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M2x3>(_ base: M2x3) -> Matrix
-    where M2x3 : KvSimdMatrix2xN & KvSimdMatrixNx3, M2x3.Scalar == Scalar, M2x3.Column == Matrix.Column.Sample3
+    where M2x3 : KvSimd2x3, M2x3.Scalar == Scalar, M2x3.Column == Matrix.Column.Sample3
     {
         Matrix(Matrix.Column(base[0], 0),
                Matrix.Column(base[1], 0),
@@ -72,7 +72,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M2x4>(_ base: M2x4) -> Matrix
-    where M2x4 : KvSimdMatrix2xN & KvSimdMatrixNx4, M2x4.Scalar == Scalar, M2x4.Column == Matrix.Column
+    where M2x4 : KvSimd2x4, M2x4.Scalar == Scalar, M2x4.Column == Matrix.Column
     {
         Matrix(base[0], base[1], [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ])
     }
@@ -80,7 +80,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M3x2>(_ base: M3x2) -> Matrix
-    where M3x2 : KvSimdMatrix3xN & KvSimdMatrixNx2, M3x2.Scalar == Scalar, M3x2.Column == Matrix.Column.Sample2
+    where M3x2 : KvSimd3x2, M3x2.Scalar == Scalar, M3x2.Column == Matrix.Column.Sample2
     {
         Matrix(Matrix.Column(lowHalf: base[0], highHalf: M3x2.Column.zero),
                Matrix.Column(lowHalf: base[1], highHalf: M3x2.Column.zero),
@@ -91,7 +91,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M3x3>(_ base: M3x3) -> Matrix
-    where M3x3 : KvSimdMatrix3xN & KvSimdMatrixNx3, M3x3.Scalar == Scalar, M3x3.Column == Matrix.Column.Sample3
+    where M3x3 : KvSimd3x3, M3x3.Scalar == Scalar, M3x3.Column == Matrix.Column.Sample3
     {
         Matrix(Matrix.Column(base[0], 0),
                Matrix.Column(base[1], 0),
@@ -102,7 +102,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M3x4>(_ base: M3x4) -> Matrix
-    where M3x4 : KvSimdMatrix3xN & KvSimdMatrixNx4, M3x4.Scalar == Scalar, M3x4.Column == Matrix.Column
+    where M3x4 : KvSimd3x4, M3x4.Scalar == Scalar, M3x4.Column == Matrix.Column
     {
         Matrix(base[0], base[1], base[2], [ 0, 0, 0, 1 ])
     }
@@ -110,7 +110,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M4x2>(_ base: M4x2) -> Matrix
-    where M4x2 : KvSimdMatrix4xN & KvSimdMatrixNx2, M4x2.Scalar == Scalar, M4x2.Column == Matrix.Column.Sample2
+    where M4x2 : KvSimd4x2, M4x2.Scalar == Scalar, M4x2.Column == Matrix.Column.Sample2
     {
         Matrix(Matrix.Column(lowHalf: base[0], highHalf: M4x2.Column.zero),
                Matrix.Column(lowHalf: base[1], highHalf: M4x2.Column.zero),
@@ -121,7 +121,7 @@ extension KvMath4 {
     /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
     @inlinable
     public static func supplemented<M4x3>(_ base: M4x3) -> Matrix
-    where M4x3 : KvSimdMatrix4xN & KvSimdMatrixNx3, M4x3.Scalar == Scalar, M4x3.Column == Matrix.Column.Sample3
+    where M4x3 : KvSimd4x3, M4x3.Scalar == Scalar, M4x3.Column == Matrix.Column.Sample3
     {
         Matrix(Matrix.Column(base[0], 0),
                Matrix.Column(base[1], 0),
@@ -171,7 +171,7 @@ extension KvMath4 {
     /// - Returns: Scale component from given 4×4 matrix.
     @inlinable
     public static func scale<Matrix>(from matrix: Matrix) -> Vector
-    where Matrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    where Matrix : KvSimd4x4, Matrix.Scalar == Scalar
     {
         .init(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
               y: length(matrix[1]),
@@ -182,7 +182,7 @@ extension KvMath4 {
     /// - Returns: Sqaured scale component from given 4×4 matrix.
     @inlinable
     public static func scale²<Matrix>(from matrix: Matrix) -> Vector
-    where Matrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    where Matrix : KvSimd4x4, Matrix.Scalar == Scalar
     {
         .init(x: length_squared(matrix[0]),
               y: length_squared(matrix[1]),
@@ -193,7 +193,7 @@ extension KvMath4 {
     /// Changes scale component of given 4×4 matrix to given value. If a column is zero then the result is undefined.
     @inlinable
     public static func setScale<Matrix>(_ scale: Vector, to matrix: inout Matrix)
-    where Matrix : KvSimdMatrix4xN & KvSimdMatrixNx4 & KvSimdSquareMatrix, Matrix.Scalar == Scalar
+    where Matrix : KvSimd4x4, Matrix.Scalar == Scalar
     {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
@@ -212,7 +212,7 @@ extension KvMath4 {
 extension KvMath4 {
 
     @inlinable
-    public static func abs<V>(_ v: V) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func abs<V>(_ v: V) -> V where V : KvSimd4, V.Scalar == Scalar {
         V(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z), Swift.abs(v.w))
     }
 
@@ -229,7 +229,7 @@ extension KvMath4 {
     public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
     @inlinable
-    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimd4, V.Scalar == Scalar {
         V(x: KvMath.clamp(v.x, min.x, max.x),
           y: KvMath.clamp(v.y, min.y, max.y),
           z: KvMath.clamp(v.z, min.z, max.z),
@@ -243,27 +243,27 @@ extension KvMath4 {
     public static func cospi(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
 
     @inlinable
-    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimd4, V.Scalar == Scalar {
         length(y - x)
     }
 
     @inlinable
-    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimd4, V.Scalar == Scalar {
         x.x * y.x + x.y * y.y + x.z * y.z + x.w * y.w
     }
 
     @inlinable
-    public static func length<V>(_ v: V) -> Scalar where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func length<V>(_ v: V) -> Scalar where V : KvSimd4, V.Scalar == Scalar {
         dot(v, v).squareRoot()
     }
 
     @inlinable
-    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimd4, V.Scalar == Scalar {
         dot(v, v)
     }
 
     @inlinable
-    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimd4, V.Scalar == Scalar {
         V(x: Swift.max(x.x, y.x),
           y: Swift.max(x.y, y.y),
           z: Swift.max(x.z, y.z),
@@ -271,7 +271,7 @@ extension KvMath4 {
     }
 
     @inlinable
-    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimd4, V.Scalar == Scalar {
         .init(x: Swift.min(x.x, y.x),
               y: Swift.min(x.y, y.y),
               z: Swift.min(x.z, y.z),
@@ -279,7 +279,7 @@ extension KvMath4 {
     }
 
     @inlinable
-    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimd4, V.Scalar == Scalar {
         let oneMinusT: Scalar = 1 - t
 
         return V(x: x.x * oneMinusT + y.x * t,
@@ -289,12 +289,12 @@ extension KvMath4 {
     }
 
     @inlinable
-    public static func normalize<V>(_ v: V) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func normalize<V>(_ v: V) -> V where V : KvSimd4, V.Scalar == Scalar {
         v / length(v)
     }
 
     @inlinable
-    public static func rsqrt<V>(_ v: V) -> V where V : KvSimdVector4, V.Scalar == Scalar {
+    public static func rsqrt<V>(_ v: V) -> V where V : KvSimd4, V.Scalar == Scalar {
         1 / (v * v).squareRoot()
     }
 
