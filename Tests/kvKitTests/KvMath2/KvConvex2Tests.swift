@@ -29,7 +29,13 @@ import simd
 
 
 
-class KvMath2ConvexPolygonTests : XCTestCase {
+class KvConvex2Tests : XCTestCase {
+
+    private typealias Vertex<Math : KvMathScope> = KvPosition2<Math, Void>
+    private typealias Convex<Math : KvMathScope> = KvConvex2<Vertex<Math>>
+
+
+    // MARK: : XCTestCase
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -43,12 +49,12 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     // MARK: .TestCase
 
-    private struct TestCase<T : KvMathFloatingPoint> {
+    private struct TestCase<Math : KvMathScope> {
 
-        typealias Math2 = KvMath2<T>
+        typealias Math = Math
 
-        typealias Convex = Math2.ConvexPolygon
-        typealias Vertex = Math2.Position
+        typealias Vertex = KvConvex2Tests.Vertex<Math>
+        typealias Convex = KvConvex2Tests.Convex<Math>
 
 
         let input: [Vertex]
@@ -58,10 +64,16 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         // MARK: .Result
 
-        struct ExpectedResult : Equatable {
+        struct ExpectedResult : KvNumericallyEquatable {
 
-            var polygon: [Convex.VertexIterator<[Vertex]>.PolygonVertexIterator.Element]
-            var convex: [Convex.VertexIterator<[Vertex]>.Element]
+            var polygon: [Convex.PolygonVertexIteratorElement]
+            var convex: [Convex.VertexIteratorElement]
+
+
+            func isEqual(to rhs: Self) -> Bool {
+                polygon.elementsEqual(rhs.polygon, by: { $0.isEqual(to: $1) })
+                && convex.elementsEqual(rhs.convex, by: { $0.isEqual(to: $1) })
+            }
 
         }
 
@@ -103,14 +115,14 @@ class KvMath2ConvexPolygonTests : XCTestCase {
                 let polygonResults = IteratorSequence(Convex.VertexIterator.PolygonVertexIterator(input))
 
                 AssertElementsEqual(polygonResults, result.polygon, "\(messagePrefix), polygon vertices and local directions") {
-                    $0.isAlmostEqual(to: $1)
+                    $0.isEqual(to: $1)
                 }
             }
             do {
                 let convexResults = IteratorSequence(Convex.VertexIterator(input))
 
                 AssertElementsEqual(convexResults, result.convex, "\(messagePrefix), convex vertices and direction") {
-                    $0.isAlmostEqual(to: $1)
+                    $0.isEqual(to: $1)
                 }
             }
         }
@@ -122,8 +134,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testEmptyInput() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type) -> TestCase<T> {
-            TestCase<T>(
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type) -> TestCase<Math> {
+            TestCase<Math>(
                 input: [ ],
                 result: .init(polygon: [ ], convex: [ ])
             )
@@ -131,8 +143,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         let prefix = "Empty input"
 
-        MakeTestCase(Float.self).run(prefix)
-        MakeTestCase(Double.self).run(prefix)
+        MakeTestCase(KvMathFloatScope.self).run(prefix)
+        MakeTestCase(KvMathDoubleScope.self).run(prefix)
     }
 
 
@@ -140,9 +152,9 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testSingleVertexInput() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type) -> TestCase<T> {
-            let input: [ KvMath2<T>.Position ] = [ .zero ]
-            let output = Self.coordinatesAndSteps(from: input)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type) -> TestCase<Math> {
+            let input: [Vertex<Math>] = [ .zero ]
+            let output = Self.verticesAndSteps(from: input)
 
             return .init(
                 input: input,
@@ -155,8 +167,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         let prefix = "Single vertex"
 
-        MakeTestCase(Float.self).run(prefix)
-        MakeTestCase(Double.self).run(prefix)
+        MakeTestCase(KvMathFloatScope.self).run(prefix)
+        MakeTestCase(KvMathDoubleScope.self).run(prefix)
     }
 
 
@@ -164,9 +176,9 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testRepeatedVertexInput() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type) -> TestCase<T> {
-            let input: [ KvMath2<T>.Position ] = [ .zero, .zero, .zero ]
-            let output = Self.coordinatesAndSteps(from: input).prefix(1)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type) -> TestCase<Math> {
+            let input: [Vertex<Math>] = [ .zero, .zero, .zero ]
+            let output = Self.verticesAndSteps(from: input).prefix(1)
 
             return .init(
                 input: input,
@@ -179,8 +191,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         let prefix = "Repeated vertex"
 
-        MakeTestCase(Float.self).run(prefix)
-        MakeTestCase(Double.self).run(prefix)
+        MakeTestCase(KvMathFloatScope.self).run(prefix)
+        MakeTestCase(KvMathDoubleScope.self).run(prefix)
     }
 
 
@@ -188,9 +200,9 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testTwoVerticesInput1() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type) -> TestCase<T> {
-            let input: [ KvMath2<T>.Position ] = [ .one, .zero ]
-            let output = Self.coordinatesAndSteps(from: input).prefix(1)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type) -> TestCase<Math> {
+            let input: [Vertex<Math>] = [ .one, .zero ]
+            let output = Self.verticesAndSteps(from: input).prefix(1)
 
             return .init(
                 input: input,
@@ -203,8 +215,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         let prefix = "Two vertices"
 
-        MakeTestCase(Float.self).run(prefix)
-        MakeTestCase(Double.self).run(prefix)
+        MakeTestCase(KvMathFloatScope.self).run(prefix)
+        MakeTestCase(KvMathDoubleScope.self).run(prefix)
     }
 
 
@@ -212,9 +224,9 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testTwoVerticesInput2() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type) -> TestCase<T> {
-            let input: [ KvMath2<T>.Position ] = [ .one, .zero, .zero, .zero ]
-            let output = Self.coordinatesAndSteps(from: input.prefix(2)).prefix(1)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type) -> TestCase<Math> {
+            let input: [Vertex<Math>] = [ .one, .zero, .zero, .zero ]
+            let output = Self.verticesAndSteps(from: input.prefix(2)).prefix(1)
 
             return .init(
                 input: [ .one, .zero, .zero, .zero ],
@@ -227,8 +239,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         let prefix = "Two vertices + repeated last"
 
-        MakeTestCase(Float.self).run(prefix)
-        MakeTestCase(Double.self).run(prefix)
+        MakeTestCase(KvMathFloatScope.self).run(prefix)
+        MakeTestCase(KvMathDoubleScope.self).run(prefix)
     }
 
 
@@ -236,9 +248,9 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testTwoVerticesInput3() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type) -> TestCase<T> {
-            let input: [ KvMath2<T>.Position ] = [ .one, .zero, .one, .one, .one ]
-            let output = Self.coordinatesAndSteps(from: input).prefix(1)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type) -> TestCase<Math> {
+            let input: [Vertex<Math>] = [ .one, .zero, .one, .one, .one ]
+            let output = Self.verticesAndSteps(from: input).prefix(1)
 
             return .init(
                 input: [ .one, .zero, .one, .one, .one ],
@@ -251,8 +263,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
         let prefix = "Two vertices + repeated first"
 
-        MakeTestCase(Float.self).run(prefix)
-        MakeTestCase(Double.self).run(prefix)
+        MakeTestCase(KvMathFloatScope.self).run(prefix)
+        MakeTestCase(KvMathDoubleScope.self).run(prefix)
     }
 
 
@@ -260,16 +272,17 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testValidInput() throws {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool, count: Int) throws -> TestCase<T> {
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, count: Int) throws -> TestCase<Math> {
             let start, end: Double
             (start, end) = isCCW ? (0, 2 * .pi) : (2 * .pi, 0)
+            let eps: Double = sign(end - start) * 1e-3
 
-            let input = stride(from: start, to: end - sign(end - start) * 1e-3, by: (end - start) / Double(count))
-                .map { KvMath2<T>.Position(T(cos($0)), T(sin($0))) }
+            let input = stride(from: start, to: end - eps, by: (end - start) / Double(count))
+                .map { Vertex<Math>(x: Math.Scalar(cos($0)), y: Math.Scalar(sin($0))) }
 
-            let output = Self.coordinatesAndSteps(from: input)
+            let output = Self.verticesAndSteps(from: input)
 
-            return TestCase<T>(
+            return TestCase<Math>(
                 input: input,
                 result: .init(
                     polygon: output.map { $0.polygonElement(isCCW: isCCW) },
@@ -282,8 +295,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
             try [ true, false ].forEach { isCCW in
                 let prefix = "Valid polygon (\(count), \(isCCW ? "CCW" : "CW"))"
 
-                try MakeTestCase(Float.self , isCCW: isCCW, count: count).run(prefix)
-                try MakeTestCase(Double.self, isCCW: isCCW, count: count).run(prefix)
+                try MakeTestCase(KvMathFloatScope.self , isCCW: isCCW, count: count).run(prefix)
+                try MakeTestCase(KvMathDoubleScope.self, isCCW: isCCW, count: count).run(prefix)
             }
         }
     }
@@ -293,10 +306,10 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testNonconvexInput() {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool, shift: Int) -> TestCase<T> {
-            typealias TC = TestCase<T>
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, shift: Int) -> TestCase<Math> {
+            typealias TC = TestCase<Math>
 
-            var input: [KvMath2<T>.Position] = [
+            var input: [Vertex<Math>] = [
                 [  0.0, 0.0 ],
                 [  0.5, 1.0 ],
                 [  0.0, 0.5 ],
@@ -312,17 +325,19 @@ class KvMath2ConvexPolygonTests : XCTestCase {
             input = Self.cyclicShiftedLeft(input, for: shift)
             ccwFlags = Self.cyclicShiftedLeft(ccwFlags, for: shift)
 
-            let output = Self.coordinatesAndSteps(from: input)
+            let output = Self.verticesAndSteps(from: input)
             ccwFlags = Self.cyclicShiftedLeft(ccwFlags)
+
+            var expectedConvex = zip(output, ccwFlags)
+                .prefix(1 + ccwFlags.firstIndex(where: { $0 != ccwFlags[0] })!)
+                .map { $0.0.convexElement(isCCW: $0.1) }
+
+            expectedConvex[expectedConvex.endIndex - 1].direction = .mixed
 
             var expectation = TC.ExpectedResult(
                 polygon: zip(output, ccwFlags).map { $0.0.polygonElement(isCCW: $0.1) },
-                convex: zip(output, ccwFlags)
-                    .prefix(1 + ccwFlags.firstIndex(where: { $0 != ccwFlags[0] })!)
-                    .map { $0.0.convexElement(isCCW: $0.1) }
+                convex: expectedConvex
             )
-
-            expectation.convex[expectation.convex.endIndex - 1].direction = .mixed
 
             return .init(input: input, result: expectation)
         }
@@ -331,8 +346,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
             [ true, false ].forEach { isCCW in
                 let prefix = "Nonconvex \(isCCW ? "CCW" : "CW") polygon shifted by \(shift)"
 
-                MakeTestCase(Float.self , isCCW: isCCW, shift: shift).run(prefix)
-                MakeTestCase(Double.self, isCCW: isCCW, shift: shift).run(prefix)
+                MakeTestCase(KvMathFloatScope.self , isCCW: isCCW, shift: shift).run(prefix)
+                MakeTestCase(KvMathDoubleScope.self, isCCW: isCCW, shift: shift).run(prefix)
             }
         }
     }
@@ -342,22 +357,22 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testBackwardVertex() {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool, backIndex: Int) -> TestCase<T> {
-            typealias TC = TestCase<T>
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, backIndex: Int) -> TestCase<Math> {
+            typealias TC = TestCase<Math>
 
-            var input = Self.quadVertices(T.self, isCCW: isCCW)
+            var input = Self.quadVertices(Math.self, isCCW: isCCW)
 
             // Insertion of backward case preserving the direction.
             do {
                 let prevIndex = (backIndex > 0 ? backIndex : input.endIndex) - 1
-                let c = input[backIndex]
-                let offset = 0.1 * (c - input[prevIndex])
+                let v = input[backIndex]
+                let offset = 0.1 * (v.coordinate - input[prevIndex].coordinate)
 
                 input[backIndex] -= offset
-                input.insert(c, at: backIndex)
+                input.insert(v, at: backIndex)
             }
 
-            let output = Self.coordinatesAndSteps(from: input).prefix(backIndex > 0 ? backIndex : input.count)
+            let output = Self.verticesAndSteps(from: input).prefix(backIndex > 0 ? backIndex : input.count)
 
             let expectation: TC.ExpectedResult = {
                 switch backIndex > 0 {
@@ -392,8 +407,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
             [ true, false ].forEach { isCCW in
                 let prefix = "Quad with back index (\(backIndex), \(isCCW ? "CCW" : "CW"))"
 
-                MakeTestCase(Float.self , isCCW: isCCW, backIndex: backIndex).run(prefix)
-                MakeTestCase(Double.self, isCCW: isCCW, backIndex: backIndex).run(prefix)
+                MakeTestCase(KvMathFloatScope.self , isCCW: isCCW, backIndex: backIndex).run(prefix)
+                MakeTestCase(KvMathDoubleScope.self, isCCW: isCCW, backIndex: backIndex).run(prefix)
             }
         }
     }
@@ -403,15 +418,15 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testDuplicatedInput() {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool, count: Int) -> TestCase<T> {
-            let quad = Self.quadVertices(T.self, isCCW: isCCW)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, count: Int) -> TestCase<Math> {
+            let quad = Self.quadVertices(Math.self, isCCW: isCCW)
             let input = Self.cyclicShiftedLeft(
                 quad
                     .map { repeatElement($0, count: count) }
                     .joined()
             )
 
-            let output = Self.coordinatesAndSteps(from: quad)
+            let output = Self.verticesAndSteps(from: quad)
 
             return .init(input: input,
                          result: .init(polygon: output.map { $0.polygonElement(isCCW: isCCW) },
@@ -422,8 +437,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
             [ true, false ].forEach { isCCW in
                 let prefix = "\(isCCW ? "CCW" : "CW") quad with \(repeatCount) copies of each vertex"
 
-                MakeTestCase(Float.self , isCCW: isCCW, count: repeatCount).run(prefix)
-                MakeTestCase(Double.self, isCCW: isCCW, count: repeatCount).run(prefix)
+                MakeTestCase(KvMathFloatScope.self , isCCW: isCCW, count: repeatCount).run(prefix)
+                MakeTestCase(KvMathDoubleScope.self, isCCW: isCCW, count: repeatCount).run(prefix)
             }
         }
     }
@@ -433,18 +448,18 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testForwardVertices() {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool, count: Int) -> TestCase<T> {
-            let quad = Self.quadVertices(T.self, isCCW: isCCW)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, count: Int) -> TestCase<Math> {
+            let quad = Self.quadVertices(Math.self, isCCW: isCCW)
 
             let step: Double = 1.0 / Double(1 + count)
             let offsets = stride(from: 0.0, to: 1.0 - 1e-4, by: step)
-                .lazy.map { T($0) }
+                .lazy.map { Math.Scalar($0) }
 
             let input = zip(quad, Self.cyclicShiftedLeft(quad))
-                .map { (start, end) in offsets.map { KvMath2<T>.mix(start, end, t: $0) } }
+                .map { (start, end) in offsets.map { start.mixed(end, t: $0) } }
                 .joined()
 
-            let output = Self.coordinatesAndSteps(from: quad)
+            let output = Self.verticesAndSteps(from: quad)
 
             return .init(input: Array(input),
                          result: .init(polygon: output.map { $0.polygonElement(isCCW: isCCW) },
@@ -455,8 +470,8 @@ class KvMath2ConvexPolygonTests : XCTestCase {
             [ true, false ].forEach { isCCW in
                 let prefix = "\(isCCW ? "CCW" : "CW") quad with \(count) forward vertices on each edge"
 
-                MakeTestCase(Float.self , isCCW: isCCW, count: count).run(prefix)
-                MakeTestCase(Double.self, isCCW: isCCW, count: count).run(prefix)
+                MakeTestCase(KvMathFloatScope.self , isCCW: isCCW, count: count).run(prefix)
+                MakeTestCase(KvMathDoubleScope.self, isCCW: isCCW, count: count).run(prefix)
             }
         }
     }
@@ -466,40 +481,40 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     func testForwardAtTheEnd() {
 
-        func MakeTestCase<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool, startCount: Int, endCount: Int) -> TestCase<T> {
-            let quad = Self.quadVertices(T.self, isCCW: isCCW)
+        func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, startCount: Int, endCount: Int) -> TestCase<Math> {
+            let quad = Self.quadVertices(Math.self, isCCW: isCCW)
 
-            let offsetsStart: [T] = {
+            let offsetsStart: [Math.Scalar] = {
                 switch startCount > 0 {
                 case true:
                     let step: Double = 0.5 / Double(startCount)
                     return stride(from: 0.5, to: 1.0 - 1e-4, by: step)
-                        .map { T($0) }
+                        .map { Math.Scalar($0) }
                 case false:
                     return [ ]
                 }
             }()
-            let offsetsEnd: [T] = {
+            let offsetsEnd: [Math.Scalar] = {
                 let step: Double = 0.5 / Double(1 + endCount)
                 return stride(from: 0.0, to: 0.5 - 1e-4, by: step)
-                    .map { T($0) }
+                    .map { Math.Scalar($0) }
             }()
 
             let v0 = quad.first!, v3 = quad.last!
 
-            let input = [ offsetsStart.map { KvMath2<T>.mix(v3, v0, t: $0) },
+            let input = [ offsetsStart.map { v3.mixed(v0, t: $0) },
                           quad.dropLast(),
-                          offsetsEnd.map { KvMath2<T>.mix(v3, v0, t: $0) }, ]
+                          offsetsEnd.map { v3.mixed(v0, t: $0) }, ]
                 .joined()
 
-            var output = Self.coordinatesAndSteps(from: quad)
+            var output = Self.verticesAndSteps(from: quad)
             if startCount > 0 {
                 output = Self.cyclicShiftedRight(output)
             }
 
-            return .init(input: Array(input),
-                         result: .init(polygon: output.map { $0.polygonElement(isCCW: isCCW) },
-                                       convex: output.map { $0.convexElement(isCCW: isCCW) }))
+            return TestCase(input: Array(input),
+                            result: .init(polygon: output.map { $0.polygonElement(isCCW: isCCW) },
+                                          convex: output.map { $0.convexElement(isCCW: isCCW) }))
         }
 
         [ 0, 1, 2, 8 ].forEach { count in
@@ -508,56 +523,103 @@ class KvMath2ConvexPolygonTests : XCTestCase {
                     let endCount = count - startCount
                     let prefix = "\(isCCW ? "CCW" : "CW") quad with \(startCount) forward cases at the start and \(endCount) at the end"
 
-                    MakeTestCase(Float.self , isCCW: isCCW, startCount: startCount, endCount: endCount).run(prefix)
-                    MakeTestCase(Double.self, isCCW: isCCW, startCount: startCount, endCount: endCount).run(prefix)
+                    MakeTestCase(KvMathFloatScope.self , isCCW: isCCW, startCount: startCount, endCount: endCount).run(prefix)
+                    MakeTestCase(KvMathDoubleScope.self, isCCW: isCCW, startCount: startCount, endCount: endCount).run(prefix)
                 }
             }
         }
     }
 
 
-    // MARK: .CoordinateAndStep
+    // MARK: (CCW|CW) Vertices Test
 
-    private struct CoordinateAndStep<T : KvMathFloatingPoint> : Hashable {
+    func testCcwCwVertices() {
 
-        typealias Convex = KvMath2<T>.ConvexPolygon
+        func RunTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, reverse isReversed: Bool) {
+            let input = Self.quadVertices(Math.self, isCCW: isCCW)
 
-        typealias PolygonElement<Points> = Convex.VertexIterator<Points>.PolygonVertexIterator.Element
-        where Points : Sequence, Points.Element == KvMath2<T>.Position
+            var output = Self.verticesAndSteps(from: input)
+            if !isCCW {
+                output.reverse()
+            }
 
-        typealias ConvexElement<Points> = Convex.VertexIterator<Points>.Element
-        where Points : Sequence, Points.Element == KvMath2<T>.Position
+            guard let convex = TestCase<Math>.Convex(input, reverse: isReversed)
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad (reversed: \(isReversed))") }
+
+            XCTAssert(convex.ccwVertices.elementsEqual(output, by: { $0.isEqual(to: $1.vertex) }), "Unexpected CCW vertices from \(isCCW ? "CCW" : "CW") quad (reversed: \(isReversed))")
+            XCTAssert(convex.cwVertices.elementsEqual(output.reversed(), by: { $0.isEqual(to: $1.vertex) }), "Unexpected CW vertices from \(isCCW ? "CCW" : "CW") quad (reversed: \(isReversed))")
+        }
+
+        [ true, false ].forEach { isCCW in
+            [ true, false ].forEach { isReversed in
+                RunTestCase(KvMathFloatScope.self , isCCW: isCCW, reverse: false)
+                RunTestCase(KvMathDoubleScope.self, isCCW: isCCW, reverse: true )
+            }
+        }
+    }
 
 
-        var coordinate: KvMath2<T>.Position
-        var step: KvMath2<T>.Vector
+    // MARK: isEqual Test
+
+    func testIsEqual() {
+
+        func RunTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool) {
+            let input = Self.quadVertices(Math.self, isCCW: isCCW)
+
+            guard let lhs = TestCase<Math>.Convex(input)
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") LHS quad") }
+
+            [ 0 as Int, 1, 2, 3 ].forEach { shift in
+                [ false, true ].forEach { isReversed in
+                    let input2 = Self.cyclicShiftedLeft(input, for: shift)
+                    guard let rhs = (!isReversed
+                                     ? TestCase<Math>.Convex(input2)
+                                     : TestCase<Math>.Convex(input2.reversed(), reverse: true))
+                    else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") RHS quad: shift=\(shift), reverse=\(isReversed)") }
+
+                    XCTAssert(lhs.isEqual(to: rhs), "Two equal quads: \(isCCW ? "CCW" : "CW"), shift=\(shift), reverse=\(isReversed)")
+                }
+            }
+        }
+
+        [ true, false ].forEach { isCCW in
+            RunTestCase(KvMathFloatScope.self , isCCW: isCCW)
+            RunTestCase(KvMathDoubleScope.self, isCCW: isCCW)
+        }
+    }
+
+
+    // MARK: .VertexAndStep
+
+    private struct VertexAndStep<Math : KvMathScope> : Hashable {
+
+        typealias Convex = KvConvex2Tests.Convex<Math>
+
+        typealias ConvexElement = Convex.VertexIteratorElement
+        typealias PolygonElement = Convex.PolygonVertexIteratorElement
+
+
+        var vertex: Convex.Vertex
+        var step: Convex.Vector
 
 
         // MARK: Operations
 
-        func polygonElement<Points>(_ direction: Convex.LocalDirection) -> PolygonElement<Points>
-        where Points : Sequence, Points.Element == KvMath2<T>.Position
-        {
-            .init(coordinate: coordinate, step: step, direction: direction)
+        func polygonElement(_ direction: Convex.LocalDirection) -> PolygonElement {
+            .init(vertex: vertex, step: step, direction: direction)
         }
 
-        func polygonElement<Points>(isCCW: Bool) -> PolygonElement<Points>
-        where Points : Sequence, Points.Element == KvMath2<T>.Position
-        {
-            .init(coordinate: coordinate, step: step, direction: isCCW ? .ccw : .cw)
+        func polygonElement(isCCW: Bool) -> PolygonElement {
+            .init(vertex: vertex, step: step, direction: isCCW ? .ccw : .cw)
         }
 
 
-        func convexElement<Points>(_ direction: Convex.Direction) -> ConvexElement<Points>
-        where Points : Sequence, Points.Element == KvMath2<T>.Position
-        {
-            .init(coordinate: coordinate, step: step, direction: direction)
+        func convexElement(_ direction: Convex.Direction) -> ConvexElement {
+            .init(vertex: vertex, step: step, direction: direction)
         }
 
-        func convexElement<Points>(isCCW: Bool) -> ConvexElement<Points>
-        where Points : Sequence, Points.Element == KvMath2<T>.Position
-        {
-            .init(coordinate: coordinate, step: step, direction: isCCW ? .ccw : .cw)
+        func convexElement(isCCW: Bool) -> ConvexElement {
+            .init(vertex: vertex, step: step, direction: isCCW ? .ccw : .cw)
         }
 
     }
@@ -565,20 +627,20 @@ class KvMath2ConvexPolygonTests : XCTestCase {
 
     // MARK: Auxiliaries
 
-    private static func quadVertices<T : KvMathFloatingPoint>(_ type: T.Type, isCCW: Bool) -> [KvMath2<T>.Position] {
+    private static func quadVertices<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool) -> [Vertex<Math>] {
         return (isCCW
                 ? [ [ 0, 0 ], [ 1, 0 ], [ 1, 1 ], [ 0, 1 ] ]
                 : [ [ 0, 0 ], [ 0, 1 ], [ 1, 1 ], [ 1, 0 ] ])
     }
 
 
-    private static func coordinatesAndSteps<Scalar, Points>(from input: Points) -> [CoordinateAndStep<Scalar>]
-    where Scalar : KvMathFloatingPoint, Points : Sequence, Points.Element == KvMath2<Scalar>.Position
+    private static func verticesAndSteps<Vertices, Math>(from input: Vertices) -> [VertexAndStep<Math>]
+    where Math : KvMathScope, Vertices : Sequence, Vertices.Element == Vertex<Math>
     {
         let cooedinates = cyclicShiftedLeft(input)
 
         return zip(cooedinates, cyclicShiftedLeft(cooedinates))
-            .map { .init(coordinate: $0.0, step: $0.1 - $0.0) }
+            .map { .init(vertex: $0.0, step: $0.1.coordinate - $0.0.coordinate) }
     }
 
 

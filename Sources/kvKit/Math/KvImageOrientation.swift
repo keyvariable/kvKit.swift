@@ -226,7 +226,7 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible, CaseIterable
     /// - Note: It's applicable to normalized positons on images. Normalized position components are in 0...1.
     @inlinable
     public func transform() -> simd_float3x3 {
-        Constants.Matrices.t₊ * KvMath3.supplemented(transform2()).wrapped * Constants.Matrices.t₋
+        Constants.Matrices.t₊ * KvMathFloatScope.make3(transform2()) * Constants.Matrices.t₋
     }
 
     /// - Returns: Inverse 3×3 matrix reprentation of the receiver.
@@ -234,7 +234,7 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible, CaseIterable
     /// - Note: It's applicable to normalized positons on images. Normalized position components are in 0...1.
     @inlinable
     public func transform⁻¹() -> simd_float3x3 {
-        Constants.Matrices.t₊ * KvMath3.supplemented(transform2⁻¹()).wrapped * Constants.Matrices.t₋
+        Constants.Matrices.t₊ * KvMathFloatScope.make3(transform2⁻¹()) * Constants.Matrices.t₋
     }
 
     /// - Returns: Inverse 3×3 matrix reprentation of the receiver.

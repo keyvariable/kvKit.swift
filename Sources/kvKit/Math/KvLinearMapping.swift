@@ -142,7 +142,7 @@ public struct KvShiftedLinearMapping<Value: BinaryFloatingPoint> {
 
 
 
-// MARK: Auxliary Initializers
+// MARK: Auxiliary Initializers
 
 extension KvShiftedLinearMapping {
 

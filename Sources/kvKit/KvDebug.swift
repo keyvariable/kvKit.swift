@@ -36,7 +36,7 @@ public class KvDebug {
     #if DEBUG
     /// Analog for *assert* providing ability to continue execution.
     ///
-    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    /// - Note: Prints reason, file and line to standard output and throws an error catching it immediately when *DEBUG* is true. Use *Swift Error Breakpoint* to pause execution.
     @inlinable
     public static func pause(_ reason: String, _ file: StaticString = #fileID, _ line: UInt = #line) {
         let message = "\(reason) | \(file):\(line)"
@@ -49,7 +49,7 @@ public class KvDebug {
     #else // !DEBUG
     /// Analog for *assert* providing ability to continue execution.
     ///
-    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    /// - Note: Prints reason, file and line to standard output and throws an error catching it immediately when *DEBUG* is true. Use *Swift Error Breakpoint* to pause execution.
     @inlinable
     public static func pause(_ reason: String) {
         print(reason)
@@ -67,7 +67,7 @@ public class KvDebug {
     ///
     ///     `return KvDebug.pause(code: -1, "Unexpected input")`
     ///
-    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    /// - Note: Prints reason, file and line to standard output and throws an error catching it immediately when *DEBUG* is true. Use *Swift Error Breakpoint* to pause execution.
     @inlinable
     public static func pause<T>(code: T, _ reason: String, _ file: StaticString = #fileID, _ line: UInt = #line) -> T {
         pause(reason, file, line)
@@ -83,7 +83,7 @@ public class KvDebug {
     ///
     ///     `return KvDebug.pause(code: -1, "Unexpected input")`
     ///
-    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    /// - Note: Prints reason, file and line to standard output and throws an error catching it immediately when *DEBUG* is true. Use *Swift Error Breakpoint* to pause execution.
     @inlinable
     public static func pause<T>(code: T, _ reason: String) -> T {
         pause(reason)
@@ -102,7 +102,7 @@ public class KvDebug {
     ///
     ///     `throw KvDebug.pause(KvError("Unexpected input"))`
     ///
-    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    /// - Note: Prints reason, file and line to standard output and throws an error catching it immediately when *DEBUG* is true. Use *Swift Error Breakpoint* to pause execution.
     @discardableResult @inlinable
     public static func pause<E: Error>(_ error: E, _ file: StaticString = #fileID, _ line: UInt = #line) -> E {
         pause((error as? KvError)?.message ?? error.localizedDescription, file, line)
@@ -118,13 +118,39 @@ public class KvDebug {
     ///
     ///     `throw KvDebug.pause(KvError("Unexpected input"))`
     ///
-    /// - Note: Prints reason, file and line to standard output and throws an errorcatching it immediately when *DEBUG* is true . Use *Swift Error Breakpoint* to pause execution.
+    /// - Note: Prints reason, file and line to standard output and throws an error catching it immediately when *DEBUG* is true. Use *Swift Error Breakpoint* to pause execution.
     @discardableResult @inlinable
     public static func pause<E: Error>(_ error: E) -> E {
         pause((error as? KvError)?.message ?? error.localizedDescription)
         return error
     }
     #endif // !DEBUG
+
+
+
+#if DEBUG
+    /// Analog of standard ``Swift/assert``()  providing ability to continue execution.
+    ///
+    /// - Note: Use *Swift Error Breakpoint* to pause execution.
+    ///
+    /// In *RELEASE* does nothing. In *DEBUG* prints *message*, file and line to standard output and throws an error catching it immediately.
+    @inlinable
+    public static func assert(_ condition: @autoclosure () -> Bool, _ message: @autoclosure () -> String = String(), file: StaticString = #fileID, line: UInt = #line) {
+        if !condition() {
+            pause(message(), file, line)
+        }
+    }
+
+#else // !DEBUG
+    /// Analog of standard ``Swift/assert``() providing ability to continue execution.
+    ///
+    /// - Note: Use *Swift Error Breakpoint* to pause execution.
+    ///
+    /// In *RELEASE* does nothing. In *DEBUG* prints *message*, file and line to standard output and throws an error catching it immediately.
+    @inlinable
+    public static func assert(_ condition: @autoclosure () -> Bool, _ message: @autoclosure () -> String = String(), file: StaticString = #fileID, line: UInt = #line)
+    { }
+#endif // !DEBUG
 
 }
 

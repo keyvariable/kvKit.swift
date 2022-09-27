@@ -59,7 +59,7 @@ public protocol KvStatisticsProcessor : KvStatisticsStream {
 
 // MARK: - KvStatistics
 
-/// Various statistics auxliliaries.
+/// Various statistics auxiliaries.
 public class KvStatistics { }
 
 
@@ -1090,7 +1090,7 @@ extension KvStatistics {
 
 
 
-            // MARK: Auxliliaries
+            // MARK: Auxiliaries
 
             private func value(divider: Int) -> Value {
                 divider > 0 ? comoment / Value(divider) : 0

@@ -25,97 +25,90 @@ import simd
 
 
 
-public enum KvMath3<Scalar> where Scalar : KvMathFloatingPoint {
+// MARK: - Legacy
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+public typealias KvMathScalar3 = BinaryFloatingPoint & SIMDScalar
+
+
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+public enum KvMath3<Scalar> where Scalar : KvMathScalar3 {
 
     public typealias Scalar = Scalar
 
     public typealias Vector = SIMD3<Scalar>
     public typealias Position = Vector
 
-    public typealias Matrix = KvSimdAny3x3<Scalar>
-    public typealias ProjectiveMatrix = KvSimdAny4x4<Scalar>
-
 }
 
 
 
-public typealias KvMath3F = KvMath3<Float>
-public typealias KvMath3D = KvMath3<Double>
+// MARK: Matrix Fabrics <Float>
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Float {
 
-
-// MARK: Operations
-
-extension KvMath3 {
-
-    /// - Returns: Normalized vector when source vector has nonzero length. Otherwise *nil* is returned.
-    @inlinable
-    public static func normalizedOrNil(_ vector: Vector) -> Vector? {
-        let l² = length_squared(vector)
-
-        guard KvIsNonzero(l²) else { return nil }
-
-        return KvIs(l², inequalTo: 1) ? (vector / sqrt(l²)) : vector
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func supplemented(_ base: simd_float2x2) -> simd_float3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
     }
 
-}
-
-
-
-// MARK: Matrix Fabrics
-
-extension KvMath3 {
-
-    /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented<M2x2>(_ base: M2x2) -> Matrix
-    where M2x2 : KvSimd2x2, M2x2.Scalar == Scalar, M2x2.Column == Matrix.Column.Sample2
-    {
-        Matrix(Matrix.Column(base[0], 0),
-               Matrix.Column(base[1], 0),
-               [ 0, 0, 1 ])
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func supplemented(_ base: simd_float2x3) -> simd_float3x3 {
+        .init(base[0], base[1], [ 0, 0, 1 ])
     }
 
-    /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented<M2x3>(_ base: M2x3) -> Matrix
-    where M2x3 : KvSimd2x3, M2x3.Scalar == Scalar, M2x3.Column == Matrix.Column
-    {
-        Matrix(base[0], base[1], [ 0, 0, 1 ])
-    }
-
-    /// - Returns: Result of replacement if the left top submatrix of identity matrix with given matrix.
-    @inlinable
-    public static func supplemented<M3x2>(_ base: M3x2) -> Matrix
-    where M3x2 : KvSimd3x2, M3x2.Scalar == Scalar, M3x2.Column == Matrix.Column.Sample2
-    {
-        Matrix(Matrix.Column(base[0], 0),
-               Matrix.Column(base[1], 0),
-               Matrix.Column(base[2], 1))
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func supplemented(_ base: simd_float3x2) -> simd_float3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
     }
 
 }
 
 
 
-// MARK: Matrix Operations
+// MARK: Matrix Fabrics <Float>
 
-extension KvMath3 {
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Double {
 
-    @inlinable
-    public static func abs(_ matrix: Matrix) -> Matrix {
-        Matrix(abs(matrix[0]), abs(matrix[1]), abs(matrix[2]))
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func supplemented(_ base: simd_double2x2) -> simd_double3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
     }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func supplemented(_ base: simd_double2x3) -> simd_double3x3 {
+        .init(base[0], base[1], [ 0, 0, 1 ])
+    }
 
-    @inlinable
-    public static func min(_ matrix: Matrix) -> Scalar {
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func supplemented(_ base: simd_double3x2) -> simd_double3x3 {
+        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
+    }
+
+}
+
+
+
+// MARK: Martix Operations <Float>
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Float {
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func abs(_ matrix: simd_float3x3) -> simd_float3x3 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func min(_ matrix: simd_float3x3) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min())
     }
 
-
-    @inlinable
-    public static func max(_ matrix: Matrix) -> Scalar {
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func max(_ matrix: simd_float3x3) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max())
     }
 
@@ -123,221 +116,326 @@ extension KvMath3 {
 
 
 
-// MARK: Transformations
+// MARK: Martix Operations <Double>
 
-extension KvMath3 {
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Double {
 
-    @inlinable
-    public static func apply(_ matrix: ProjectiveMatrix, toPosition position: Position) -> Position {
-        let p4 = matrix * ProjectiveMatrix.Row(position, 1)
-
-        return p4[[ 0, 1, 2] as simd_long3] / p4.w
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func abs(_ matrix: simd_double3x3) -> simd_double3x3 {
+        .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]))
     }
 
-    @inlinable
-    public static func apply(_ matrix: ProjectiveMatrix, toVector vector: Vector) -> Vector {
-        let p4 = matrix * ProjectiveMatrix.Row(vector, 0)
-
-        return p4[[ 0, 1, 2] as simd_long3]
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func min(_ matrix: simd_double3x3) -> Scalar {
+        Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min())
     }
 
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> ProjectiveMatrix {
-        ProjectiveMatrix([ 1, 0, 0, 0 ],
-                         [ 0, 1, 0, 0 ],
-                         [ 0, 0, 1, 0 ],
-                         ProjectiveMatrix.Column(translation, 1))
-    }
-
-    @inlinable
-    public static func translation<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
-    where ProjectiveMatrix : KvSimd4x4, ProjectiveMatrix.Scalar == Scalar
-    {
-        let c4 = matrix[3]
-
-        return c4[[ 0, 1, 2] as simd_long3] / c4.w
-    }
-
-    @inlinable
-    public static func setTranslation<ProjectiveMatrix>(_ translation: Vector, to matrix: inout ProjectiveMatrix)
-    where ProjectiveMatrix : KvSimd4x4, ProjectiveMatrix.Scalar == Scalar
-    {
-        let w = matrix[3, 3]
-
-        matrix[3] = ProjectiveMatrix.Column(translation * w, w)
-    }
-
-
-    /// - Returns: Scale component from given 3×3 matrix.
-    @inlinable
-    public static func scale<Matrix>(from matrix: Matrix) -> Vector
-    where Matrix : KvSimd3x3, Matrix.Scalar == Scalar
-    {
-        Vector(x: length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
-               y: length(matrix[1]),
-               z: length(matrix[2]))
-    }
-
-    /// - Returns: Sqaured scale component from given 3×3 matrix.
-    @inlinable
-    public static func scale²<Matrix>(from matrix: Matrix) -> Vector
-    where Matrix : KvSimd3x3, Matrix.Scalar == Scalar
-    {
-        Vector(x: length_squared(matrix[0]),
-               y: length_squared(matrix[1]),
-               z: length_squared(matrix[2]))
-    }
-
-    /// Changes scale component of given 3×3 matrix to given value. If a column is zero then the result is undefined.
-    @inlinable
-    public static func setScale<Matrix>(_ scale: Vector, to matrix: inout Matrix)
-    where Matrix : KvSimd3x3, Matrix.Scalar == Scalar
-    {
-        let s = scale * rsqrt(self.scale²(from: matrix))
-
-        matrix[0] *= s.x * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
-        matrix[1] *= s.y
-        matrix[2] *= s.z
-    }
-
-
-    /// - Returns: Scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
-    @inlinable
-    public static func scale<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
-    where ProjectiveMatrix : KvSimd4x4, ProjectiveMatrix.Scalar == Scalar
-    {
-        Vector(x: KvMath4.length(matrix[0]) * (KvIsNotNegative(matrix.determinant) ? 1 : -1),
-               y: KvMath4.length(matrix[1]),
-               z: KvMath4.length(matrix[2]))
-    }
-
-    /// - Returns: Squared scale component from given 4×4 projective matrix having row[3] == [ 0, 0, 0, 1 ].
-    @inlinable
-    public static func scale²<ProjectiveMatrix>(from matrix: ProjectiveMatrix) -> Vector
-    where ProjectiveMatrix : KvSimd4x4, ProjectiveMatrix.Scalar == Scalar
-    {
-        Vector(x: KvMath4.length_squared(matrix[0]),
-               y: KvMath4.length_squared(matrix[1]),
-               z: KvMath4.length_squared(matrix[2]))
-    }
-
-    /// Changes scale component of given projective 4×4 matrix having row[3] == [ 0, 0, 0, 1 ]. If a column is zero then the result is undefined.
-    @inlinable
-    public static func setScale<ProjectiveMatrix>(_ scale: Vector, to matrix: inout ProjectiveMatrix)
-    where ProjectiveMatrix : KvSimd4x4, ProjectiveMatrix.Scalar == Scalar
-    {
-        let s = scale * rsqrt(self.scale²(from: matrix))
-
-        // OK due to matrix[0].w == 0
-        matrix[0] *= ProjectiveMatrix.Column(s.x, s.x, s.x, 1) * (KvIsNotNegative(matrix.determinant) ? 1 : -1)
-        matrix[1] *= ProjectiveMatrix.Column(s.y, s.y, s.y, 1)
-        matrix[2] *= ProjectiveMatrix.Column(s.z, s.z, s.z, 1)
-    }
-
-
-    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
-    @inlinable
-    public static func transformation<Matrix>(_ transform: Matrix, relativeTo position: Matrix.Row) -> ProjectiveMatrix
-    where Matrix : KvSimd3x3, Matrix.Scalar == Scalar,
-          Matrix.Row.SimdView == Matrix.Column.SimdView,
-          Matrix.Column == ProjectiveMatrix.Column.Sample3
-    {
-        ProjectiveMatrix(ProjectiveMatrix.Column(transform[0], 0),
-                         ProjectiveMatrix.Column(transform[1], 0),
-                         ProjectiveMatrix.Column(transform[2], 0),
-                         ProjectiveMatrix.Column(position - transform * position, 1))
-    }
-
-
-    /// - Returns: Transformed X basis vector.
-    @inlinable
-    public static func basisX(from matrix: Matrix) -> Matrix.Column {
-        matrix[0]
-    }
-
-    /// - Returns: Transformed Y basis vector.
-    @inlinable
-    public static func basisY(from matrix: Matrix) -> Matrix.Column {
-        matrix[1]
-    }
-
-    /// - Returns: Transformed Z basis vector.
-    @inlinable
-    public static func basisZ(from matrix: Matrix) -> Matrix.Column {
-        matrix[2]
-    }
-
-
-    /// - Returns: Transformed X basis vector.
-    @inlinable
-    public static func basisX(from matrix: ProjectiveMatrix) -> Vector {
-        Vector(simdView: (matrix[0])[[ 0, 1, 2] as simd_long3])
-    }
-
-    /// - Returns: Transformed Y basis vector.
-    @inlinable
-    public static func basisY(from matrix: ProjectiveMatrix) -> Vector {
-        Vector(simdView: (matrix[1])[[ 0, 1, 2] as simd_long3])
-    }
-
-    /// - Returns: Transformed Z basis vector.
-    @inlinable
-    public static func basisZ(from matrix: ProjectiveMatrix) -> Vector {
-        Vector(simdView: (matrix[2])[[ 0, 1, 2] as simd_long3])
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func max(_ matrix: simd_double3x3) -> Scalar {
+        Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max())
     }
 
 }
 
 
 
-// MARK: Projections
+// MARK: Transformations <Float>
 
-extension KvMath3 {
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Float {
 
-    /// - Returns: Matrix of standard orthogonal projection.
-    @inlinable
-    public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> ProjectiveMatrix {
-        // - Note: Single SIMD division seems faster.
-        ProjectiveMatrix(diagonal: .one / ProjectiveMatrix.Diagonal(left - right, bottom - top, near - far, 1))
-        * ProjectiveMatrix([ -2,  0, 0, 0 ],
-                           [  0, -2, 0, 0 ],
-                           [  0,  0, 2, 0 ],
-                           ProjectiveMatrix.Column(right + left, top + bottom, far + near, 1))
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func apply(_ matrix: simd_float4x4, toPosition position: Position) -> Position {
+        let p4 = matrix * simd_make_float4(position, 1)
+
+        return simd_make_float3(p4) / p4.w
     }
 
-
-    /// - Parameter aspect: Ratio of Viewport width to viewport height.
-    /// - Parameter fof: Vertical camera angle.
-    ///
-    /// - Returns: Projection matrix for a centered rectangular pinhole camera.
-    @inlinable
-    public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> ProjectiveMatrix {
-        let tg = KvMath.tan(0.5 * fov)
-        
-        // - Note: Single SIMD division seems faster.
-        return (ProjectiveMatrix(diagonal: .one / ProjectiveMatrix.Diagonal(aspect * tg, tg, near - far, 1))
-                * ProjectiveMatrix([ 1, 0, 0, 0 ],
-                                   [ 0, 1, 0, 0 ],
-                                   ProjectiveMatrix.Column(0,  0,  (far + near)  , -1),
-                                   ProjectiveMatrix.Column(0,  0,  2 * far * near,  0)))
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func apply(_ matrix: simd_float4x4, toVector vector: Vector) -> Vector {
+        simd_make_float3(matrix * simd_make_float4(vector))
     }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func translationMatrix(by translation: Vector) -> simd_float4x4 {
+        simd_matrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0], simd_make_float4(translation, 1))
+    }
 
-    /// - Parameter k: Calibration matrix K (intrinsic matrix) of pinhole camera.
-    ///
-    /// - Returns: Projective matrix for pinhole camera.
-    ///
-    /// - Note: The perspective projection matrix is a combination of orthogonal projection matrix in the frame image units and the camera projective matrix.
-    /// - Note: See details [here](http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/).
-    @inlinable
-    public static func projectiveCameraMatrix(k: Matrix, near: Scalar, far: Scalar) -> ProjectiveMatrix {
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func translation(from matrix: simd_float4x4) -> Vector {
+        let c4 = matrix[3]
+
+        return simd_make_float3(c4) / c4.w
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func setTranslation(_ translation: Vector, to matrix: inout simd_float4x4) {
+        let w = matrix[3, 3]
+
+        matrix[3] = simd_make_float4(translation * w, w)
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale(from matrix: simd_float3x3) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale²(from matrix: simd_float3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[1] *= s.y
+        matrix[2] *= s.z
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale(from matrix: simd_float4x4) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale²(from matrix: simd_float4x4) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        // OK due to matrix[0].w == 0
+        matrix[0] *= simd_make_float4(s.x, s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[1] *= simd_make_float4(s.y, s.y, s.y, 1)
+        matrix[2] *= simd_make_float4(s.z, s.z, s.z, 1)
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func transformation(_ transform: simd_float3x3, relativeTo position: Vector) -> simd_float4x4 {
+        simd_matrix(simd_make_float4(transform[0]),
+                    simd_make_float4(transform[1]),
+                    simd_make_float4(transform[2]),
+                    simd_make_float4(position - transform * position, 1))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func basisX(from matrix: simd_float4x4) -> Vector {
+        simd_make_float3(matrix[0])
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func basisY(from matrix: simd_float4x4) -> Vector {
+        simd_make_float3(matrix[1])
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func basisZ(from matrix: simd_float4x4) -> Vector {
+        simd_make_float3(matrix[2])
+    }
+
+}
+
+
+
+// MARK: Transformations <Double>
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Double {
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func apply(_ matrix: simd_double4x4, toPosition position: Position) -> Position {
+        let p4 = matrix * simd_make_double4(position, 1)
+
+        return simd_make_double3(p4) / p4.w
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func apply(_ matrix: simd_double4x4, toVector vector: Vector) -> Vector {
+        simd_make_double3(matrix * simd_make_double4(vector))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func translationMatrix(by translation: Vector) -> simd_double4x4 {
+        simd_matrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0], simd_make_double4(translation, 1))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func translation(from matrix: simd_double4x4) -> Vector {
+        let c4 = matrix[3]
+
+        return simd_make_double3(c4) / c4.w
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func setTranslation(_ translation: Vector, to matrix: inout simd_double4x4) {
+        let w = matrix[3, 3]
+
+        matrix[3] = simd_make_double4(translation * w, w)
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale(from matrix: simd_double3x3) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale²(from matrix: simd_double3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[1] *= s.y
+        matrix[2] *= s.z
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale(from matrix: simd_double4x4) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
+              y: simd.length(matrix[1]),
+              z: simd.length(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func scale²(from matrix: simd_double4x4) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]),
+              z: simd.length_squared(matrix[2]))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        // OK due to matrix[0].w == 0
+        matrix[0] *= simd_make_double4(s.x, s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[1] *= simd_make_double4(s.y, s.y, s.y, 1)
+        matrix[2] *= simd_make_double4(s.z, s.z, s.z, 1)
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func transformation(_ matrix: simd_double3x3, relativeTo position: Vector) -> simd_double4x4 {
+        simd_matrix(simd_make_double4(matrix[0]),
+                    simd_make_double4(matrix[1]),
+                    simd_make_double4(matrix[2]),
+                    simd_make_double4(position - matrix * position, 1))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func basisX(from matrix: simd_double4x4) -> Vector {
+        simd_make_double3(matrix[0])
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func basisY(from matrix: simd_double4x4) -> Vector {
+        simd_make_double3(matrix[1])
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func basisZ(from matrix: simd_double4x4) -> Vector {
+        simd_make_double3(matrix[2])
+    }
+
+}
+
+
+
+// MARK: Projections <Float>
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Float {
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> simd_float4x4 {
+        // - Note: Single SIMD division seems faster.
+        simd_float4x4(diagonal: .one / simd_float4(left - right, bottom - top, near - far, 1))
+        * simd_float4x4([ -2,  0, 0, 0 ],
+                        [  0, -2, 0, 0 ],
+                        [  0,  0, 2, 0 ],
+                        .init(right + left, top + bottom, far + near, 1))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> simd_float4x4 {
+        let tg = tan(0.5 * fov)
+
+        // - Note: Single SIMD division seems faster.
+        return (simd_float4x4(diagonal: .one / simd_float4(aspect * tg, tg, near - far, 1))
+                * simd_float4x4([ 1, 0, 0, 0 ],
+                                [ 0, 1, 0, 0 ],
+                                .init(0,  0,  (far + near)  , -1),
+                                .init(0,  0,  2 * far * near,  0)))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func projectiveCameraMatrix(k: simd_float3x3, near: Scalar, far: Scalar) -> simd_float4x4 {
         // - Note: Implementation below uses full K matrix. It seems better then picking some elements if K.
-        ProjectiveMatrix([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
-        * ProjectiveMatrix(ProjectiveMatrix.Column(k[0], 0),
-                           ProjectiveMatrix.Column(k[1], 0),
-                           ProjectiveMatrix.Column(-k[2], near + far),
-                           ProjectiveMatrix.Column(0, 0, 0, near * far))
+        simd_float4x4([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
+        * simd_float4x4(simd_make_float4(k[0]),
+                        simd_make_float4(k[1]),
+                        simd_make_float4(-k[2], near + far),
+                        .init(0, 0, 0, near * far))
+    }
+
+}
+
+
+
+// MARK: Projections <Double>
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 where Scalar == Double {
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> simd_double4x4 {
+        // - Note: Single SIMD division seems faster.
+        simd_double4x4(diagonal: .one / simd_double4(left - right, bottom - top, near - far, 1))
+        * simd_double4x4([ -2,  0, 0, 0 ],
+                         [  0, -2, 0, 0 ],
+                         [  0,  0, 2, 0 ],
+                         .init(right + left, top + bottom, far + near, 1))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> simd_double4x4 {
+        let tg = tan(0.5 * fov)
+
+        // - Note: Single SIMD division seems faster.
+        return (simd_double4x4(diagonal: .one / simd_double4(aspect * tg, tg, near - far, 1))
+                * simd_double4x4([ 1, 0, 0, 0 ],
+                                 [ 0, 1, 0, 0 ],
+                                 .init(0,  0,  (far + near)  , -1),
+                                 .init(0,  0,  2 * far * near,  0)))
+    }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func projectiveCameraMatrix(k: simd_double3x3, near: Scalar, far: Scalar) -> simd_double4x4 {
+        // - Note: Implementation below uses full K matrix. It seems better then picking some elements if K.
+        simd_double4x4([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 0, 1 ], [ 0, 0, 1, 0 ])
+        * simd_double4x4(simd_make_double4(k[0]),
+                         simd_make_double4(k[1]),
+                         simd_make_double4(-k[2], near + far),
+                         .init(0, 0, 0, near * far))
     }
 
 }
@@ -346,8 +444,10 @@ extension KvMath3 {
 
 // MARK: .Line
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
+    @available(*, deprecated, message: "Use KvLine3")
     public struct Line : Hashable {
 
         /// Line origin is the closest point to origin of the coordinate space.
@@ -468,8 +568,10 @@ extension KvMath3 {
 
 // MARK: .Segment
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
+    @available(*, deprecated)
     public struct Segment : Hashable {
 
         public let line: Line
@@ -503,7 +605,7 @@ extension KvMath3 {
 
         @inlinable
         public func distance(to point: Position) -> Scalar {
-            let offset = KvMath.clamp(line.projectionOffset(for: point), range.lowerBound, range.upperBound)
+            let offset = KvMath3.clamp(line.projectionOffset(for: point), range.lowerBound, range.upperBound)
 
             return KvMath3.distance(line.at(offset), point)
         }
@@ -515,8 +617,8 @@ extension KvMath3 {
             case .some(let offset1):
                 let offset2 = segment.line.nearbyOffset(for: line)!
 
-                return KvMath3.distance(line.at(KvMath.clamp(offset1, range.lowerBound, range.upperBound)),
-                                         segment.line.at(KvMath.clamp(offset2, segment.range.lowerBound, segment.range.upperBound)))
+                return KvMath3.distance(line.at(KvMath3.clamp(offset1, range.lowerBound, range.upperBound)),
+                                        segment.line.at(KvMath3.clamp(offset2, segment.range.lowerBound, segment.range.upperBound)))
 
             case .none:
                 typealias Projection = (offset: Scalar, point: Position)
@@ -525,7 +627,7 @@ extension KvMath3 {
                 let pl2: Projection = { (offset: line.projectionOffset(for: $0), point: $0) }(segment.p1)
 
                 let projectedRange: (lowerBound: Projection, upperBound: Projection) = (pl1.offset <= pl2.offset)
-                    ? (lowerBound: pl1, upperBound: pl2) : (lowerBound: pl2, upperBound: pl1)
+                ? (lowerBound: pl1, upperBound: pl2) : (lowerBound: pl2, upperBound: pl1)
 
                 if KvIs(range.upperBound, lessThan: projectedRange.lowerBound.offset) {
                     return KvMath3.distance(p2, projectedRange.lowerBound.point)
@@ -574,9 +676,10 @@ extension KvMath3 {
 
 // MARK: .Plane
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
-    /// Plane equation: *normal* · *x* + *d* = 0, where *x* in on the plane.
+    @available(*, deprecated, message: "Use KvPlane3")
     public struct Plane : Hashable {
 
         public let normal: Vector
@@ -627,12 +730,6 @@ extension KvMath3 {
         /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
         @inlinable
         public init?(_ abcd: SIMD4<Scalar>) {
-            self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
-        }
-
-        /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
-        @inlinable
-        public init?<V4>(_ abcd: V4) where V4 : KvSimd4, V4.Scalar == Scalar {
             self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
         }
 
@@ -752,11 +849,10 @@ extension KvMath3 {
 
 // MARK: .FastPlane
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
-    /// A plane with neither normalization nor normal validation.
-    ///
-    /// Plane equation: *normal* · *x* + *d* = 0, where *x* in on the plane.
+    @available(*, deprecated, message: "Use KvPlane3")
     public struct FastPlane : Hashable {
 
         public let normal: Vector
@@ -781,12 +877,6 @@ extension KvMath3 {
         /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
         @inlinable
         public init(_ abcd: SIMD4<Scalar>) {
-            self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
-        }
-
-        /// Initialize a plane where a, b, c and d coeficients are scalars of given vector.
-        @inlinable
-        public init<V4>(_ abcd: V4) where V4 : KvSimd4, V4.Scalar == Scalar {
             self.init(a: abcd.x, b: abcd.y, c: abcd.z, d: abcd.w)
         }
 
@@ -825,9 +915,10 @@ extension KvMath3 {
 
 // MARK: .AABB
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
-    /// Axis-alligned bounding box.
+    @available(*, deprecated, message: "Use KvAABB3")
     public struct AABB : Hashable {
 
         public let min: Position
@@ -960,14 +1051,38 @@ extension KvMath3 {
             .init(min: min + translation, max: max + translation)
         }
 
+    }
 
-        @inlinable
-        public func applying(_ transform: ProjectiveMatrix) -> Self {
-            Self(over: Self.pointIndices.lazy.map { index in
-                apply(transform, toPosition: point(at: index))
-            })!
-        }
+}
 
+
+
+// MARK: <Float>.AABB
+
+@available(*, deprecated, message: "Use KvAABB3")
+extension KvMath3.AABB where Scalar == Float {
+
+    @inlinable
+    public func applying(_ transform: simd_float4x4) -> Self {
+        Self(over: Self.pointIndices.lazy.map { index in
+            KvMath3.apply(transform, toPosition: point(at: index))
+        })!
+    }
+
+}
+
+
+
+// MARK: <Double>.AABB
+
+@available(*, deprecated, message: "Use KvAABB3")
+extension KvMath3.AABB where Scalar == Double {
+
+    @inlinable
+    public func applying(_ transform: simd_double4x4) -> Self {
+        Self(over: Self.pointIndices.lazy.map { index in
+            KvMath3.apply(transform, toPosition: point(at: index))
+        })!
     }
 
 }
@@ -976,8 +1091,10 @@ extension KvMath3 {
 
 // MARK: .Frustum
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
+    @available(*, deprecated, message: "Use KvFrustum")
     public struct Frustum : Hashable {
 
         public let left, right, bottom, top, near, far: Plane
@@ -992,53 +1109,6 @@ extension KvMath3 {
             self.near = near
             self.far = far
         }
-
-
-        /// Initializes a frustum with a perspective projection matrix.
-        public init?<Projection>(_ projectionMatrix: Projection)
-        where Projection : KvSimd4x4, Projection.Scalar == Scalar
-        {
-            let m = projectionMatrix.transpose
-
-            guard let l = Plane(m[3] + m[0]),
-                  let r = Plane(m[3] - m[0]),
-                  let b = Plane(m[3] + m[1]),
-                  let t = Plane(m[3] - m[1]),
-                  let n = Plane(m[3] + m[2]),
-                  let f = Plane(m[3] - m[2])
-            else { return nil }
-
-            self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
-        }
-
-        /// Initializes a frustum with a perspective projection matrix.
-        @inlinable
-        public init?(_ projectionMatrix: ProjectiveMatrix) { self.init(projectionMatrix.wrapped) }
-
-
-
-        /// Initializes a frustum with a perspective projection matrix overriding Z planes.
-        public init?<Projection>(_ projectionMatrix: Projection, zNear: Scalar, zFar: Scalar)
-        where Projection : KvSimd4x4, Projection.Scalar == Scalar
-        {
-            let m = projectionMatrix.transpose
-
-            guard let l = Plane(m[3] + m[0]),
-                  let r = Plane(m[3] - m[0]),
-                  let b = Plane(m[3] + m[1]),
-                  let t = Plane(m[3] - m[1])
-            else { return nil }
-
-            let (n, f) = (zFar < zNear
-                          ? (Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
-                          : (Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
-
-            self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
-        }
-
-        /// Initializes a frustum with a perspective projection matrix overriding Z planes.
-        @inlinable
-        public init?(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) { self.init(projectionMatrix.wrapped, zNear: zNear, zFar: zFar) }
 
 
         /// The zero frustum, containing zero point only.
@@ -1092,10 +1162,98 @@ extension KvMath3 {
 
 
 
+// MARK: <Float>.Frustum
+
+@available(*, deprecated, message: "Use KvFrustum")
+extension KvMath3.Frustum where Scalar == Float {
+
+    /// Initializes a frustum with a perspective projection matrix.
+    public init?(_ projectionMatrix: simd_float4x4) {
+        let m = projectionMatrix.transpose
+
+        guard let l = KvMath3.Plane(m[3] + m[0]),
+              let r = KvMath3.Plane(m[3] - m[0]),
+              let b = KvMath3.Plane(m[3] + m[1]),
+              let t = KvMath3.Plane(m[3] - m[1]),
+              let n = KvMath3.Plane(m[3] + m[2]),
+              let f = KvMath3.Plane(m[3] - m[2])
+        else { return nil }
+
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
+    }
+
+
+
+    /// Initializes a frustum with a perspective projection matrix overriding Z planes.
+    public init?(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
+        let m = projectionMatrix.transpose
+
+        guard let l = KvMath3.Plane(m[3] + m[0]),
+              let r = KvMath3.Plane(m[3] - m[0]),
+              let b = KvMath3.Plane(m[3] + m[1]),
+              let t = KvMath3.Plane(m[3] - m[1])
+        else { return nil }
+
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
+
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
+    }
+
+}
+
+
+
+// MARK: <Double>.Frustum
+
+@available(*, deprecated, message: "Use KvFrustum")
+extension KvMath3.Frustum where Scalar == Double {
+
+    /// Initializes a frustum with a perspective projection matrix.
+    public init?(_ projectionMatrix: simd_double4x4) {
+        let m = projectionMatrix.transpose
+
+        guard let l = KvMath3.Plane(m[3] + m[0]),
+              let r = KvMath3.Plane(m[3] - m[0]),
+              let b = KvMath3.Plane(m[3] + m[1]),
+              let t = KvMath3.Plane(m[3] - m[1]),
+              let n = KvMath3.Plane(m[3] + m[2]),
+              let f = KvMath3.Plane(m[3] - m[2])
+        else { return nil }
+
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
+    }
+
+
+
+    /// Initializes a frustum with a perspective projection matrix overriding Z range.
+    public init?(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
+        let m = projectionMatrix.transpose
+
+        guard let l = KvMath3.Plane(m[3] + m[0]),
+              let r = KvMath3.Plane(m[3] - m[0]),
+              let b = KvMath3.Plane(m[3] + m[1]),
+              let t = KvMath3.Plane(m[3] - m[1])
+        else { return nil }
+
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zNear), KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.Plane(unitNormal: [ 0, 0,  1 ], d: -zNear), KvMath3.Plane(unitNormal: [ 0, 0, -1 ], d:  zFar)))
+
+        self.init(left: l, right: r, bottom: b, top: t, near: n, far: f)
+    }
+
+}
+
+
+
 // MARK: .FastFrustum
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
+    @available(*, deprecated, message: "Use KvFrustum")
     public struct FastFrustum : Hashable {
 
         public let left, right, bottom, top, near, far: FastPlane
@@ -1109,50 +1267,6 @@ extension KvMath3 {
             self.top = top
             self.near = near
             self.far = far
-        }
-
-
-        /// Initializes a frustum with a perspective projection matrix.
-        public init<Projection>(_ projectionMatrix: Projection)
-        where Projection : KvSimd4x4, Projection.Scalar == Scalar
-        {
-            let m = projectionMatrix.transpose
-
-            self.init(left:   FastPlane(m[3] + m[0]),
-                      right:  FastPlane(m[3] - m[0]),
-                      bottom: FastPlane(m[3] + m[1]),
-                      top:    FastPlane(m[3] - m[1]),
-                      near:   FastPlane(m[3] + m[2]),
-                      far:    FastPlane(m[3] - m[2]))
-        }
-
-        /// Initializes a frustum with a perspective projection matrix.
-        @inlinable
-        public init(_ projectionMatrix: ProjectiveMatrix) { self.init(projectionMatrix.wrapped) }
-
-
-
-        /// Initializes a frustum with a perspective projection matrix overriding Z range.
-        public init<Projection>(_ projectionMatrix: Projection, zNear: Scalar, zFar: Scalar)
-        where Projection : KvSimd4x4, Projection.Scalar == Scalar
-        {
-            let m = projectionMatrix.transpose
-            let (n, f) = (zFar < zNear
-                          ? (FastPlane(normal: [ 0, 0, -1 ], d:  zNear), FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
-                          : (FastPlane(normal: [ 0, 0,  1 ], d: -zNear), FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
-
-            self.init(left:   FastPlane(m[3] + m[0]),
-                      right:  FastPlane(m[3] - m[0]),
-                      bottom: FastPlane(m[3] + m[1]),
-                      top:    FastPlane(m[3] - m[1]),
-                      near:   n,
-                      far:    f)
-        }
-
-        /// Initializes a frustum with a perspective projection matrix overriding Z range.
-        @inlinable
-        public init(_ projectionMatrix: ProjectiveMatrix, zNear: Scalar, zFar: Scalar) {
-            self.init(projectionMatrix.wrapped, zNear: zNear, zFar: zFar)
         }
 
 
@@ -1183,10 +1297,110 @@ extension KvMath3 {
 
 
 
-// MARK: .Sphere
+// MARK: <Float>.FastFrustum
 
+@available(*, deprecated, message: "Use KvFrustum")
+extension KvMath3.FastFrustum where Scalar == Float {
+
+    /// Initializes a frustum with a perspective projection matrix.
+    @inlinable
+    public init(_ projectionMatrix: simd_float4x4) {
+        let m = projectionMatrix.transpose
+
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   .init(m[3] + m[2]),
+                  far:    .init(m[3] - m[2]))
+    }
+
+
+
+    /// Initializes a frustum with a perspective projection matrix overriding Z range.
+    @inlinable
+    public init(_ projectionMatrix: simd_float4x4, zNear: Scalar, zFar: Scalar) {
+        let m = projectionMatrix.transpose
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zNear), KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zNear), KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
+
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   n,
+                  far:    f)
+    }
+
+}
+
+
+
+// MARK: <Double>.FastFrustum
+
+@available(*, deprecated, message: "Use KvFrustum")
+extension KvMath3.FastFrustum where Scalar == Double {
+
+    /// Initializes a frustum with a perspective projection matrix.
+    @inlinable
+    public init(_ projectionMatrix: simd_double4x4) {
+        let m = projectionMatrix.transpose
+
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   .init(m[3] + m[2]),
+                  far:    .init(m[3] - m[2]))
+    }
+
+
+
+    /// Initializes a frustum with a perspective projection matrix overriding Z range.
+    @inlinable
+    public init(_ projectionMatrix: simd_double4x4, zNear: Scalar, zFar: Scalar) {
+        let m = projectionMatrix.transpose
+        let (n, f) = (zFar < zNear
+                      ? (KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zNear), KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zFar))
+                      : (KvMath3.FastPlane(normal: [ 0, 0,  1 ], d: -zNear), KvMath3.FastPlane(normal: [ 0, 0, -1 ], d:  zFar)))
+
+        self.init(left:   .init(m[3] + m[0]),
+                  right:  .init(m[3] - m[0]),
+                  bottom: .init(m[3] + m[1]),
+                  top:    .init(m[3] - m[1]),
+                  near:   n,
+                  far:    f)
+    }
+
+}
+
+
+
+// MARK: Auxiliaries
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func normalizedOrNil(_ vector: Vector) -> Vector? {
+        let l² = length_squared(vector)
+
+        guard KvIsNonzero(l²) else { return nil }
+
+        return KvIs(l², inequalTo: 1) ? (vector / sqrt(l²)) : vector
+    }
+
+}
+
+
+
+// MARK: .Sphere
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+extension KvMath3 {
+
+    @available(*, deprecated, message: "Use KvSphere3")
     public struct Sphere : Hashable {
 
         public let center: Position
@@ -1230,14 +1444,14 @@ extension KvMath3 {
 
 // MARK: .MeshVolume
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
-    @available(*, deprecated, renamed: "MeshVolume")
+    @available(*, deprecated, message: "Use KvMesh3.Volume")
     public struct Volume { }
 
 
-
-    /// Stream accumulating volume of solid body composed of triangles. Volume is calculated as sum of signed pyramid volumes where bases are surface triangles and having the same top vertex.
+    @available(*, deprecated, message: "Use KvMesh3.Volume")
     public struct MeshVolume : Hashable {
 
         @inlinable
@@ -1278,108 +1492,63 @@ extension KvMath3 {
 
 // MARK: Generalization of SIMD
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 {
 
-    @inlinable
-    public static func abs<V>(_ v: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        V(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z))
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y), Swift.abs(v.z)) }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
+        Vector(x: KvMath3.clamp(v.x, min.x, max.x),
+               y: KvMath3.clamp(v.y, min.y, max.y),
+               z: KvMath3.clamp(v.z, min.z, max.z))
     }
 
-    @inlinable
-    public static func acos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func asin(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func atan(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func clamp<V>(_ v: V, _ min: V, _ max: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        V(x: KvMath.clamp(v.x, min.x, max.x),
-          y: KvMath.clamp(v.y, min.y, max.y),
-          z: KvMath.clamp(v.z, min.z, max.z))
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector {
+        Vector(x: x.y * y.z - x.z * y.y,
+               y: x.z * y.x - x.x * y.z,
+               z: x.x * y.y - x.y * y.x)
     }
 
-    @inlinable
-    public static func cos(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
 
-    @inlinable
-    public static func cospi(_ x: Scalar) -> Scalar { fatalError("Incomplete implementation") }
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y + x.z * y.z }
 
-    @inlinable public static func cross<V>(_ x: V, _ y: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        V(x: x.y * y.z - x.z * y.y,
-          y: x.z * y.x - x.x * y.z,
-          z: x.x * y.y - x.y * y.x)
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func length_squared(_ v: Vector) -> Scalar { dot(v, v) }
+
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector {
+        Vector(x: Swift.max(x.x, y.x),
+               y: Swift.max(x.y, y.y),
+               z: Swift.max(x.z, y.z))
     }
 
-    @inlinable
-    public static func distance<V>(_ x: V, _ y: V) -> Scalar where V : KvSimd3, V.Scalar == Scalar {
-        length(y - x)
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector {
+        Vector(x: Swift.min(x.x, y.x),
+               y: Swift.min(x.y, y.y),
+               z: Swift.min(x.z, y.z))
     }
 
-    @inlinable
-    public static func dot<V>(_ x: V, _ y: V) -> Scalar where V : KvSimd3, V.Scalar == Scalar {
-        x.x * y.x + x.y * y.y + x.z * y.z
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
+        let oneMinusT = 1 - t
+
+        return Vector(x: x.x * oneMinusT + y.x * t,
+                      y: x.y * oneMinusT + y.y * t,
+                      z: x.z * oneMinusT + y.z * t)
     }
-
-    @inlinable
-    public static func length<V>(_ v: V) -> Scalar where V : KvSimd3, V.Scalar == Scalar {
-        dot(v, v).squareRoot()
-    }
-
-    @inlinable
-    public static func length_squared<V>(_ v: V) -> Scalar where V : KvSimd3, V.Scalar == Scalar {
-        dot(v, v)
-    }
-
-    @inlinable
-    public static func max<V>(_ x: Vector, _ y: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        V(x: Swift.max(x.x, y.x),
-          y: Swift.max(x.y, y.y),
-          z: Swift.max(x.z, y.z))
-    }
-
-    @inlinable
-    public static func min<V>(_ x: V, _ y: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        .init(x: Swift.min(x.x, y.x),
-              y: Swift.min(x.y, y.y),
-              z: Swift.min(x.z, y.z))
-    }
-
-    @inlinable
-    public static func mix<V>(_ x: V, _ y: V, t: Scalar) -> V where V : KvSimd3, V.Scalar == Scalar {
-        let oneMinusT: Scalar = 1 - t
-
-        return V(x: x.x * oneMinusT + y.x * t,
-                 y: x.y * oneMinusT + y.y * t,
-                 z: x.z * oneMinusT + y.z * t)
-    }
-
-    @inlinable
-    public static func normalize<V>(_ v: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        v / length(v)
-    }
-
-    @inlinable
-    public static func rsqrt<V>(_ v: V) -> V where V : KvSimd3, V.Scalar == Scalar {
-        1 / (v * v).squareRoot()
-    }
-
-    @inlinable
-    public static func sin(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func sinpi(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func tan(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
-
-    @inlinable
-    public static func tanpi(_ x: Vector) -> Vector { fatalError("Incomplete implementation") }
 
 }
 
@@ -1387,61 +1556,41 @@ extension KvMath3 {
 
 // MARK: SIMD where Scalar == Float
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 where Scalar == Float {
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func acos(_ x: Vector) -> Vector { simd.acos(x) }
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func asin(_ x: Vector) -> Vector { simd.asin(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func atan(_ x: Vector) -> Vector { simd.atan(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func atan2(_ x: Vector, _ y: Vector) -> Vector { simd.atan2(x, y) }
-
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func cos(_ x: Vector) -> Vector { simd.cos(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func cospi(_ x: Vector) -> Vector { simd.cospi(x) }
-
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector { simd.cross(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { simd.dot(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { simd.length(v) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func length_squared(_ v: Vector) -> Scalar { simd.length_squared(v) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector { simd_max(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
-
-    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
-
-    @inlinable public static func rsqrt(_ v: Vector) -> Vector { simd.rsqrt(v) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func sin(_ x: Vector) -> Vector { simd.sin(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func sinpi(_ x: Vector) -> Vector { simd.sinpi(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func tan(_ x: Vector) -> Vector { simd.tan(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func tanpi(_ x: Vector) -> Vector { simd.tanpi(x) }
 
 }
 
@@ -1449,61 +1598,41 @@ extension KvMath3 where Scalar == Float {
 
 // MARK: SIMD where Scalar == Double
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 where Scalar == Double {
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func acos(_ x: Vector) -> Vector { simd.acos(x) }
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func asin(_ x: Vector) -> Vector { simd.asin(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func atan(_ x: Vector) -> Vector { simd.atan(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func atan2(_ x: Vector, _ y: Vector) -> Vector { simd.atan2(x, y) }
-
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func cos(_ x: Vector) -> Vector { simd.cos(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func cospi(_ x: Vector) -> Vector { simd.cospi(x) }
-
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector { simd.cross(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { simd.dot(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { simd.length(v) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func length_squared(_ v: Vector) -> Scalar { simd.length_squared(v) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector { simd_max(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
 
+    @available(*, deprecated, message: "Refactor related code to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
-
-    @inlinable public static func normalize(_ v: Vector) -> Vector { simd.normalize(v) }
-
-    @inlinable public static func rsqrt(_ v: Vector) -> Vector { simd.rsqrt(v) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func sin(_ x: Vector) -> Vector { simd.sin(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func sinpi(_ x: Vector) -> Vector { simd.sinpi(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func tan(_ x: Vector) -> Vector { simd.tan(x) }
-
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    @inlinable public static func tanpi(_ x: Vector) -> Vector { simd.tanpi(x) }
 
 }
 
@@ -1511,17 +1640,16 @@ extension KvMath3 where Scalar == Double {
 
 // MARK: - Vector Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, equalTo rhs: KvMath3<Scalar>.Vector) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, equalTo rhs: KvMath3<Scalar>.Vector) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIsZero(KvMath3.abs(lhs - rhs).max())
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, inequalTo rhs: KvMath3<Scalar>.Vector) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Vector, inequalTo rhs: KvMath3<Scalar>.Vector) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIsNonzero(KvMath3.abs(lhs - rhs).max())
 }
@@ -1530,18 +1658,23 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - Matrix Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Matrix, equalTo rhs: KvMath3<Scalar>.Matrix) -> Bool
-where Scalar : KvMathFloatingPoint
-{
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_float3x3, equalTo rhs: simd_float3x3) -> Bool {
     KvIsZero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_double3x3, equalTo rhs: simd_double3x3) -> Bool {
+    KvIsZero(KvMath3.max(KvMath3.abs(lhs - rhs)))
+}
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Matrix, inequalTo rhs: KvMath3<Scalar>.Matrix) -> Bool
-where Scalar : KvMathFloatingPoint
-{
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_float3x3, inequalTo rhs: simd_float3x3) -> Bool {
+    KvIsNonzero(KvMath3.max(KvMath3.abs(lhs - rhs)))
+}
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_double3x3, inequalTo rhs: simd_double3x3) -> Bool {
     KvIsNonzero(KvMath3.max(KvMath3.abs(lhs - rhs)))
 }
 
@@ -1549,17 +1682,16 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - Line Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, equalTo rhs: KvMath3<Scalar>.Line) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, equalTo rhs: KvMath3<Scalar>.Line) -> Bool
+where Scalar : KvMathScalar3
 {
     lhs.contains(rhs.origin) && KvIs(lhs.standardDirection, equalTo: rhs.standardDirection)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, inequalTo rhs: KvMath3<Scalar>.Line) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Line, inequalTo rhs: KvMath3<Scalar>.Line) -> Bool
+where Scalar : KvMathScalar3
 {
     !lhs.contains(rhs.origin) || KvIs(lhs.standardDirection, inequalTo: rhs.standardDirection)
 }
@@ -1568,19 +1700,18 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - Segment Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, equalTo rhs: KvMath3<Scalar>.Segment) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, equalTo rhs: KvMath3<Scalar>.Segment) -> Bool
+where Scalar : KvMathScalar3
 {
     let p11 = lhs.p1, p21 = rhs.p1
 
     return KvIs(p11, equalTo: p21) ? KvIs(lhs.p2, equalTo: rhs.p2) : (KvIs(p11, equalTo: rhs.p2) && KvIs(lhs.p2, equalTo: p21))
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, inequalTo rhs: KvMath3<Scalar>.Segment) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Segment, inequalTo rhs: KvMath3<Scalar>.Segment) -> Bool
+where Scalar : KvMathScalar3
 {
     !KvIs(lhs, equalTo: rhs)
 }
@@ -1589,17 +1720,16 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - Plane Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, equalTo rhs: KvMath3<Scalar>.Plane) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, equalTo rhs: KvMath3<Scalar>.Plane) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.normal, equalTo: rhs.normal) && KvIs(lhs.d, equalTo: rhs.d)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, inequalTo rhs: KvMath3<Scalar>.Plane) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Plane, inequalTo rhs: KvMath3<Scalar>.Plane) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.normal, inequalTo: rhs.normal) || KvIs(lhs.d, inequalTo: rhs.d)
 }
@@ -1608,17 +1738,16 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - AABB Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, equalTo rhs: KvMath3<Scalar>.AABB) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, equalTo rhs: KvMath3<Scalar>.AABB) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.min, equalTo: rhs.min) && KvIs(lhs.max, equalTo: rhs.max)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, inequalTo rhs: KvMath3<Scalar>.AABB) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.AABB, inequalTo rhs: KvMath3<Scalar>.AABB) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)
 }
@@ -1627,19 +1756,18 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - Frustum Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, equalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, equalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.left, equalTo: rhs.left) && KvIs(lhs.right, equalTo: rhs.right)
     && KvIs(lhs.bottom, equalTo: rhs.bottom) && KvIs(lhs.top, equalTo: rhs.top)
     && KvIs(lhs.near, equalTo: rhs.near) && KvIs(lhs.far, equalTo: rhs.far)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, inequalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Frustum, inequalTo rhs: KvMath3<Scalar>.Frustum) -> Bool
+where Scalar : KvMathScalar3
 {
     !KvIs(lhs, equalTo: rhs)
 }
@@ -1648,17 +1776,16 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - Sphere Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, equalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, equalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.center, equalTo: rhs.center) && KvIs(lhs.radius, equalTo: rhs.radius)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, inequalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.Sphere, inequalTo rhs: KvMath3<Scalar>.Sphere) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs.center, inequalTo: rhs.center) || KvIs(lhs.radius, inequalTo: rhs.radius)
 }
@@ -1667,66 +1794,51 @@ where Scalar : KvMathFloatingPoint
 
 // MARK: - MeshVolume Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, equalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, equalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs._value, equalTo: rhs._value)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, inequalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
-where Scalar : KvMathFloatingPoint
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath3<Scalar>.MeshVolume, inequalTo rhs: KvMath3<Scalar>.MeshVolume) -> Bool
+where Scalar : KvMathScalar3
 {
     KvIs(lhs._value, inequalTo: rhs._value)
 }
 
 
 
-// MARK: - Legacy
+// MARK: - Legacy <Float>
 
-@available(*, deprecated, renamed: "KvMathFloatingPoint")
-public typealias KvMathScalar3 = KvMathFloatingPoint
-
-
-extension KvMath3 {
-
-    @available(*, deprecated, message: "Use KvMath.clamp()")
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
-
-}
-
-
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 where Scalar == Float {
 
-    @available(*, deprecated, message: "Use KvMath.clamp()")
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+    @available(*, deprecated, renamed: "basisX") @inlinable
+    public static func right(from matrix: simd_float4x4) -> Vector { basisX(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisZ")
-    @inlinable public static func front(from matrix: ProjectiveMatrix) -> Vector { basisZ(from: matrix) }
+    @available(*, deprecated, renamed: "basisY") @inlinable
+    public static func up(from matrix: simd_float4x4) -> Vector { basisY(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisX")
-    @inlinable public static func right(from matrix: ProjectiveMatrix) -> Vector { basisX(from: matrix) }
-
-    @available(*, deprecated, renamed: "basisY")
-    @inlinable public static func up(from matrix: ProjectiveMatrix) -> Vector { basisY(from: matrix) }
+    @available(*, deprecated, renamed: "basisZ") @inlinable
+    public static func front(from matrix: simd_float4x4) -> Vector { basisZ(from: matrix) }
 
 }
 
 
+// MARK: - Legacy <Double>
+
+@available(*, deprecated, message: "Refactor related code to KvMathScope")
 extension KvMath3 where Scalar == Double {
 
-    @available(*, deprecated, message: "Use KvMath.clamp()")
-    @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
+    @available(*, deprecated, renamed: "basisX") @inlinable
+    public static func right(from matrix: simd_double4x4) -> Vector { basisX(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisZ")
-    @inlinable public static func front(from matrix: ProjectiveMatrix) -> Vector { basisZ(from: matrix) }
+    @available(*, deprecated, renamed: "basisY") @inlinable
+    public static func up(from matrix: simd_double4x4) -> Vector { basisY(from: matrix) }
 
-    @available(*, deprecated, renamed: "basisX")
-    @inlinable public static func right(from matrix: ProjectiveMatrix) -> Vector { basisX(from: matrix) }
-
-    @available(*, deprecated, renamed: "basisY")
-    @inlinable public static func up(from matrix: ProjectiveMatrix) -> Vector { basisY(from: matrix) }
+    @available(*, deprecated, renamed: "basisZ") @inlinable
+    public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
 
 }

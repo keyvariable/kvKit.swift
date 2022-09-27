@@ -22,36 +22,23 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  Collection of convinient protocols to provide generic constarints for dimmensions of SIMD vectors.
+//  Collection of convinient protocols for SIMD vectors to provide generic constarints for dimmensions of SIMD vectors.
 //
 
 import simd
 
 
 
-// MARK: - KvSimdVectorScalar
-
-public typealias KvSimdVectorScalar = SIMDScalar & Comparable
-
-
-
 // MARK: - KvSimdVector
 
-public protocol KvSimdVector : SIMD
-where Scalar : KvSimdVectorScalar, ArrayLiteralElement == Scalar
-{
+public protocol KvSimdVector : Hashable, CustomDebugStringConvertible {
 
-    associatedtype SimdView : SIMD where SimdView.Scalar == Scalar
+    associatedtype Scalar : SIMDScalar
 
-
-    // MARK: Properties
 
     var scalarCount: Int { get }
 
     var indices: Range<Int> { get }
-
-    /// SIMD representation of the receiver. It's designed to solve some generic cases.
-    var simdView: SimdView { get set }
 
 
     // MARK: Initialization
@@ -64,37 +51,24 @@ where Scalar : KvSimdVectorScalar, ArrayLiteralElement == Scalar
 
     init<S>(_ scalars: S) where S : Sequence, Scalar == S.Element
 
-    init(simdView: SimdView)
-
 
     // MARK: Subscripts
 
     subscript(index: Int) -> Scalar { get set }
 
-    subscript<Index>(index: SIMD2<Index>) -> Sample2 where Index : SIMDScalar & FixedWidthInteger { get }
+    subscript<Index>(index: SIMD2<Index>) -> SIMD2<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
-    subscript<Index>(index: SIMD3<Index>) -> Sample3 where Index : SIMDScalar & FixedWidthInteger { get }
+    subscript<Index>(index: SIMD3<Index>) -> SIMD3<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
-    subscript<Index>(index: SIMD4<Index>) -> Sample4 where Index : SIMDScalar & FixedWidthInteger { get }
+    subscript<Index>(index: SIMD4<Index>) -> SIMD4<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
-    subscript<Index>(index: SIMD8<Index>) -> Sample8 where Index : SIMDScalar & FixedWidthInteger { get }
+    subscript<Index>(index: SIMD8<Index>) -> SIMD8<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
-    subscript<Index>(index: SIMD16<Index>) -> Sample16 where Index : SIMDScalar & FixedWidthInteger { get }
+    subscript<Index>(index: SIMD16<Index>) -> SIMD16<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
-    subscript<Index>(index: SIMD32<Index>) -> Sample32 where Index : SIMDScalar & FixedWidthInteger { get }
+    subscript<Index>(index: SIMD32<Index>) -> SIMD32<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
-    subscript<Index>(index: SIMD64<Index>) -> Sample64 where Index : SIMDScalar & FixedWidthInteger { get }
-
-
-    // MARK: Operations
-
-    func min() -> Scalar
-
-    func max() -> Scalar
-
-    mutating func clamp(lowerBound: Self, upperBound: Self)
-
-    func clamped(lowerBound: Self, upperBound: Self) -> Self
+    subscript<Index>(index: SIMD64<Index>) -> SIMD64<Scalar> where Index : SIMDScalar & FixedWidthInteger { get }
 
 
     // MARK: Operators
@@ -106,34 +80,21 @@ where Scalar : KvSimdVectorScalar, ArrayLiteralElement == Scalar
 }
 
 
-extension KvSimdVector {
 
-    /// Type for samples of 2 components.
-    public typealias Sample2 = SIMD2<Scalar>
-    /// Type for samples of 3 components.
-    public typealias Sample3 = SIMD3<Scalar>
-    /// Type for samples of 4 components.
-    public typealias Sample4 = SIMD4<Scalar>
-    /// Type for samples of 8 components.
-    public typealias Sample8 = SIMD8<Scalar>
-    /// Type for samples of 16 components.
-    public typealias Sample16 = SIMD16<Scalar>
-    /// Type for samples of 32 components.
-    public typealias Sample32 = SIMD32<Scalar>
-    /// Type for samples of 64 components.
-    public typealias Sample64 = SIMD64<Scalar>
+// MARK: - KvSimdVectorComparable
 
-}
+public protocol KvSimdVectorComparable : KvSimdVector
+where Scalar : Comparable
+{
 
+    mutating func clamp(lowerBound: Self, upperBound: Self)
 
-@inlinable
-public func ==<LHS, RHS>(lhs: LHS, rhs: RHS) -> Bool where LHS : KvSimdVector, RHS : KvSimdVector, LHS.SimdView == RHS.SimdView {
-    lhs.simdView == rhs.simdView
-}
+    func clamped(lowerBound: Self, upperBound: Self) -> Self
 
-@inlinable
-public func !=<LHS, RHS>(lhs: LHS, rhs: RHS) -> Bool where LHS : KvSimdVector, RHS : KvSimdVector, LHS.SimdView == RHS.SimdView {
-    lhs.simdView != rhs.simdView
+    func max() -> Scalar
+
+    func min() -> Scalar
+
 }
 
 
@@ -275,117 +236,11 @@ public protocol KvSimdVectorI : KvSimdVector where Scalar : FixedWidthInteger {
 }
 
 
-@inlinable
-public prefix func ~ <RHS>(a: RHS) -> RHS where RHS : KvSimdVectorI {
-    RHS(simdView: 0 &- a.simdView)
-}
-
-@inlinable
-public func & <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView & b.simdView)
-}
-
-@inlinable
-public func ^ <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView ^ b.simdView)
-}
-
-@inlinable
-public func | <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView | b.simdView)
-}
-
-@inlinable
-public func &<< <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView &<< b.simdView)
-}
-
-@inlinable
-public func &>> <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView &>> b.simdView)
-}
-
-@inlinable
-public func &+ <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView &+ b.simdView)
-}
-
-@inlinable
-public func &- <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView &- b.simdView)
-}
-
-@inlinable
-public func &* <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView &* b.simdView)
-}
-
-@inlinable
-public func / <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView / b.simdView)
-}
-
-@inlinable
-public func % <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView % b.simdView)
-}
-
-@inlinable
-public func &= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView &= b.simdView
-}
-
-@inlinable
-public func ^= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView ^= b.simdView
-}
-
-@inlinable
-public func |= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView |= b.simdView
-}
-
-@inlinable
-public func &<<= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView &<<= b.simdView
-}
-
-@inlinable
-public func &>>= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView &>>= b.simdView
-}
-
-@inlinable
-public func &+= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView &+= b.simdView
-}
-
-@inlinable
-public func &-= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView &-= b.simdView
-}
-
-@inlinable
-public func &*= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView &*= b.simdView
-}
-
-@inlinable
-public func /= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView /= b.simdView
-}
-
-@inlinable
-public func %= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorI, RHS : KvSimdVectorI, LHS.SimdView == RHS.SimdView {
-    a.simdView %= b.simdView
-}
-
-
 
 // MARK: - KvSimdVectorF
 
 /// Protocol for SIMD vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimdVectorF : KvSimdVector where Scalar : BinaryFloatingPoint {
+public protocol KvSimdVectorF : KvSimdVector where Scalar : FloatingPoint {
 
     static var zero: Self { get }
     static var one: Self { get }
@@ -405,13 +260,21 @@ public protocol KvSimdVectorF : KvSimdVector where Scalar : BinaryFloatingPoint 
 
     mutating func addProduct(_ a: Self, _ b: Scalar)
 
-    func squareRoot() -> Self
+    mutating func clamp(lowerBound: Self, upperBound: Self)
+
+    func clamped(lowerBound: Self, upperBound: Self) -> Self
 
     mutating func formSquareRoot()
+
+    func max() -> Scalar
+
+    func min() -> Scalar
 
     mutating func round(_ rule: FloatingPointRoundingRule)
 
     func rounded(_ rule: FloatingPointRoundingRule) -> Self
+
+    func squareRoot() -> Self
 
     func sum() -> Scalar
 
@@ -463,50 +326,6 @@ public protocol KvSimdVectorF : KvSimdVector where Scalar : BinaryFloatingPoint 
 }
 
 
-@inlinable
-public prefix func - <RHS>(a: RHS) -> RHS where RHS : KvSimdVectorF { RHS(simdView: -a.simdView) }
-
-@inlinable
-public func + <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView + b.simdView)
-}
-
-@inlinable
-public func - <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView - b.simdView)
-}
-
-@inlinable
-public func * <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView * b.simdView)
-}
-
-@inlinable
-public func / <LHS, RHS>(a: LHS, b: RHS) -> LHS where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    LHS(simdView: a.simdView / b.simdView)
-}
-
-@inlinable
-public func += <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    a.simdView += b.simdView
-}
-
-@inlinable
-public func -= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    a.simdView -= b.simdView
-}
-
-@inlinable
-public func *= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    a.simdView *= b.simdView
-}
-
-@inlinable
-public func /= <LHS, RHS>(a: inout LHS, b: RHS) where LHS : KvSimdVectorF, RHS : KvSimdVectorF, LHS.SimdView == RHS.SimdView {
-    a.simdView /= b.simdView
-}
-
-
 
 // MARK: - KvSimd2
 
@@ -532,6 +351,16 @@ public protocol KvSimd2 : KvSimdVector {
 /// Protocol for SIMD2 vectors where components conform to *FixedWidthInteger* protocol.
 public protocol KvSimd2I : KvSimd2, KvSimdVectorI {
 
+    /// `[ 1, 0 ]`
+    static var unitX: Self { get }
+    /// `[ -1, 0 ]`
+    static var unitNX: Self { get }
+    /// `[ 0, 1 ]`
+    static var unitY: Self { get }
+    /// `[ 0, -1 ]`
+    static var unitNY: Self { get }
+
+
     init<Other>(_ other: SIMD2<Other>, rounding rule: FloatingPointRoundingRule)
     where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -546,7 +375,17 @@ public protocol KvSimd2I : KvSimd2, KvSimdVectorI {
 // MARK: - KvSimd2F
 
 /// Protocol for SIMD2 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd2F : KvSimd2, KvSimdVectorF {
+public protocol KvSimd2F : KvSimd2, KvSimdVectorF where Scalar : BinaryFloatingPoint {
+
+    /// `[ 1, 0 ]`
+    static var unitX: Self { get }
+    /// `[ -1, 0 ]`
+    static var unitNX: Self { get }
+    /// `[ 0, 1 ]`
+    static var unitY: Self { get }
+    /// `[ 0, -1 ]`
+    static var unitNY: Self { get }
+
 
     init<Other>(_ other: SIMD2<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -572,7 +411,7 @@ public protocol KvSimd3 : KvSimdVector {
 
     init(x: Scalar, y: Scalar, z: Scalar)
 
-    init(_ xy: Sample2, _ w: Scalar)
+    init(_ xy: SIMD2<Scalar>, _ w: Scalar)
 
 }
 
@@ -595,6 +434,20 @@ extension KvSimd3 {
 /// Protocol for SIMD3 vectors where components conform to *FixedWidthInteger* protocol.
 public protocol KvSimd3I : KvSimd3, KvSimdVectorI {
 
+    /// `[ 1, 0, 0 ]`
+    static var unitX: Self { get }
+    /// `[ -1, 0, 0 ]`
+    static var unitNX: Self { get }
+    /// `[ 0, 1, 0 ]`
+    static var unitY: Self { get }
+    /// `[ 0, -1, 0 ]`
+    static var unitNY: Self { get }
+    /// `[ 0, 0, 1 ]`
+    static var unitZ: Self { get }
+    /// `[ 0, 0, -1 ]`
+    static var unitNZ: Self { get }
+
+
     init<Other>(_ other: SIMD3<Other>, rounding rule: FloatingPointRoundingRule)
     where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -609,7 +462,21 @@ public protocol KvSimd3I : KvSimd3, KvSimdVectorI {
 // MARK: - KvSimd3F
 
 /// Protocol for SIMD3 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd3F : KvSimd3, KvSimdVectorF {
+public protocol KvSimd3F : KvSimd3, KvSimdVectorF where Scalar : BinaryFloatingPoint {
+
+    /// `[ 1, 0, 0 ]`
+    static var unitX: Self { get }
+    /// `[ -1, 0, 0 ]`
+    static var unitNX: Self { get }
+    /// `[ 0, 1, 0 ]`
+    static var unitY: Self { get }
+    /// `[ 0, -1, 0 ]`
+    static var unitNY: Self { get }
+    /// `[ 0, 0, 1 ]`
+    static var unitZ: Self { get }
+    /// `[ 0, 0, -1 ]`
+    static var unitNZ: Self { get }
+
 
     init<Other>(_ other: SIMD3<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -629,10 +496,10 @@ public protocol KvSimd4 : KvSimdVector {
     var z: Scalar { get set }
     var w: Scalar { get set }
 
-    var lowHalf: Sample2 { get set }
-    var highHalf: Sample2 { get set }
-    var evenHalf: Sample2 { get set }
-    var oddHalf: Sample2 { get set }
+    var lowHalf: SIMD2<Scalar> { get set }
+    var highHalf: SIMD2<Scalar> { get set }
+    var evenHalf: SIMD2<Scalar> { get set }
+    var oddHalf: SIMD2<Scalar> { get set }
 
 
     // MARK: Initialization
@@ -641,9 +508,9 @@ public protocol KvSimd4 : KvSimdVector {
 
     init(x: Scalar, y: Scalar, z: Scalar, w: Scalar)
 
-    init(lowHalf: Sample2, highHalf: Sample2)
+    init(lowHalf: SIMD2<Scalar>, highHalf: SIMD2<Scalar>)
 
-    init(_ xyz: Sample3, _ w: Scalar)
+    init(_ xyz: SIMD3<Scalar>, _ w: Scalar)
 
 }
 
@@ -674,6 +541,24 @@ extension KvSimd4 {
 /// Protocol for SIMD4 vectors where components conform to *FixedWidthInteger* protocol.
 public protocol KvSimd4I : KvSimd4, KvSimdVectorI {
 
+    /// `[ 1, 0, 0, 0 ]`
+    static var unitX: Self { get }
+    /// `[ -1, 0, 0, 0 ]`
+    static var unitNX: Self { get }
+    /// `[ 0, 1, 0, 0 ]`
+    static var unitY: Self { get }
+    /// `[ 0, -1, 0, 0 ]`
+    static var unitNY: Self { get }
+    /// `[ 0, 0, 1, 0 ]`
+    static var unitZ: Self { get }
+    /// `[ 0, 0, -1, 0 ]`
+    static var unitNZ: Self { get }
+    /// `[ 0, 0, 0, 1 ]`
+    static var unitW: Self { get }
+    /// `[ 0, 0, 0, -1 ]`
+    static var unitNW: Self { get }
+
+
     init<Other>(_ other: SIMD4<Other>, rounding rule: FloatingPointRoundingRule)
     where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -688,7 +573,25 @@ public protocol KvSimd4I : KvSimd4, KvSimdVectorI {
 // MARK: - KvSimd4F
 
 /// Protocol for SIMD4 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd4F : KvSimd4, KvSimdVectorF {
+public protocol KvSimd4F : KvSimd4, KvSimdVectorF where Scalar : BinaryFloatingPoint {
+
+    /// `[ 1, 0, 0, 0 ]`
+    static var unitX: Self { get }
+    /// `[ -1, 0, 0, 0 ]`
+    static var unitNX: Self { get }
+    /// `[ 0, 1, 0, 0 ]`
+    static var unitY: Self { get }
+    /// `[ 0, -1, 0, 0 ]`
+    static var unitNY: Self { get }
+    /// `[ 0, 0, 1, 0 ]`
+    static var unitZ: Self { get }
+    /// `[ 0, 0, -1, 0 ]`
+    static var unitNZ: Self { get }
+    /// `[ 0, 0, 0, 1 ]`
+    static var unitW: Self { get }
+    /// `[ 0, 0, 0, -1 ]`
+    static var unitNW: Self { get }
+
 
     init<Other>(_ other: SIMD4<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -703,30 +606,17 @@ public protocol KvSimd4F : KvSimd4, KvSimdVectorF {
 /// Protocol for SIMD8 vectors.
 public protocol KvSimd8 : KvSimdVector {
 
-    var lowHalf: Sample4 { get set }
-    var highHalf: Sample4 { get set }
-    var evenHalf: Sample4 { get set }
-    var oddHalf: Sample4 { get set }
+    var lowHalf: SIMD4<Scalar> { get set }
+    var highHalf: SIMD4<Scalar> { get set }
+    var evenHalf: SIMD4<Scalar> { get set }
+    var oddHalf: SIMD4<Scalar> { get set }
 
 
     // MARK: Initialization
 
     init(_ v0: Scalar, _ v1: Scalar, _ v2: Scalar, _ v3: Scalar, _ v4: Scalar, _ v5: Scalar, _ v6: Scalar, _ v7: Scalar)
 
-    init(lowHalf: Sample4, highHalf: Sample4)
-
-}
-
-
-extension KvSimd8 {
-
-    @inlinable
-    public init<LH, RH>(lowHalf: LH, highHalf: RH)
-    where LH : KvSimd4, LH.Scalar == Scalar, RH : KvSimd4, RH.Scalar == Scalar
-    {
-        self.init(lowHalf:   lowHalf[[ 0, 1, 2, 3 ] as simd_long4],
-                  highHalf: highHalf[[ 0, 1, 2, 3 ] as simd_long4])
-    }
+    init(lowHalf: SIMD4<Scalar>, highHalf: SIMD4<Scalar>)
 
 }
 
@@ -751,7 +641,7 @@ public protocol KvSimd8I : KvSimd8, KvSimdVectorI {
 // MARK: - KvSimd8F
 
 /// Protocol for SIMD8 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd8F : KvSimd8, KvSimdVectorF {
+public protocol KvSimd8F : KvSimd8, KvSimdVectorF where Scalar : BinaryFloatingPoint {
 
     init<Other>(_ other: SIMD8<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -766,30 +656,17 @@ public protocol KvSimd8F : KvSimd8, KvSimdVectorF {
 /// Protocol for SIMD16 vectors.
 public protocol KvSimd16 : KvSimdVector {
 
-    var lowHalf: Sample8 { get set }
-    var highHalf: Sample8 { get set }
-    var evenHalf: Sample8 { get set }
-    var oddHalf: Sample8 { get set }
+    var lowHalf: SIMD8<Scalar> { get set }
+    var highHalf: SIMD8<Scalar> { get set }
+    var evenHalf: SIMD8<Scalar> { get set }
+    var oddHalf: SIMD8<Scalar> { get set }
 
 
     // MARK: Initialization
 
     init(_ v0: Scalar, _ v1: Scalar, _ v2: Scalar, _ v3: Scalar, _ v4: Scalar, _ v5: Scalar, _ v6: Scalar, _ v7: Scalar, _ v8: Scalar, _ v9: Scalar, _ v10: Scalar, _ v11: Scalar, _ v12: Scalar, _ v13: Scalar, _ v14: Scalar, _ v15: Scalar)
 
-    init(lowHalf: Sample8, highHalf: Sample8)
-
-}
-
-
-extension KvSimd16 {
-
-    @inlinable
-    public init<LH, RH>(lowHalf: LH, highHalf: RH)
-    where LH : KvSimd8, LH.Scalar == Scalar, RH : KvSimd8, RH.Scalar == Scalar
-    {
-        self.init(lowHalf:   lowHalf[[ 0, 1, 2, 3, 4, 5, 6, 7 ] as simd_int8],
-                  highHalf: highHalf[[ 0, 1, 2, 3, 4, 5, 6, 7 ] as simd_int8])
-    }
+    init(lowHalf: SIMD8<Scalar>, highHalf: SIMD8<Scalar>)
 
 }
 
@@ -814,7 +691,7 @@ public protocol KvSimd16I : KvSimd16, KvSimdVectorI {
 // MARK: - KvSimd16F
 
 /// Protocol for SIMD16 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd16F : KvSimd16, KvSimdVectorF {
+public protocol KvSimd16F : KvSimd16, KvSimdVectorF where Scalar : BinaryFloatingPoint {
 
     init<Other>(_ other: SIMD16<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -829,30 +706,17 @@ public protocol KvSimd16F : KvSimd16, KvSimdVectorF {
 /// Protocol for SIMD32 vectors.
 public protocol KvSimd32 : KvSimdVector {
 
-    var lowHalf: Sample16 { get set }
-    var highHalf: Sample16 { get set }
-    var evenHalf: Sample16 { get set }
-    var oddHalf: Sample16 { get set }
+    var lowHalf: SIMD16<Scalar> { get set }
+    var highHalf: SIMD16<Scalar> { get set }
+    var evenHalf: SIMD16<Scalar> { get set }
+    var oddHalf: SIMD16<Scalar> { get set }
 
 
     // MARK: Initialization
 
     init(_ v0: Scalar, _ v1: Scalar, _ v2: Scalar, _ v3: Scalar, _ v4: Scalar, _ v5: Scalar, _ v6: Scalar, _ v7: Scalar, _ v8: Scalar, _ v9: Scalar, _ v10: Scalar, _ v11: Scalar, _ v12: Scalar, _ v13: Scalar, _ v14: Scalar, _ v15: Scalar, _ v16: Scalar, _ v17: Scalar, _ v18: Scalar, _ v19: Scalar, _ v20: Scalar, _ v21: Scalar, _ v22: Scalar, _ v23: Scalar, _ v24: Scalar, _ v25: Scalar, _ v26: Scalar, _ v27: Scalar, _ v28: Scalar, _ v29: Scalar, _ v30: Scalar, _ v31: Scalar)
 
-    init(lowHalf: Sample16, highHalf: Sample16)
-
-}
-
-
-extension KvSimd32 {
-
-    @inlinable
-    public init<LH, RH>(lowHalf: LH, highHalf: RH)
-    where LH : KvSimd16, LH.Scalar == Scalar, RH : KvSimd16, RH.Scalar == Scalar
-    {
-        self.init(lowHalf:   lowHalf[[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ] as simd_short16],
-                  highHalf: highHalf[[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ] as simd_short16])
-    }
+    init(lowHalf: SIMD16<Scalar>, highHalf: SIMD16<Scalar>)
 
 }
 
@@ -877,7 +741,7 @@ public protocol KvSimd32I : KvSimd32, KvSimdVectorI {
 // MARK: - KvSimd32F
 
 /// Protocol for SIMD32 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd32F : KvSimd32, KvSimdVectorF {
+public protocol KvSimd32F : KvSimd32, KvSimdVectorF where Scalar : BinaryFloatingPoint {
 
     init<Other>(_ other: SIMD32<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -892,30 +756,17 @@ public protocol KvSimd32F : KvSimd32, KvSimdVectorF {
 /// Protocol for SIMD64 vectors.
 public protocol KvSimd64 : KvSimdVector {
 
-    var lowHalf: Sample32 { get set }
-    var highHalf: Sample32 { get set }
-    var evenHalf: Sample32 { get set }
-    var oddHalf: Sample32 { get set }
+    var lowHalf: SIMD32<Scalar> { get set }
+    var highHalf: SIMD32<Scalar> { get set }
+    var evenHalf: SIMD32<Scalar> { get set }
+    var oddHalf: SIMD32<Scalar> { get set }
 
 
     // MARK: Initialization
 
     init(_ v0: Scalar, _ v1: Scalar, _ v2: Scalar, _ v3: Scalar, _ v4: Scalar, _ v5: Scalar, _ v6: Scalar, _ v7: Scalar, _ v8: Scalar, _ v9: Scalar, _ v10: Scalar, _ v11: Scalar, _ v12: Scalar, _ v13: Scalar, _ v14: Scalar, _ v15: Scalar, _ v16: Scalar, _ v17: Scalar, _ v18: Scalar, _ v19: Scalar, _ v20: Scalar, _ v21: Scalar, _ v22: Scalar, _ v23: Scalar, _ v24: Scalar, _ v25: Scalar, _ v26: Scalar, _ v27: Scalar, _ v28: Scalar, _ v29: Scalar, _ v30: Scalar, _ v31: Scalar, _ v32: Scalar, _ v33: Scalar, _ v34: Scalar, _ v35: Scalar, _ v36: Scalar, _ v37: Scalar, _ v38: Scalar, _ v39: Scalar, _ v40: Scalar, _ v41: Scalar, _ v42: Scalar, _ v43: Scalar, _ v44: Scalar, _ v45: Scalar, _ v46: Scalar, _ v47: Scalar, _ v48: Scalar, _ v49: Scalar, _ v50: Scalar, _ v51: Scalar, _ v52: Scalar, _ v53: Scalar, _ v54: Scalar, _ v55: Scalar, _ v56: Scalar, _ v57: Scalar, _ v58: Scalar, _ v59: Scalar, _ v60: Scalar, _ v61: Scalar, _ v62: Scalar, _ v63: Scalar)
 
-    init(lowHalf: Sample32, highHalf: Sample32)
-
-}
-
-
-extension KvSimd64 {
-
-    @inlinable
-    public init<LH, RH>(lowHalf: LH, highHalf: RH)
-    where LH : KvSimd32, LH.Scalar == Scalar, RH : KvSimd32, RH.Scalar == Scalar
-    {
-        self.init(lowHalf:   lowHalf[[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 ] as simd_char32],
-                  highHalf: highHalf[[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 ] as simd_char32])
-    }
+    init(lowHalf: SIMD32<Scalar>, highHalf: SIMD32<Scalar>)
 
 }
 
@@ -940,7 +791,7 @@ public protocol KvSimd64I : KvSimd64, KvSimdVectorI {
 // MARK: - KvSimd64F
 
 /// Protocol for SIMD64 vectors where components conform to *BinaryFloatingPoint* protocol.
-public protocol KvSimd64F : KvSimd64, KvSimdVectorF {
+public protocol KvSimd64F : KvSimd64, KvSimdVectorF where Scalar : BinaryFloatingPoint {
 
     init<Other>(_ other: SIMD64<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
@@ -952,194 +803,165 @@ public protocol KvSimd64F : KvSimd64, KvSimdVectorF {
 
 // MARK: - SIMD2
 
-extension SIMD2 : KvSimdVector where Scalar : Comparable {
+extension SIMD2 : KvSimd2 { }
+extension SIMD2 : KvSimdVectorComparable where Scalar : Comparable { }
+extension SIMD2 : KvSimdVectorI where Scalar : FixedWidthInteger { }
+extension SIMD2 : KvSimdVectorF where Scalar : FloatingPoint { }
+extension SIMD2 : KvSimd2I where Scalar : FixedWidthInteger {
 
-    public typealias SimdView = SIMD2<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
+    /// `[ 1, 0 ]`
+    @inlinable public static var unitX: Self { [ 1, 0 ] }
+    /// `[ -1, 0 ]`
+    @inlinable public static var unitNX: Self { [ -1, 0 ] }
+    /// `[ 0, 1 ]`
+    @inlinable public static var unitY: Self { [ 0, 1 ] }
+    /// `[ 0, -1 ]`
+    @inlinable public static var unitNY: Self { [ 0, -1 ] }
 
 }
+extension SIMD2 : KvSimd2F where Scalar : BinaryFloatingPoint {
 
-extension SIMD2 : KvSimd2 where Scalar : Comparable { }
+    /// `[ 1, 0 ]`
+    @inlinable public static var unitX: Self { [ 1, 0 ] }
+    /// `[ -1, 0 ]`
+    @inlinable public static var unitNX: Self { [ -1, 0 ] }
+    /// `[ 0, 1 ]`
+    @inlinable public static var unitY: Self { [ 0, 1 ] }
+    /// `[ 0, -1 ]`
+    @inlinable public static var unitNY: Self { [ 0, -1 ] }
 
-extension SIMD2 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
-extension SIMD2 : KvSimd2I where Scalar : FixedWidthInteger { }
-
-extension SIMD2 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
-extension SIMD2 : KvSimd2F where Scalar : BinaryFloatingPoint { }
+}
 
 
 
 // MARK: - SIMD3
 
-extension SIMD3 : KvSimdVector where Scalar : Comparable {
+extension SIMD3 : KvSimd3 { }
+extension SIMD3 : KvSimdVectorComparable where Scalar : Comparable { }
+extension SIMD3 : KvSimdVectorI where Scalar : FixedWidthInteger { }
+extension SIMD3 : KvSimdVectorF where Scalar : FloatingPoint { }
+extension SIMD3 : KvSimd3I where Scalar : FixedWidthInteger {
 
-    public typealias SimdView = SIMD3<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
+    /// `[ 1, 0, 0 ]`
+    @inlinable public static var unitX: Self { [ 1, 0, 0 ] }
+    /// `[ -1, 0, 0 ]`
+    @inlinable public static var unitNX: Self { [ -1, 0, 0 ] }
+    /// `[ 0, 1, 0 ]`
+    @inlinable public static var unitY: Self { [ 0, 1, 0 ] }
+    /// `[ 0, -1, 0 ]`
+    @inlinable public static var unitNY: Self { [ 0, -1, 0 ] }
+    /// `[ 0, 0, 1 ]`
+    @inlinable public static var unitZ: Self { [ 0, 0, 1 ] }
+    /// `[ 0, 0, -1 ]`
+    @inlinable public static var unitNZ: Self { [ 0, 0, -1 ] }
 
 }
+extension SIMD3 : KvSimd3F where Scalar : BinaryFloatingPoint {
 
-extension SIMD3 : KvSimd3 where Scalar : Comparable { }
+    /// `[ 1, 0, 0 ]`
+    @inlinable public static var unitX: Self { [ 1, 0, 0 ] }
+    /// `[ -1, 0, 0 ]`
+    @inlinable public static var unitNX: Self { [ -1, 0, 0 ] }
+    /// `[ 0, 1, 0 ]`
+    @inlinable public static var unitY: Self { [ 0, 1, 0 ] }
+    /// `[ 0, -1, 0 ]`
+    @inlinable public static var unitNY: Self { [ 0, -1, 0 ] }
+    /// `[ 0, 0, 1 ]`
+    @inlinable public static var unitZ: Self { [ 0, 0, 1 ] }
+    /// `[ 0, 0, -1 ]`
+    @inlinable public static var unitNZ: Self { [ 0, 0, -1 ] }
 
-extension SIMD3 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
-extension SIMD3 : KvSimd3I where Scalar : FixedWidthInteger { }
-
-extension SIMD3 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
-extension SIMD3 : KvSimd3F where Scalar : BinaryFloatingPoint { }
+}
 
 
 
 // MARK: - SIMD4
 
-extension SIMD4 : KvSimdVector where Scalar : Comparable {
+extension SIMD4 : KvSimd4 { }
+extension SIMD4 : KvSimdVectorComparable where Scalar : Comparable { }
+extension SIMD4 : KvSimdVectorI where Scalar : FixedWidthInteger { }
+extension SIMD4 : KvSimdVectorF where Scalar : FloatingPoint { }
+extension SIMD4 : KvSimd4I where Scalar : FixedWidthInteger {
 
-    public typealias SimdView = SIMD4<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
+    /// `[ 1, 0, 0, 0 ]`
+    @inlinable public static var unitX: Self { [ 1, 0, 0, 0 ] }
+    /// `[ -1, 0, 0, 0 ]`
+    @inlinable public static var unitNX: Self { [ -1, 0, 0, 0 ] }
+    /// `[ 0, 1, 0, 0 ]`
+    @inlinable public static var unitY: Self { [ 0, 1, 0, 0 ] }
+    /// `[ 0, -1, 0, 0 ]`
+    @inlinable public static var unitNY: Self { [ 0, -1, 0, 0 ] }
+    /// `[ 0, 0, 1, 0 ]`
+    @inlinable public static var unitZ: Self { [ 0, 0, 1, 0 ] }
+    /// `[ 0, 0, -1, 0 ]`
+    @inlinable public static var unitNZ: Self { [ 0, 0, -1, 0 ] }
+    /// `[ 0, 0, 0, 1 ]`
+    @inlinable public static var unitW: Self { [ 0, 0, 0, 1 ] }
+    /// `[ 0, 0, 0, -1 ]`
+    @inlinable public static var unitNW: Self { [ 0, 0, 0, -1 ] }
 
 }
+extension SIMD4 : KvSimd4F where Scalar : BinaryFloatingPoint {
 
-extension SIMD4 : KvSimd4 where Scalar : Comparable { }
+    /// `[ 1, 0, 0, 0 ]`
+    @inlinable public static var unitX: Self { [ 1, 0, 0, 0 ] }
+    /// `[ -1, 0, 0, 0 ]`
+    @inlinable public static var unitNX: Self { [ -1, 0, 0, 0 ] }
+    /// `[ 0, 1, 0, 0 ]`
+    @inlinable public static var unitY: Self { [ 0, 1, 0, 0 ] }
+    /// `[ 0, -1, 0, 0 ]`
+    @inlinable public static var unitNY: Self { [ 0, -1, 0, 0 ] }
+    /// `[ 0, 0, 1, 0 ]`
+    @inlinable public static var unitZ: Self { [ 0, 0, 1, 0 ] }
+    /// `[ 0, 0, -1, 0 ]`
+    @inlinable public static var unitNZ: Self { [ 0, 0, -1, 0 ] }
+    /// `[ 0, 0, 0, 1 ]`
+    @inlinable public static var unitW: Self { [ 0, 0, 0, 1 ] }
+    /// `[ 0, 0, 0, -1 ]`
+    @inlinable public static var unitNW: Self { [ 0, 0, 0, -1 ] }
 
-extension SIMD4 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
-extension SIMD4 : KvSimd4I where Scalar : FixedWidthInteger { }
-
-extension SIMD4 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
-extension SIMD4 : KvSimd4F where Scalar : BinaryFloatingPoint { }
+}
 
 
 
 // MARK: - SIMD8
 
-extension SIMD8 : KvSimdVector where Scalar : Comparable {
-
-    public typealias SimdView = SIMD8<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
-
-}
-
-extension SIMD8 : KvSimd8 where Scalar : Comparable { }
-
+extension SIMD8 : KvSimd8 { }
+extension SIMD8 : KvSimdVectorComparable where Scalar : Comparable { }
 extension SIMD8 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
+extension SIMD8 : KvSimdVectorF where Scalar : FloatingPoint { }
 extension SIMD8 : KvSimd8I where Scalar : FixedWidthInteger { }
-
-extension SIMD8 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
 extension SIMD8 : KvSimd8F where Scalar : BinaryFloatingPoint { }
 
 
 
 // MARK: - SIMD16
 
-extension SIMD16 : KvSimdVector where Scalar : Comparable {
-
-    public typealias SimdView = SIMD16<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
-
-}
-
-extension SIMD16 : KvSimd16 where Scalar : Comparable { }
-
+extension SIMD16 : KvSimd16 { }
+extension SIMD16 : KvSimdVectorComparable where Scalar : Comparable { }
 extension SIMD16 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
+extension SIMD16 : KvSimdVectorF where Scalar : FloatingPoint { }
 extension SIMD16 : KvSimd16I where Scalar : FixedWidthInteger { }
-
-extension SIMD16 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
 extension SIMD16 : KvSimd16F where Scalar : BinaryFloatingPoint { }
 
 
 
 // MARK: - SIMD32
 
-extension SIMD32 : KvSimdVector where Scalar : Comparable {
-
-    public typealias SimdView = SIMD32<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
-
-}
-
-extension SIMD32 : KvSimd32 where Scalar : Comparable { }
-
+extension SIMD32 : KvSimd32 { }
+extension SIMD32 : KvSimdVectorComparable where Scalar : Comparable { }
 extension SIMD32 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
+extension SIMD32 : KvSimdVectorF where Scalar : FloatingPoint { }
 extension SIMD32 : KvSimd32I where Scalar : FixedWidthInteger { }
-
-extension SIMD32 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
 extension SIMD32 : KvSimd32F where Scalar : BinaryFloatingPoint { }
 
 
 
 // MARK: - SIMD64
 
-extension SIMD64 : KvSimdVector where Scalar : Comparable {
-
-    public typealias SimdView = SIMD64<Scalar>
-
-    public var simdView: SimdView {
-        @inlinable get { self }
-        @inlinable set { self = newValue }
-    }
-
-    @inlinable
-    public init(simdView: SimdView) { self = simdView }
-
-}
-
-extension SIMD64 : KvSimd64 where Scalar : Comparable { }
-
+extension SIMD64 : KvSimd64 { }
+extension SIMD64 : KvSimdVectorComparable where Scalar : Comparable { }
 extension SIMD64 : KvSimdVectorI where Scalar : FixedWidthInteger { }
-
+extension SIMD64 : KvSimdVectorF where Scalar : FloatingPoint { }
 extension SIMD64 : KvSimd64I where Scalar : FixedWidthInteger { }
-
-extension SIMD64 : KvSimdVectorF where Scalar : BinaryFloatingPoint { }
-
 extension SIMD64 : KvSimd64F where Scalar : BinaryFloatingPoint { }
