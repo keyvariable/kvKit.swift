@@ -334,12 +334,12 @@ class KvConvex2Tests : XCTestCase {
 
             expectedConvex[expectedConvex.endIndex - 1].direction = .mixed
 
-            var expectation = TC.ExpectedResult(
+            let expected = TC.ExpectedResult(
                 polygon: zip(output, ccwFlags).map { $0.0.polygonElement(isCCW: $0.1) },
                 convex: expectedConvex
             )
 
-            return .init(input: input, result: expectation)
+            return .init(input: input, result: expected)
         }
 
         (0..<4).forEach { shift in
@@ -374,20 +374,20 @@ class KvConvex2Tests : XCTestCase {
 
             let output = Self.verticesAndSteps(from: input).prefix(backIndex > 0 ? backIndex : input.count)
 
-            let expectation: TC.ExpectedResult = {
+            let expected: TC.ExpectedResult = {
                 switch backIndex > 0 {
                 case true:
                     let lastIndex = output.endIndex - 1
 
-                    var expectation = TC.ExpectedResult(
+                    var expected = TC.ExpectedResult(
                         polygon: output.map { $0.polygonElement(isCCW: isCCW) },
                         convex: output.map { $0.convexElement(isCCW: isCCW) }
                     )
 
-                    expectation.polygon[lastIndex].direction = .degenerate
-                    expectation.convex[lastIndex].direction = .invalid
+                    expected.polygon[lastIndex].direction = .degenerate
+                    expected.convex[lastIndex].direction = .invalid
 
-                    return expectation
+                    return expected
 
                 case false:
                     let localDirections: [TC.Convex.LocalDirection] = isCCW ? [ .cw, .ccw, .ccw, .ccw, .degenerate ] : [ .ccw, .cw, .cw, .cw, .degenerate ]
@@ -400,7 +400,7 @@ class KvConvex2Tests : XCTestCase {
                 }
             }()
 
-            return .init(input: input, result: expectation)
+            return .init(input: input, result: expected)
         }
 
         (0..<4).forEach { backIndex in

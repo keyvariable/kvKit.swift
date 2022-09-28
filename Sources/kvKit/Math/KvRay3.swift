@@ -116,7 +116,6 @@ public struct KvRay3<Vertex : KvVertex3Protocol> {
     }
 
 
-    #warning("TODO: Unit test")
     /// - Returns: The argument of the canonical equation the receiver and given plane intersect at.
     ///
     /// - Note: It's equal to distance to the intersection coordinate when the receiver has unit direction.

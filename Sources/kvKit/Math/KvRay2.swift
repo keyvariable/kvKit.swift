@@ -116,7 +116,7 @@ public struct KvRay2<Vertex : KvVertex2Protocol> {
     }
 
 
-    /// - Returns: *T* where *origin* + *direction* · *t* is a coordinate the receiver intersects given plane.
+    /// - Returns: *T* where *origin* + *direction* · *t* is a coordinate the receiver intersects given ray.
     ///
     /// - Note: It's equal to distance to the intersection coordinate when the receiver has unit direction.
     @inlinable
@@ -130,7 +130,6 @@ public struct KvRay2<Vertex : KvVertex2Protocol> {
         let recip_d = Math.recip(denominator)
         let dOrigin = ray.origin.coordinate - origin.coordinate
 
-#warning("Unit test")
         let t = (dOrigin.y * ray.direction.x - dOrigin.x * ray.direction.y) * recip_d
         let tr = (dOrigin.y * direction.x - dOrigin.x * direction.y) * recip_d
 

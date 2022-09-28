@@ -66,7 +66,6 @@ public struct KvLine3<Math : KvMathScope> {
     }
 
 
-#warning("Unit test both cases")
     /// A line having given direction and containing given coordinate.
     @inlinable
     public init(in direction: Vector, at coordinate: Coordinate) {

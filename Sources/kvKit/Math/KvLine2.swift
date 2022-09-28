@@ -172,7 +172,6 @@ public struct KvLine2<Math : KvMathScope> {
 
         guard KvIsNonzero(denominator) else { return nil }
 
-#warning("Unit test")
         return Coordinate(x: line.c * normal.y - c * line.normal.y, y: c * line.normal.x - line.c * normal.x) / denominator
     }
 

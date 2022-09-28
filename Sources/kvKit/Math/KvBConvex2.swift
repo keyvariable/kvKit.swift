@@ -147,7 +147,7 @@ public struct KvBConvex2<Math : KvMathScope> {
         case 0, 1, 2:
             return nil
         case 3:
-            self.init(points[0], points[1], points[2])
+            self.init(triangle: points[0], points[1], points[2])
         default:
             self.init(points)
         }
@@ -155,7 +155,7 @@ public struct KvBConvex2<Math : KvMathScope> {
 
 
     @inlinable
-    public init?(c0: Coordinate, c1: Coordinate, c2: Coordinate) {
+    public init?(triangle c0: Coordinate, _ c1: Coordinate, _ c2: Coordinate) {
         let line1 = Line(c0, c1)
         guard !line1.isDegenerate else { return nil }
 
@@ -195,7 +195,6 @@ public struct KvBConvex2<Math : KvMathScope> {
     }
 
 
-#warning("unit test")
     /// - Returns: Range of X-coordinates inside the receiver at given Y-coordinate.
     public func segment(y: Math.Scalar) -> ClosedRange<Math.Scalar>? {
         var lowerBound: Math.Scalar = -.infinity
