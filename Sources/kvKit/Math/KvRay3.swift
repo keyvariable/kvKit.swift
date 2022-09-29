@@ -78,6 +78,10 @@ public struct KvRay3<Vertex : KvVertex3Protocol> {
     @inlinable public mutating func negate() { direction = -direction }
 
 
+    /// - Returns: Copy of the receiver where vertices are cloned.
+    @inlinable public func clone() -> Self { Self(in: direction, at: origin.clone()) }
+
+
     /// Flips the origin preserving the direction.
     @inlinable public mutating func flip() { origin.flip() }
 

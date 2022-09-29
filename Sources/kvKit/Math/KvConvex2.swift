@@ -251,6 +251,9 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
     @inlinable public func reversed() -> Self { Self(unsafeVertices: _vertices.map { $0.clone() }, reverse: !isReversed) }
 
 
+    /// - Returns: Copy of the receiver where vertices are cloned.
+    @inlinable public func clone() -> Self { Self(unsafeVertices: _vertices.map { $0.clone() }, reverse: isReversed) }
+
 
     /// Flips and reverses the receiver's vertices.
     @inlinable
