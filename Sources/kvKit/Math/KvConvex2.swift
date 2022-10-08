@@ -156,7 +156,7 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
     }
 
 
-    /// A boolean value indicating whether there is a vertex where the angle is degenerate or the direction is not the same on all vertices.
+    /// A boolean value indicating whether angles on all vertices are not degenerate and the directions are the same on all vertices.
     ///
     ///  - SeeAlso: ``isCCW``
     public var isValid: Bool {
@@ -290,6 +290,123 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
     /// Applies given transformation to all the receiver's vertices.
     @inlinable public mutating func apply(_ t: AffineTransform) { self = t * self }
+
+
+    public typealias SplitResult = (front: Self?, back: Self?)
+
+    /// - Returns: Front and back parts of the receiver relative to given line.
+    public func split(by line: KvLine2<Math>) -> SplitResult {
+        let vertices = _vertices
+        let offsets = vertices.enumerated().reduce(into: (front: (first: -1, last: -1), back: (first: -1, last: -1))) { indices, vertex in
+            var isNegative = false
+
+            if KvIsPositive(line.signedOffset(to: vertex.element.coordinate), alsoIsNegative: &isNegative) {
+                indices.front = (first: indices.front.first >= 0 ? indices.front.first : vertex.offset,
+                                 last: vertex.offset)
+            }
+            else if isNegative {
+                indices.back = (first: indices.back.first >= 0 ? indices.back.first : vertex.offset,
+                                last: vertex.offset)
+            }
+        }
+
+        switch (offsets.front.first >= 0, offsets.back.first >= 0) {
+        case (true, true):
+            // Polygon to be split.
+
+            func Is(_ next: Int, after prev: Int) -> Bool {
+                next == prev + 1 || next == 0 && prev + 1 == vertices.count
+            }
+
+
+            func IndexAfter(_ index: Int) -> Int {
+                let next = index + 1
+                return next < vertices.count ? next : 0
+            }
+
+
+            func Vertex(at offset: Int) -> Vertex {
+                vertices[vertices.index(vertices.startIndex, offsetBy: offset)]
+            }
+
+
+            /// Appends given vertex array with elements from cyclic indices from *from* to *to* (excluding).
+            func Append(_ dest: inout [Vertex], from: Int, to: Int) {
+                let from = vertices.index(vertices.startIndex, offsetBy: from)
+                let to = vertices.index(vertices.startIndex, offsetBy: to)
+
+                switch from < to {
+                case true:
+                    dest.append(contentsOf: vertices[from..<to])
+                case false:
+                    dest.append(contentsOf: vertices[from...])
+                    dest.append(contentsOf: vertices[..<to])
+                }
+            }
+
+
+            /// Appends given vertex array with elements from cyclic indices from *from* to *though* (including).
+            func Append(_ dest: inout [Vertex], from: Int, though: Int) {
+                let from = vertices.index(vertices.startIndex, offsetBy: from)
+                let though = vertices.index(vertices.startIndex, offsetBy: though)
+
+                switch from <= though {
+                case true:
+                    dest.append(contentsOf: vertices[from...though])
+                case false:
+                    dest.append(contentsOf: vertices[from...])
+                    dest.append(contentsOf: vertices[...though])
+                }
+            }
+
+
+            /// Appends common vertices from (exclusing) *last* back or front offset to (excluding) front or back offset.
+            func AppendCommon(last: Int, first: Int) {
+                switch Is(first, after: last) {
+                case true:
+                    let v1 = Vertex(at: last)
+                    let v2 = Vertex(at: first)
+
+                    let ray = KvRay2(from: v1, to: v2.coordinate)
+                    let v0 = ray.intersection(with: line)!
+
+                    front.append(v0)
+                    back.append(v0)
+
+                case false:
+                    let from = IndexAfter(offsets.back.last)
+                    Append(&front, from: from, to: first)
+                    Append(&back, from: from, to: first)
+                }
+            }
+
+
+            Swift.assert(offsets.front.last >= 0)
+            Swift.assert(offsets.back.last >= 0)
+
+            var front: [Vertex] = .init()
+            var back: [Vertex] = .init()
+
+            AppendCommon(last: offsets.back.last, first: offsets.front.first)
+            Append(&front, from: offsets.front.first, though: offsets.front.last)
+            AppendCommon(last: offsets.front.last, first: offsets.back.first)
+            Append(&back, from: offsets.back.first, though: offsets.back.last)
+
+            return (front: Self(unsafeVertices: front), back: Self(unsafeVertices: back))
+
+        case (true, false):
+            // Whole polygon is in front of the line.
+            return (front: self, back: nil)
+
+        case (false, true):
+            // Whole polygon is behind the line.
+            return (front: nil, back: self)
+
+        case (false, false):
+            // Polygon is degenerate
+            return (front: nil, back: nil)
+        }
+    }
 
 
 

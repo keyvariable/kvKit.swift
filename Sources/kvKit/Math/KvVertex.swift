@@ -52,12 +52,12 @@ public protocol KvVertexProtocol {
 
     /// Flips orientation of the receiver.
     ///
-    /// Usually the normal or tangent space have to be inversed.
+    /// Usually the normal or tangent space have to be inverted.
     mutating func flip()
 
     /// - Returns: Copy of the receiver having opposite orientation.
     ///
-    /// Usually the normal or tangent space have to be inversed.
+    /// Usually the normal or tangent space have to be inverted.
     func flipped() -> Self
 
 
