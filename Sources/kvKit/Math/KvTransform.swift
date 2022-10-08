@@ -232,6 +232,21 @@ public struct KvTransform2<Math : KvMathScope> {
     }
 
 
+    /// - Returns: Transformed coordinate by a transformation represented as given matrix.
+    @inlinable
+    public static func act(_ matrix: Matrix, coordinate c: Vector) -> Vector {
+        let c3 = matrix * Math.make3(c)
+        return Math.make2(c3) / c3.z
+    }
+
+
+    /// - Returns: Transformed vector by a transformation represented as given matrix.
+    @inlinable
+    public static func act(_ matrix: Matrix, vector v: Vector) -> Vector {
+        Math.make2(matrix * Math.make3(v))
+    }
+
+
 
     // MARK: Operations
 
@@ -257,7 +272,7 @@ public struct KvTransform2<Math : KvMathScope> {
     ///
     /// - Warning: Assuming bottom row of the receiver's matrix is `[ 0, 0, 1 ]`.
     /// - Note: If determinant of the matrix is negative then X scale element is negative and other elements are non-negative.
-    @inlinable public var scale: Vector { Self.scale(from: matrix) }
+    @inlinable public var scale: Vector { KvTransform2.scale(from: matrix) }
 
     /// Translation component of the receiver.
     ///
@@ -269,13 +284,10 @@ public struct KvTransform2<Math : KvMathScope> {
     @inlinable public func act(normal n: Vector) -> Vector { normalMatrix * n }
 
     /// - Returns: Transformed coordinate.
-    @inlinable public func act(coordinate c: Vector) -> Vector {
-        let c3 = matrix * Math.make3(c)
-        return Math.make2(c3) / c3.z
-    }
+    @inlinable public func act(coordinate c: Vector) -> Vector { KvTransform2.act(matrix, coordinate: c) }
 
     /// - Returns: Transformed vector.
-    @inlinable public func act(vector v: Vector) -> Vector { Math.make2(matrix * Math.make3(v)) }
+    @inlinable public func act(vector v: Vector) -> Vector { KvTransform2.act(matrix, vector: v) }
 
 
 #if DEBUG
@@ -374,7 +386,7 @@ public struct KvAffineTransform2<Math : KvMathScope> {
 
     @inlinable
     public init(_ matrix: Matrix, inverseMatrix: Matrix) {
-        self.init(matrix, inverseMatrix, Self.normalizeScaleComponent(inverseMatrix.transpose))
+        self.init(matrix, inverseMatrix, KvAffineTransform2.normalizeScaleComponent(inverseMatrix.transpose))
     }
 
     @usableFromInline
@@ -759,6 +771,21 @@ public struct KvTransform3<Math : KvMathScope> {
     }
 
 
+    /// - Returns: Transformed coordinate by a transformation represented as given matrix.
+    @inlinable
+    public static func act(_ matrix: Matrix, coordinate c: Vector) -> Vector {
+        let c4 = matrix * Math.make4(c)
+        return Math.make3(c4) / c4.w
+    }
+
+
+    /// - Returns: Transformed vector by a transformation represented as given matrix.
+    @inlinable
+    public static func act(_ matrix: Matrix, vector v: Vector) -> Vector {
+        Math.make3(matrix * Math.make4(v))
+    }
+
+
 
     // MARK: Projections
 
@@ -833,7 +860,7 @@ public struct KvTransform3<Math : KvMathScope> {
     ///
     /// - Warning: Assuming bottom row of the matrix is `[ 0, 0, 0, 1 ]`.
     /// - Note: If determinant of the matrix is negative then X scale element is negative and other elements are non-negative.
-    @inlinable public var scale: Vector { Self.scale(from: matrix) }
+    @inlinable public var scale: Vector { KvTransform3.scale(from: matrix) }
 
     /// Translation component of the receiver.
     ///
@@ -845,13 +872,10 @@ public struct KvTransform3<Math : KvMathScope> {
     @inlinable public func act(normal n: Vector) -> Vector { normalMatrix * n }
 
     /// - Returns: Transformed coordinate.
-    @inlinable public func act(coordinate c: Vector) -> Vector {
-        let c4 = matrix * Math.make4(c)
-        return Math.make3(c4) / c4.w
-    }
+    @inlinable public func act(coordinate c: Vector) -> Vector { KvTransform3.act(matrix, coordinate: c) }
 
     /// - Returns: Transformed vector.
-    @inlinable public func act(vector v: Vector) -> Vector { Math.make3(matrix * Math.make4(v)) }
+    @inlinable public func act(vector v: Vector) -> Vector { KvTransform3.act(matrix, vector: v) }
 
 
 #if DEBUG
@@ -950,7 +974,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
 
     @inlinable
     public init(_ matrix: Matrix, inverseMatrix: Matrix) {
-        self.init(matrix, inverseMatrix, Self.normalizeScaleComponent(inverseMatrix.transpose))
+        self.init(matrix, inverseMatrix, KvAffineTransform3.normalizeScaleComponent(inverseMatrix.transpose))
     }
 
     @usableFromInline
@@ -1061,7 +1085,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
     /// Scale component of the receiver.
     ///
     /// - Note: If determinant of the matrix is negative then X scale element is negative and other elements are non-negative.
-    @inlinable public var scale: Vector { Self.scale(from: matrix) }
+    @inlinable public var scale: Vector { KvAffineTransform3.scale(from: matrix) }
 
 
     /// - Returns: Tranformed normal.

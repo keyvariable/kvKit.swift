@@ -82,8 +82,11 @@ public struct KvPlane3<Math : KvMathScope> {
 
     // MARK: Operations
 
-    /// - Returns: Some coordinate on the receiver.
-    @inlinable public var anyCoordinate: Coordinate { normal * -d }
+    /// Some coordinate on the receiver.
+    @inlinable public var anyCoordinate: Coordinate { closestToOrigin }
+
+    /// A coordinate on the receiver having minimum distance to the coordinate origin.
+    @inlinable public var closestToOrigin: Coordinate { normal * -d }
 
     @inlinable public var isDegenerate: Bool { Math.isZero(normal) }
 
