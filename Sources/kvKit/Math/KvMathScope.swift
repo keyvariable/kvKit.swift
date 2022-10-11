@@ -757,21 +757,21 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: Normalized vector or *nil* whether *v* is nondegenerate.
     @inlinable
     public static func safeNormalize(_ v: Vector2) -> Vector2? {
-        guard isZero(v) else { return nil }
+        guard isNonzero(v) else { return nil }
         return normalize(v)
     }
 
     /// - Returns: Normalized vector or *nil* whether *v* is nondegenerate.
     @inlinable
     public static func safeNormalize(_ v: Vector3) -> Vector3? {
-        guard isZero(v) else { return nil }
+        guard isNonzero(v) else { return nil }
         return normalize(v)
     }
 
     /// - Returns: Normalized vector or *nil* whether *v* is nondegenerate.
     @inlinable
     public static func safeNormalize(_ v: Vector4) -> Vector4? {
-        guard isZero(v) else { return nil }
+        guard isNonzero(v) else { return nil }
         return normalize(v)
     }
 
@@ -1293,21 +1293,21 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: Normalized vector or *nil* whether *v* is nondegenerate.
     @inlinable
     public static func safeNormalize(_ v: Vector2) -> Vector2? {
-        guard isZero(v) else { return nil }
+        guard isNonzero(v) else { return nil }
         return normalize(v)
     }
 
     /// - Returns: Normalized vector or *nil* whether *v* is nondegenerate.
     @inlinable
     public static func safeNormalize(_ v: Vector3) -> Vector3? {
-        guard isZero(v) else { return nil }
+        guard isNonzero(v) else { return nil }
         return normalize(v)
     }
 
     /// - Returns: Normalized vector or *nil* whether *v* is nondegenerate.
     @inlinable
     public static func safeNormalize(_ v: Vector4) -> Vector4? {
-        guard isZero(v) else { return nil }
+        guard isNonzero(v) else { return nil }
         return normalize(v)
     }
 
