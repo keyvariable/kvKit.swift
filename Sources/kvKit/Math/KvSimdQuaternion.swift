@@ -39,6 +39,12 @@ public protocol KvSimdQuaternion : Equatable, CustomDebugStringConvertible {
     associatedtype Matrix4x4
 
 
+    // MARK: Static Properties
+
+    /// Rotation for zero angle.
+    static var zeroAngle: Self { get }
+
+
     // MARK: Properties
 
     var vector: SIMD4<Scalar> { get set }
@@ -124,6 +130,12 @@ extension simd_quatf : KvSimdQuaternion {
     public typealias Matrix3x3 = simd_float3x3
     public typealias Matrix4x4 = simd_float4x4
 
+
+    // MARK: Static Properties
+
+    /// Rotation for zero angle.
+    public static var zeroAngle: Self { Self(vector: [ 0, 0, 0, 1 ]) }
+
 }
 
 
@@ -134,5 +146,11 @@ extension simd_quatd : KvSimdQuaternion {
 
     public typealias Matrix3x3 = simd_double3x3
     public typealias Matrix4x4 = simd_double4x4
+
+
+    // MARK: Static Properties
+
+    /// Rotation for zero angle.
+    public static var zeroAngle: Self { Self(vector: [ 0, 0, 0, 1 ]) }
 
 }
