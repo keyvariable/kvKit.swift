@@ -236,7 +236,7 @@ public struct KvTransform2<Math : KvMathScope> {
     /// - Returns: Transformed coordinate by a transformation represented as given matrix.
     @inlinable
     public static func act(_ matrix: Matrix, coordinate c: Vector) -> Vector {
-        let c3 = matrix * Math.make3(c)
+        let c3 = matrix * Matrix.Column(c, 1)
         return Math.make2(c3) / c3.z
     }
 
@@ -770,7 +770,7 @@ public struct KvTransform3<Math : KvMathScope> {
     /// - Returns: Transformed coordinate by a transformation represented as given matrix.
     @inlinable
     public static func act(_ matrix: Matrix, coordinate c: Vector) -> Vector {
-        let c4 = matrix * Math.make4(c)
+        let c4 = matrix * Matrix.Column(c, 1)
         return Math.make3(c4) / c4.w
     }
 
