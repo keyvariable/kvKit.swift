@@ -860,7 +860,7 @@ public struct KvTransform3<Math : KvMathScope> {
     /// Translation component of the receiver.
     ///
     /// - Warning: Assuming bottom row of the receiver's matrix is `[ 0, 0, 0, 1 ]`.
-    @inlinable public var translation: Vector { Math.make3(matrix[2]) }
+    @inlinable public var translation: Vector { Math.make3(matrix[3]) }
 
 
     /// - Returns: Tranformed normal.
