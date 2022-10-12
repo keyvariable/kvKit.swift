@@ -53,6 +53,19 @@ class KvPlane3Tests : XCTestCase {
             let sqrt1_2 = (0.5 as Math.Scalar).squareRoot()
 
             let cases: [(lhs: P, rhs: P, expected: L?)] = [
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0,  1, 0 ], at: [ 0,  0,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -1, 0 ], at: [ 0,  0,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0,  1, 0 ], at: [ 0,  1,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -1, 0 ], at: [ 0,  1,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0,  1, 0 ], at: [ 0, -1,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -1, 0 ], at: [ 0, -1,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0,  1, 0 ], at: [ 0,  0,  1 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -1, 0 ], at: [ 0,  0,  1 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0,  1, 0 ], at: [ 0,  0, -1 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -1, 0 ], at: [ 0,  0, -1 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 1), P(normal: [ 0,  1, 0 ], at: [ 0,  1,  0 ]), nil),
+                (P(normal: [ 0, 1, 0 ], d: 1), P(normal: [ 0, -1, 0 ], at: [ 0,  1,  0 ]), nil),
+
                 (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -sqrt1_2, sqrt1_2 ], d: 0), L(in: [ 1, 0, 0 ], at: .zero)),
                 (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -sqrt1_2, sqrt1_2 ], d: -sqrt1_2), L(in: [ 1, 0, 0 ], at: [ 0, 0, 1 ])),
             ]

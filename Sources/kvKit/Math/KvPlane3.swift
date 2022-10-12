@@ -298,7 +298,7 @@ extension KvPlane3 : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver and *rhs* are numerically equal.
     @inlinable
     public func isEqual(to rhs: Self) -> Bool {
-        d.isEqual(to: rhs.d) && Math.isEqual(normal, rhs.normal)
+        KvIs(d, equalTo: rhs.d) && Math.isEqual(normal, rhs.normal)
     }
 
 }
