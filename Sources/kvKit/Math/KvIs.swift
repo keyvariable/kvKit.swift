@@ -27,9 +27,37 @@ import simd
 
 // MARK: Auxiliaries
 
+/// - Returns: The tolerance for numerical comparisons.
+///
+/// - Warning: Given *magnitude* must be non-negative.
+@usableFromInline
+internal func KvEps<T : FloatingPoint>(magnitude: T) -> T {
+    .ulpOfOne * Swift.max(Swift.min(16 * magnitude, T.greatestFiniteMagnitude), T.ulpOfOne)
+}
+
+
+/// - Returns: The tolerance for numerical comparisons depending on signle value.
+@inlinable public func KvEps<T : FloatingPoint>(for value: T) -> T { KvEps(magnitude: Swift.abs(value)) }
+
+/// - Returns: The tolerance for numerical comparisons depending on two values.
+@inlinable public func KvEps<T : FloatingPoint>(for v1: T, _ v2: T) -> T { KvEps(magnitude: Swift.max(Swift.abs(v1), Swift.abs(v2))) }
+
+/// - Returns: The tolerance for numerical comparisons depending on three values.
 @inlinable
-public func KvUlp<T : FloatingPoint>(of value: T) -> T {
-    .ulpOfOne * Swift.max(Swift.min(Swift.abs(16 * value), T.greatestFiniteMagnitude), T.ulpOfOne)
+public func KvEps<T : FloatingPoint>(for v1: T, _ v2: T, _ v3: T) -> T {
+    KvEps(magnitude: Swift.max(
+        Swift.max(Swift.abs(v1), Swift.abs(v2)),
+        Swift.abs(v3)
+    ))
+}
+
+/// - Returns: The tolerance for numerical comparisons depending on four values.
+@inlinable
+public func KvEps<T : FloatingPoint>(for v1: T, _ v2: T, _ v3: T, _ v4: T) -> T {
+    KvEps(magnitude: Swift.max(
+        Swift.max(Swift.abs(v1), Swift.abs(v2)),
+        Swift.max(Swift.abs(v3), Swift.abs(v4))
+    ))
 }
 
 
@@ -40,11 +68,18 @@ public func KvUlp<T : FloatingPoint>(of value: T) -> T {
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T) -> Bool {
-    let eps = KvUlp(of: lhs)
-
-    return lhs < rhs + eps && lhs > rhs - eps
+public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, eps: T) -> Bool {
+    lhs <= rhs + eps && lhs >= rhs - eps
 }
+
+/// - Returns: A boolean value indicating whether *lhs* is equal to *rhs* taking into account the computational error.
+///
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T) -> Bool {
+    KvIs(lhs, equalTo: rhs, eps: KvEps(for: lhs, rhs))
+}
+
 
 
 /// - Parameter greaterFlag: Destination for a boolean value indicating whether *lhs* is greater than *rhs* taking into account the computational error.
@@ -55,12 +90,22 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, eps: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+    greaterFlag = lhs > rhs + eps
+
+    return lhs >= rhs - eps && !greaterFlag
+}
+
+/// - Parameter greaterFlag: Destination for a boolean value indicating whether *lhs* is greater than *rhs* taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *lhs* is equal to *rhs* taking into account the computational error.
+///
+/// - Note: It is designed to be applied when equality case is primary but the order is significant in opposite case.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
-    let eps = KvUlp(of: lhs)
-
-    greaterFlag = lhs >= rhs + eps
-
-    return lhs > rhs - eps && !greaterFlag
+    KvIs(lhs, equalTo: rhs, eps: KvEps(for: lhs, rhs), alsoIsGreaterThan: &greaterFlag)
 }
 
 
@@ -69,10 +114,16 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThan 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T) -> Bool {
-    let eps = KvUlp(of: lhs)
+public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: T) -> Bool {
+    lhs > rhs + eps || lhs < rhs - eps
+}
 
-    return lhs >= rhs + eps || lhs <= rhs - eps
+/// - Returns: A boolean value indicating whether *lhs* is inequal to *rhs* taking into account the computational error.
+///
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T) -> Bool {
+    KvIs(lhs, inequalTo: rhs, eps: KvEps(for: lhs, rhs))
 }
 
 
@@ -85,12 +136,22 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+    greaterFlag = lhs > rhs + eps
+
+    return lhs < rhs - eps || greaterFlag
+}
+
+/// - Parameter greaterFlag: Destination for a boolean value indicating whether *lhs* is greater than *rhs* taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *lhs* is inequal to *rhs* taking into account the computational error.
+///
+/// - Note: It is designed to be applied when inequality case is primary and the order is significant. E.g. *guard* statement.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
-    let eps = KvUlp(of: lhs)
-
-    greaterFlag = lhs >= rhs + eps
-
-    return lhs <= rhs - eps || greaterFlag
+    KvIs(lhs, inequalTo: rhs, eps: KvEps(for: lhs, rhs), alsoIsGreaterThan: &greaterFlag)
 }
 
 
@@ -99,8 +160,16 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterTha
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: T) -> Bool {
+    lhs > rhs + eps
+}
+
+/// - Returns: A boolean value indicating whether *lhs* is greater than *rhs* taking into account the computational error.
+///
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T) -> Bool {
-    lhs >= rhs + KvUlp(of: lhs)
+    KvIs(lhs, greaterThan: rhs, eps: KvEps(for: lhs, rhs))
 }
 
 
@@ -113,14 +182,23 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, alsoIsLessThan lessFlag: inout Bool) -> Bool {
-    let eps = KvUlp(of: lhs)
+public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: T, alsoIsLessThan lessFlag: inout Bool) -> Bool {
+    lessFlag = lhs < rhs - eps
 
-    lessFlag = lhs <= rhs - eps
-
-    return lhs >= rhs + eps
+    return lhs > rhs + eps
 }
 
+/// - Parameter lessFlag: Destination for a boolean value indicating whether *lhs* is less than *rhs* taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *lhs* is greater than *rhs* taking into account the computational error.
+///
+/// - Note: It is designed to be applied when descendence case is primary but ascendence is significant in opposite case.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, alsoIsLessThan lessFlag: inout Bool) -> Bool {
+    KvIs(lhs, greaterThan: rhs, eps: KvEps(for: lhs, rhs), alsoIsLessThan: &lessFlag)
+}
 
 
 
@@ -128,8 +206,16 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, alsoIsLessThan
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, eps: T) -> Bool {
+    lhs < rhs - eps
+}
+
+/// - Returns: A boolean value indicating whether *lhs* is less than *rhs* taking into account the computational error.
+///
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T) -> Bool {
-    lhs <= rhs - KvUlp(of: lhs)
+    KvIs(lhs, lessThan: rhs, eps: KvEps(for: lhs, rhs))
 }
 
 
@@ -142,12 +228,22 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, eps: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+    greaterFlag = lhs > rhs + eps
+
+    return lhs < rhs - eps
+}
+
+/// - Parameter greaterFlag: Destination for a boolean value indicating whether *lhs* is greater than *rhs* taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *lhs* is less than *rhs* taking into account the computational error.
+///
+/// - Note: It is designed to be applied when ascendence case is primary but descendence is significant in opposite case.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
-    let eps = KvUlp(of: lhs)
-
-    greaterFlag = lhs >= rhs + eps
-
-    return lhs <= rhs - eps
+    KvIs(lhs, lessThan: rhs, eps: KvEps(for: lhs, rhs), alsoIsGreaterThan: &greaterFlag)
 }
 
 
@@ -156,8 +252,16 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, alsoIsGreaterThan
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T, eps: T) -> Bool {
+    lhs >= rhs - eps
+}
+
+/// - Returns: A boolean value indicating whether *lhs* is greater than or equal to *rhs* taking into account the computational error.
+///
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T) -> Bool {
-    lhs > rhs - KvUlp(of: lhs)
+    KvIs(lhs, greaterThanOrEqualTo: rhs, eps: KvEps(for: lhs, rhs))
 }
 
 
@@ -166,8 +270,16 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T) -> Bo
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T, eps: T) -> Bool {
+    lhs <= rhs + eps
+}
+
+/// - Returns: A boolean value indicating whether *lhs* is less than or equal to *rhs* taking into account the computational error.
+///
+/// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T) -> Bool {
-    lhs < rhs + KvUlp(of: lhs)
+    KvIs(lhs, lessThanOrEqualTo: rhs, eps: KvEps(for: lhs, rhs))
 }
 
 
@@ -176,8 +288,16 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T) -> Bool 
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsZero<T : FloatingPoint>(_ value: T, eps: T) -> Bool {
+    abs(value) <= eps
+}
+
+/// - Returns: A boolean value indicating whether *value* is equal to zero taking into account the computational error.
+///
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsZero<T : FloatingPoint>(_ value: T) -> Bool {
-    abs(value) < 16 * .ulpOfOne
+    KvIsZero(value, eps: 16 * .ulpOfOne)
 }
 
 
@@ -190,12 +310,22 @@ public func KvIsZero<T : FloatingPoint>(_ value: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsZero<T : FloatingPoint>(_ value: T, eps: T, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+    positiveFlag = value > eps
+
+    return !positiveFlag && value >= -eps
+}
+
+/// - Parameter positiveFlag: Destination for a boolean value indicating whether *value* is positive taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *value* is equal to zero taking into account the computational error.
+///
+/// - Note: It is designed to be applied when equality case is primary but the sign is significant in opposite case.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsZero<T : FloatingPoint>(_ value: T, alsoIsPositive positiveFlag: inout Bool) -> Bool {
-    let eps: T = 16 * .ulpOfOne
-
-    positiveFlag = value >= eps
-
-    return !positiveFlag && value > -eps
+    KvIsZero(value, eps: 16 * .ulpOfOne, alsoIsPositive: &positiveFlag)
 }
 
 
@@ -204,8 +334,16 @@ public func KvIsZero<T : FloatingPoint>(_ value: T, alsoIsPositive positiveFlag:
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: T) -> Bool {
+    abs(value) > eps
+}
+
+/// - Returns: A boolean value indicating whether *value* is not equal to zero taking into account the computational error.
+///
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsNonzero<T : FloatingPoint>(_ value: T) -> Bool {
-    abs(value) >= 16 * .ulpOfOne
+    KvIsNonzero(value, eps: 16 * .ulpOfOne)
 }
 
 
@@ -218,12 +356,22 @@ public func KvIsNonzero<T : FloatingPoint>(_ value: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: T, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+    positiveFlag = value > eps
+
+    return positiveFlag || value < -eps
+}
+
+/// - Parameter positiveFlag: Destination for a boolean value indicating whether *value* is positive taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *value* is not equal to zero taking into account the computational error.
+///
+/// - Note: It is designed to be applied when inequality case is primary and the sign is significant. E.g. *guard* statement.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsNonzero<T : FloatingPoint>(_ value: T, alsoIsPositive positiveFlag: inout Bool) -> Bool {
-    let eps: T = 16 * .ulpOfOne
-
-    positiveFlag = value >= eps
-
-    return positiveFlag || value <= -eps
+    KvIsNonzero(value, eps: 16 * .ulpOfOne, alsoIsPositive: &positiveFlag)
 }
 
 
@@ -232,8 +380,16 @@ public func KvIsNonzero<T : FloatingPoint>(_ value: T, alsoIsPositive positiveFl
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: T) -> Bool {
+    value > eps
+}
+
+/// - Returns: A boolean value indicating whether *value* is positive taking into account the computational error.
+///
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsPositive<T : FloatingPoint>(_ value: T) -> Bool {
-    value >= 16 * .ulpOfOne
+    KvIsPositive(value, eps: 16 * .ulpOfOne)
 }
 
 
@@ -246,12 +402,22 @@ public func KvIsPositive<T : FloatingPoint>(_ value: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: T, alsoIsNegative negativeFlag: inout Bool) -> Bool {
+    negativeFlag = value < -eps
+
+    return value > eps
+}
+
+/// - Parameter negativeFlag: Destination for a boolean value indicating whether *value* is negative taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *value* is positive taking into account the computational error.
+///
+/// - Note: It is designed to be applied when positivity case is primary but the sign is significant in opposite case.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsPositive<T : FloatingPoint>(_ value: T, alsoIsNegative negativeFlag: inout Bool) -> Bool {
-    let eps: T = 16 * .ulpOfOne
-
-    negativeFlag = value <= -eps
-
-    return value >= eps
+    KvIsPositive(value, eps: 16 * .ulpOfOne, alsoIsNegative: &negativeFlag)
 }
 
 
@@ -260,8 +426,16 @@ public func KvIsPositive<T : FloatingPoint>(_ value: T, alsoIsNegative negativeF
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: T) -> Bool {
+    value < -eps
+}
+
+/// - Returns: A boolean value indicating whether *value* is negative taking into account the computational error.
+///
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsNegative<T : FloatingPoint>(_ value: T) -> Bool {
-    value <= -16 * .ulpOfOne
+    KvIsNegative(value, eps: 16 * .ulpOfOne)
 }
 
 
@@ -274,12 +448,22 @@ public func KvIsNegative<T : FloatingPoint>(_ value: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: T, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+    positiveFlag = value > eps
+
+    return value < -eps
+}
+
+/// - Parameter positiveFlag: Destination for a boolean value indicating whether *value* is positive taking into account the computational error.
+///
+/// - Returns: A boolean value indicating whether *value* is negative taking into account the computational error.
+///
+/// - Note: It is designed to be applied when negativity case is primary but the sign is significant in opposite case.
+/// - Note: It's faster to check the flag than to compare the same values twice.
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsNegative<T : FloatingPoint>(_ value: T, alsoIsPositive positiveFlag: inout Bool) -> Bool {
-    let eps: T = 16 * .ulpOfOne
-
-    positiveFlag = value >= eps
-
-    return value <= -eps
+    KvIsNegative(value, eps: 16 * .ulpOfOne, alsoIsPositive: &positiveFlag)
 }
 
 
@@ -288,8 +472,16 @@ public func KvIsNegative<T : FloatingPoint>(_ value: T, alsoIsPositive positiveF
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsNotPositive<T : FloatingPoint>(_ value: T, eps: T) -> Bool {
+    value <= eps
+}
+
+/// - Returns: A boolean value indicating whether *value* isn't positive taking into account the computational error.
+///
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsNotPositive<T : FloatingPoint>(_ value: T) -> Bool {
-    value < 16 * .ulpOfOne
+    KvIsNotPositive(value, eps: 16 * .ulpOfOne)
 }
 
 
@@ -298,8 +490,16 @@ public func KvIsNotPositive<T : FloatingPoint>(_ value: T) -> Bool {
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
+public func KvIsNotNegative<T : FloatingPoint>(_ value: T, eps: T) -> Bool {
+    value >= -eps
+}
+
+/// - Returns: A boolean value indicating whether *value* isn't negative taking into account the computational error.
+///
+/// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+@inlinable
 public func KvIsNotNegative<T : FloatingPoint>(_ value: T) -> Bool {
-    value > -16 * .ulpOfOne
+    KvIsNotNegative(value, eps: 16 * .ulpOfOne)
 }
 
 
@@ -682,13 +882,15 @@ public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : BinaryFloatingPoint {
 
 // MARK: Legacy
 
+@available(*, deprecated, renamed: "KvEps(for:)")
+@inlinable
+public func KvUlp<T : FloatingPoint>(of value: T) -> T { KvEps(for: value) }
+
 @available(*, deprecated, renamed: "KvIs(_:equalTo:alsoIsGreaterThan:)")
 @inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, equalTo: rhs, alsoIsGreaterThan: &greaterFlag)
 }
-
-
 
 @available(*, deprecated, renamed: "KvIs(_:inequalTo:alsoIsGreaterThan:)")
 @inlinable
@@ -696,15 +898,11 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThe
     KvIs(lhs, inequalTo: rhs, alsoIsGreaterThan: &greaterFlag)
 }
 
-
-
 @available(*, deprecated, renamed: "KvIs(_:greaterThan:)")
 @inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThen rhs: T) -> Bool {
     KvIs(lhs, greaterThan: rhs)
 }
-
-
 
 @available(*, deprecated, renamed: "KvIs(_:greaterThan:alsoIsLessThan:)")
 @inlinable
@@ -712,15 +910,11 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThen rhs: T, alsoIsLessThen
     KvIs(lhs, greaterThan: rhs, alsoIsLessThan: &lessFlag)
 }
 
-
-
 @available(*, deprecated, renamed: "KvIs(_:lessThan:)")
 @inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, lessThen rhs: T) -> Bool {
     KvIs(lhs, lessThan: rhs)
 }
-
-
 
 @available(*, deprecated, renamed: "KvIs(_:lessThan:alsoIsGreaterThan:)")
 @inlinable
@@ -728,15 +922,11 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThen rhs: T, alsoIsGreaterThen
     KvIs(lhs, lessThan: rhs, alsoIsGreaterThan: &greaterFlag)
 }
 
-
-
 @available(*, deprecated, renamed: "KvIs(_:greaterThanOrEqualTo:)")
 @inlinable
 public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThenOrEqualTo rhs: T) -> Bool {
     KvIs(lhs, greaterThanOrEqualTo: rhs)
 }
-
-
 
 @available(*, deprecated, renamed: "KvIs(_:lessThanOrEqualTo:)")
 @inlinable

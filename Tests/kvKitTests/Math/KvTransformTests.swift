@@ -55,11 +55,11 @@ class KvTransformTests : XCTestCase {
     func testTR() {
 
         func RunT2<Math : KvMathScope>(_ math: Math.Type, _ translation: Math.Vector2, _ angle: Math.Scalar, expected: T2<Math>) {
-            assertEqual(.init(translation: translation, angle: angle), expected)
+            KvAssertEqual(T2<Math>(translation: translation, angle: angle), expected)
         }
 
         func RunT3<Math : KvMathScope>(_ math: Math.Type, _ translation: Math.Vector3, _ quaternion: Math.Quaternion, expected: T3<Math>) {
-            assertEqual(.init(translation: translation, quaternion: quaternion), expected)
+            KvAssertEqual(T3<Math>(translation: translation, quaternion: quaternion), expected)
         }
 
         // TODO: Complete tests
@@ -75,26 +75,6 @@ class KvTransformTests : XCTestCase {
 
         Run(KvMathFloatScope.self)
         Run(KvMathDoubleScope.self)
-    }
-
-
-
-    // MARK: Auziliaries
-
-    private func assertEqual<Math : KvMathScope>(_ lhs: T2<Math>, _ rhs: T2<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.isEqual(to: rhs), [ message(), "lhs.isEqual(to: rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ lhs: AT2<Math>, _ rhs: AT2<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.isEqual(to: rhs), [ message(), "lhs.isEqual(to: rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ lhs: T3<Math>, _ rhs: T3<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.isEqual(to: rhs), [ message(), "lhs.isEqual(to: rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ lhs: AT3<Math>, _ rhs: AT3<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.isEqual(to: rhs), [ message(), "lhs.isEqual(to: rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
     }
 
 }

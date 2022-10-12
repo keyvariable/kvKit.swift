@@ -61,7 +61,7 @@ class KvBConvex2Tests : XCTestCase {
             ]
 
             for (y, expected) in testCases {
-                AssertEqual(bconvex.segment(y: y), expected, by: KvIs(_:equalTo:))
+                KvAssertEqual(bconvex.segment(y: y), expected, by: KvIs(_:equalTo:))
             }
         }
 

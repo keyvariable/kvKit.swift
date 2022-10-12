@@ -41,11 +41,30 @@ public protocol KvNumericallyEquatable {
 }
 
 
-// MARK: Default implementations
+// MARK: Default Implementations
 
 extension KvNumericallyEquatable {
 
     @inlinable public func isInequal(to rhs: Self) -> Bool { !isEqual(to: rhs) }
+
+}
+
+
+// MARK: Static Methods
+
+extension KvNumericallyEquatable {
+
+    /// - Returns: A boolean value indicating whether the receiver is equal to *rhs* taking into account the computational error.
+    ///
+    /// - Note: See `KvIs(_:equalTo:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+    @inlinable public static func isEqual(_ lhs: Self, to rhs: Self) -> Bool { lhs.isEqual(to: rhs) }
+
+    /// - Returns: A boolean value indicating whether the receiver is inequal to *rhs* taking into account the computational error.
+    ///
+    /// - Note: See `KvIs(_:inequalTo:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+    @inlinable public static func isInequal(_ lhs: Self, to rhs: Self) -> Bool { lhs.isInequal(to: rhs) }
 
 }
 
@@ -71,10 +90,29 @@ public protocol KvNumericallyZeroEquatable {
 }
 
 
-// MARK: Default implementations
+// MARK: Default Implementations
 
 extension KvNumericallyZeroEquatable {
 
     @inlinable public func isNonzero() -> Bool { !isZero() }
+
+}
+
+
+// MARK: Static Methods
+
+extension KvNumericallyZeroEquatable {
+
+    /// - Returns: A boolean value indicating whether the receiver is equal to zero taking into account the computational error.
+    ///
+    /// - Note: See `KvIsZero(_:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+    @inlinable public static func isZero(_ v: Self) -> Bool { v.isZero() }
+
+    /// - Returns: A boolean value indicating whether the receiver is not equal to zero taking into account the computational error.
+    ///
+    /// - Note: See `KvIsNonzero(_:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
+    @inlinable public static func isNonzero(_ v: Self) -> Bool { v.isNonzero() }
 
 }

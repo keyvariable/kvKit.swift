@@ -15,10 +15,10 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  KvRay2Tests.swift
+//  KvPlane3Tests.swift
 //  kvKit
 //
-//  Created by Svyatoslav Popov on 28.09.2022.
+//  Created by Svyatoslav Popov on 12.10.2022.
 //
 
 import XCTest
@@ -27,12 +27,7 @@ import XCTest
 
 
 
-class KvRay2Tests : XCTestCase {
-
-    typealias Vertex<Math : KvMathScope> = KvPosition2<Math, Void>
-    typealias Ray<Math : KvMathScope> = KvRay2<Vertex<Math>>
-
-
+class KvPlane3Tests : XCTestCase {
 
     // MARK: : XCTestCase
 
@@ -47,22 +42,24 @@ class KvRay2Tests : XCTestCase {
 
 
 
-    // MARK: Offset to Ray Test
+    // MARK: Plane-plane Intersection Test
 
-    func testOffsetToRay() {
+    func testIntersectionWithPlane() {
 
         func Run<Math : KvMathScope>(_ math: Math.Type) {
-            let ray = Ray<Math>(in: .one, at: .init(.unitY))
+            typealias P = KvPlane3<Math>
+            typealias L = KvLine3<Math>
 
-            func Assert(_ other: Ray<Math>, _ expected: Math.Scalar?) {
-                KvAssertEqual(ray.offset(to: other), expected, by: KvIs(_:equalTo:))
+            let sqrt1_2 = (0.5 as Math.Scalar).squareRoot()
+
+            let cases: [(lhs: P, rhs: P, expected: L?)] = [
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -sqrt1_2, sqrt1_2 ], d: 0), L(in: [ 1, 0, 0 ], at: .zero)),
+                (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -sqrt1_2, sqrt1_2 ], d: -sqrt1_2), L(in: [ 1, 0, 0 ], at: [ 0, 0, 1 ])),
+            ]
+
+            cases.forEach { (lhs, rhs, expected) in
+                KvAssertEqual(lhs.intersection(with: rhs), expected)
             }
-
-            Assert(ray, nil)
-            Assert(.init(in: .unitX, at: .init(.unitY)), 0)
-            Assert(.init(in: -.unitX, at: [ 10, 1 ]), 0)
-            Assert(.init(in: -.unitX, at: [ 1, 10 ]), nil)
-            Assert(.init(in: -.unitX, at: [ 10, 0 ]), nil)
         }
 
         Run(KvMathFloatScope.self)

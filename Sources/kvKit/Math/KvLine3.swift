@@ -38,7 +38,7 @@ public struct KvLine3<Math : KvMathScope> {
 
     /// Quaternion defining orientation of the line.
     public var quaternion: Quaternion
-    /// Distance from the origin to the line.
+    /// The distance from the origin to the line.
     public var d: Scalar
 
 
@@ -69,15 +69,15 @@ public struct KvLine3<Math : KvMathScope> {
     /// A line having given direction and containing given coordinate.
     @inlinable
     public init(in direction: Vector, at coordinate: Coordinate) {
-        var right = Math.cross(direction, coordinate)
+        var left = Math.cross(coordinate, -direction)
 
-        switch Math.isNonzero(right) {
+        switch Math.isNonzero(left) {
         case true:
-            let front = Math.normalize(direction)
-            right = Math.normalize(right)
-            let up = Math.cross(right, front)
+            let front = Math.normalize(-direction)
+            left = Math.normalize(left)
+            let up = Math.cross(front, left)
 
-            let q = Quaternion(Math.Matrix3x3(right, up, front))
+            let q = Quaternion(Math.Matrix3x3(left, up, front))
 
             self.init(quaternion: q, d: -Math.dot(coordinate, up))
 
@@ -120,8 +120,10 @@ public struct KvLine3<Math : KvMathScope> {
     /// - SeeAlso: ``front``, ``up``.
     @inlinable public var right: Vector { quaternion.act(Self.right) }
 
+    /// A coordinate on the receiver having minimum distance to the coordinate origin.
+    @inlinable public var closestToOrigin: Coordinate { up * -d }
     /// - Returns: Some coordinate on the receiver.
-    @inlinable public var anyCoordinate: Coordinate { up * -d }
+    @inlinable public var anyCoordinate: Coordinate { closestToOrigin }
 
     @inlinable public var isDegenerate: Bool { Math.isZero(quaternion) }
 
@@ -192,14 +194,14 @@ extension KvLine3 : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver and *rhs* are numerically equal.
     @inlinable
     public func isEqual(to rhs: Self) -> Bool {
+        guard Math.isCollinear(front, rhs.front) else { return false }
+
         switch KvIsNonzero(d) {
         case true:
-            guard KvIsNonzero(rhs.d) else { return false }
-
-            return Math.isEqual(quaternion * rhs.d, rhs.quaternion * d)
+            return Math.isEqual(closestToOrigin, rhs.closestToOrigin)
 
         case false:
-            return KvIsZero(rhs.d) && Math.isCoDirectional(front, rhs.front)
+            return KvIsZero(rhs.d)
         }
     }
 

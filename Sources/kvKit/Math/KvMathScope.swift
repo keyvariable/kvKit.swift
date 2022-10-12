@@ -116,6 +116,13 @@ public protocol KvMathScope {
     static func dot(_ lhs: Vector3, _ rhs: Vector3) -> Scalar
     static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar
 
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    static func eps(for v1: Vector2, _ v2: Vector2) -> Scalar
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    static func eps(for v1: Vector3, _ v2: Vector3) -> Scalar
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    static func eps(for v1: Vector4, _ v2: Vector4) -> Scalar
+
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
     ///
     /// - Note: Two zero vectors are not co-directional.
@@ -128,6 +135,26 @@ public protocol KvMathScope {
     ///
     /// - Note: Two zero vectors are not co-directional.
     static func isCoDirectional(_ lhs: Vector4, _ rhs: Vector4) -> Bool
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    static func isCollinear(_ lhs: Vector4, _ rhs: Vector4) -> Bool
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    static func isCollinearOrZero(_ lhs: Vector2, _ rhs: Vector2) -> Bool
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    static func isCollinearOrZero(_ lhs: Vector3, _ rhs: Vector3) -> Bool
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    static func isCollinearOrZero(_ lhs: Vector4, _ rhs: Vector4) -> Bool
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool
@@ -466,13 +493,31 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd.dot(lhs, rhs) }
 
 
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    @inlinable
+    public static func eps(for v1: Vector2, _ v2: Vector2) -> Scalar {
+        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
+    }
+
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    @inlinable
+    public static func eps(for v1: Vector3, _ v2: Vector3) -> Scalar {
+        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
+    }
+
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    @inlinable
+    public static func eps(for v1: Vector4, _ v2: Vector4) -> Scalar {
+        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
+    }
+
+
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
     ///
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x)
-        && KvIsPositive(dot(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -480,9 +525,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x)
-        && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y)
-        && KvIsPositive(simd_dot(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -490,55 +533,153 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x)
-        && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y)
-        && KvIs(lhs.z * rhs.w, equalTo: lhs.w * rhs.z)
-        && KvIsPositive(simd_dot(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    @inlinable
+    public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    @inlinable
+    public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    @inlinable
+    public static func isCollinear(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    @inlinable
+    public static func isCollinearOrZero(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        let e = max(abs(lhs), abs(rhs))
+
+        return KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
+    }
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    @inlinable
+    public static func isCollinearOrZero(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        let e = max(abs(lhs), abs(rhs))
+
+        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
+                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z))))
+    }
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    @inlinable
+    public static func isCollinearOrZero(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        let e = max(abs(lhs), abs(rhs))
+
+        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
+                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z)))
+                && KvIs(lhs.z * rhs.w, equalTo: lhs.w * rhs.z, eps: KvEps(magnitude: Swift.max(e.z, e.w))))
     }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
-    @inlinable public static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
-    @inlinable public static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
-    @inlinable public static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given quaternions are inequal.
     @inlinable public static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isInequal(lhs.vector, rhs.vector) }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
-    @inlinable public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
+        isInequal(lhs[0], rhs[0])
+        || isInequal(lhs[1], rhs[1])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
-    @inlinable public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
+        isInequal(lhs[0], rhs[0])
+        || isInequal(lhs[1], rhs[1])
+        || isInequal(lhs[2], rhs[2])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
-    @inlinable public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
+        isInequal(lhs[0], rhs[0])
+        || isInequal(lhs[1], rhs[1])
+        || isInequal(lhs[2], rhs[2])
+        || isInequal(lhs[3], rhs[3])
+    }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
-    @inlinable public static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
-    @inlinable public static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
-    @inlinable public static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given quaternions are equal.
     @inlinable public static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isEqual(lhs.vector, rhs.vector) }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
-    @inlinable public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
+        isEqual(lhs[0], rhs[0])
+        && isEqual(lhs[1], rhs[1])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
-    @inlinable public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
+        isEqual(lhs[0], rhs[0])
+        && isEqual(lhs[1], rhs[1])
+        && isEqual(lhs[2], rhs[2])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
-    @inlinable public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
+        isEqual(lhs[0], rhs[0])
+        && isEqual(lhs[1], rhs[1])
+        && isEqual(lhs[2], rhs[2])
+        && isEqual(lhs[3], rhs[3])
+    }
 
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
@@ -1002,13 +1143,31 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd.dot(lhs, rhs) }
 
 
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    @inlinable
+    public static func eps(for v1: Vector2, _ v2: Vector2) -> Scalar {
+        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
+    }
+
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    @inlinable
+    public static func eps(for v1: Vector3, _ v2: Vector3) -> Scalar {
+        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
+    }
+
+    /// - Returns: The tolerance for numerical comparisons depending on two values.
+    @inlinable
+    public static func eps(for v1: Vector4, _ v2: Vector4) -> Scalar {
+        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
+    }
+
+
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
     ///
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x)
-        && KvIsPositive(dot(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1016,9 +1175,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x)
-        && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y)
-        && KvIsPositive(simd_dot(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1026,55 +1183,153 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x)
-        && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y)
-        && KvIs(lhs.z * rhs.w, equalTo: lhs.w * rhs.z)
-        && KvIsPositive(simd_dot(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    @inlinable
+    public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    @inlinable
+    public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are collinear.
+    ///
+    /// - Note: *False* is returned if any of given vectors is zero.
+    @inlinable
+    public static func isCollinear(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+    }
+
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    @inlinable
+    public static func isCollinearOrZero(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        let e = max(abs(lhs), abs(rhs))
+
+        return KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
+    }
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    @inlinable
+    public static func isCollinearOrZero(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        let e = max(abs(lhs), abs(rhs))
+
+        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
+                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z))))
+    }
+
+    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
+    @inlinable
+    public static func isCollinearOrZero(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        let e = max(abs(lhs), abs(rhs))
+
+        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
+                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z)))
+                && KvIs(lhs.z * rhs.w, equalTo: lhs.w * rhs.z, eps: KvEps(magnitude: Swift.max(e.z, e.w))))
     }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
-    @inlinable public static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
-    @inlinable public static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
-    @inlinable public static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given quaternions are inequal.
     @inlinable public static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isInequal(lhs.vector, rhs.vector) }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
-    @inlinable public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
+        isInequal(lhs[0], rhs[0])
+        || isInequal(lhs[1], rhs[1])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
-    @inlinable public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
+        isInequal(lhs[0], rhs[0])
+        || isInequal(lhs[1], rhs[1])
+        || isInequal(lhs[2], rhs[2])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
-    @inlinable public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool { isNonzero(lhs - rhs) }
+    @inlinable
+    public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
+        isInequal(lhs[0], rhs[0])
+        || isInequal(lhs[1], rhs[1])
+        || isInequal(lhs[2], rhs[2])
+        || isInequal(lhs[3], rhs[3])
+    }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
-    @inlinable public static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
-    @inlinable public static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
-    @inlinable public static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+    }
 
     /// - Returns: A boolean value indicating wheather given quaternions are equal.
     @inlinable public static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isEqual(lhs.vector, rhs.vector) }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
-    @inlinable public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
+        isEqual(lhs[0], rhs[0])
+        && isEqual(lhs[1], rhs[1])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
-    @inlinable public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
+        isEqual(lhs[0], rhs[0])
+        && isEqual(lhs[1], rhs[1])
+        && isEqual(lhs[2], rhs[2])
+    }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
-    @inlinable public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool { isZero(lhs - rhs) }
+    @inlinable
+    public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
+        isEqual(lhs[0], rhs[0])
+        && isEqual(lhs[1], rhs[1])
+        && isEqual(lhs[2], rhs[2])
+        && isEqual(lhs[3], rhs[3])
+    }
 
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.

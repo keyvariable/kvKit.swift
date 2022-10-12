@@ -51,7 +51,7 @@ class KvLine2Tests : XCTestCase {
             let line = makeLine(math, angle: 0.25 * .pi, c: c)
 
             func Assert(_ result: Math.Vector2?, _ expected: Math.Vector2?) {
-                AssertEqual(result, expected, by: Math.isEqual(_:_:))
+                KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
             }
 
             Assert(line.intersection(with: makeLine(math, angle: 0, c: 0)), [ -1, 0 ])

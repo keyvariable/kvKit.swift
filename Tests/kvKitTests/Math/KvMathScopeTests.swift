@@ -1,3 +1,19 @@
+//===----------------------------------------------------------------------===//
+//
+//  Copyright (c) 2021 Svyatoslav Popov.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+//  the License. You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+//  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+//  specific language governing permissions and limitations under the License.
+//
+//  SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
 //
 //  KvMathScopeTests.swift
 //  kvKit
@@ -182,7 +198,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = 2 * KvUlp(of: 1 as S<Math>)
+            let bound = 2 * KvEps(for: 1 as S<Math>)
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -215,7 +231,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = 2 * KvUlp(of: 1 as S<Math>)
+            let bound = 2 * KvEps(for: 1 as S<Math>)
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -248,7 +264,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = 2 * KvUlp(of: 1 as S<Math>)
+            let bound = 2 * KvEps(for: 1 as S<Math>)
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -279,7 +295,7 @@ class KvMathScopeTests : XCTestCase {
             ]
 
             input.forEach { (input, expected) in
-                assertEqual(Math.self, Math.safeNormalize(input), expected)
+                KvAssertEqual(Math.self, Math.safeNormalize(input), expected)
             }
         }
 
@@ -300,7 +316,7 @@ class KvMathScopeTests : XCTestCase {
             ]
 
             input.forEach { (input, expected) in
-                assertEqual(Math.self, Math.safeNormalize(input), expected)
+                KvAssertEqual(Math.self, Math.safeNormalize(input), expected)
             }
         }
 
@@ -321,43 +337,12 @@ class KvMathScopeTests : XCTestCase {
             ]
 
             input.forEach { (input, expected) in
-                assertEqual(Math.self, Math.safeNormalize(input), expected)
+                KvAssertEqual(Math.self, Math.safeNormalize(input), expected)
             }
         }
 
         Run(KvMathFloatScope.self)
         Run(KvMathDoubleScope.self)
-    }
-
-
-
-    // MARK: Auxiliaries
-
-    private func assertEqual<Math : KvMathScope>(_ math: Math.Type, _ lhs: V2<Math>, _ rhs: V2<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(Math.isEqual(lhs, rhs), [ message(), "Math.isEqual(lhs, rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ math: Math.Type, _ lhs: V3<Math>, _ rhs: V3<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(Math.isEqual(lhs, rhs), [ message(), "Math.isEqual(lhs, rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ math: Math.Type, _ lhs: V4<Math>, _ rhs: V4<Math>, message: @autoclosure () -> String = "") {
-        XCTAssert(Math.isEqual(lhs, rhs), [ message(), "Math.isEqual(lhs, rhs) != true, where", "\(lhs)", "\(rhs)" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ math: Math.Type, _ lhs: V2<Math>?, _ rhs: V2<Math>?, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.flatMap { lhs in rhs.map { rhs in Math.isEqual(lhs, rhs) } } ?? (rhs == nil),
-                  [ message(), "Math.isEqual(lhs, rhs) != true, where", "\(KvStringKit.with(lhs))", "\(KvStringKit.with(rhs))" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ math: Math.Type, _ lhs: V3<Math>?, _ rhs: V3<Math>?, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.flatMap { lhs in rhs.map { rhs in Math.isEqual(lhs, rhs) } } ?? (rhs == nil),
-                  [ message(), "Math.isEqual(lhs, rhs) != true, where", "\(KvStringKit.with(lhs))", "\(KvStringKit.with(rhs))" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
-    }
-
-    private func assertEqual<Math : KvMathScope>(_ math: Math.Type, _ lhs: V4<Math>?, _ rhs: V4<Math>?, message: @autoclosure () -> String = "") {
-        XCTAssert(lhs.flatMap { lhs in rhs.map { rhs in Math.isEqual(lhs, rhs) } } ?? (rhs == nil),
-                  [ message(), "Math.isEqual(lhs, rhs) != true, where", "\(KvStringKit.with(lhs))", "\(KvStringKit.with(rhs))" ].filter { !$0.isEmpty }.joined(separator: "\n\t"))
     }
 
 }
