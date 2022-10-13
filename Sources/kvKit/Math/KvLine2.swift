@@ -83,6 +83,13 @@ public struct KvLine2<Math : KvMathScope> {
     }
 
 
+    /// A line having given direction and distance to coordinate origin.
+    @inlinable
+    public init(in direction: Vector, c: Scalar) {
+        self.init(normal: Vector(x: -direction.y, y: direction.x), c: c)
+    }
+
+
     /// A line having given normal and containing given coordinate.
     @inlinable
     public init(normal: Vector, at coordinate: Coordinate) {
