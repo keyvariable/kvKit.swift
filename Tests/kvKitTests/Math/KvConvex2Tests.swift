@@ -567,7 +567,7 @@ class KvConvex2Tests : XCTestCase {
             let input = Self.quadVertices(Math.self, isCCW: isCCW)
 
             guard let lhs = TestCase<Math>.Convex(input)
-            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") LHS quad") }
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad") }
 
             [ 0 as Int, 1, 2, 3 ].forEach { shift in
                 [ false, true ].forEach { isReversed in
@@ -575,7 +575,7 @@ class KvConvex2Tests : XCTestCase {
                     guard let rhs = (!isReversed
                                      ? TestCase<Math>.Convex(input2)
                                      : TestCase<Math>.Convex(input2.reversed(), reverse: true))
-                    else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") RHS quad: shift=\(shift), reverse=\(isReversed)") }
+                    else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad: shift=\(shift), reverse=\(isReversed)") }
 
                     XCTAssert(lhs.isEqual(to: rhs), "Two equal quads: \(isCCW ? "CCW" : "CW"), shift=\(shift), reverse=\(isReversed)")
                 }
@@ -585,6 +585,101 @@ class KvConvex2Tests : XCTestCase {
         [ true, false ].forEach { isCCW in
             RunTestCase(KvMathFloatScope.self , isCCW: isCCW)
             RunTestCase(KvMathDoubleScope.self, isCCW: isCCW)
+        }
+    }
+
+
+    // MARK: Split Test
+
+    func testSplit() {
+
+        func RunSplit<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool) {
+            let line: KvLine2<Math> = [ 0, 1, -0.5 ]
+
+            let input = Self.quadVertices(Math.self, isCCW: isCCW)
+            let (front, back): ([Vertex<Math>], [Vertex<Math>]) = isCCW
+            ? ([ [ 0, 0.5 ], [ 1, 0.5 ], [ 1, 1 ], [ 0, 1 ] ],
+               [ [ 0, 0 ], [ 1, 0 ], [ 1, 0.5 ], [ 0, 0.5 ] ])
+            : ([ [ 0, 0.5 ], [ 0, 1 ], [ 1, 1 ], [ 1, 0.5 ] ],
+               [ [ 0, 0 ], [ 0, 0.5 ], [ 1, 0.5 ], [ 1, 0 ] ])
+
+            guard let quad = TestCase<Math>.Convex(input)
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad") }
+
+            guard let quadFront = TestCase<Math>.Convex(front)
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") front quad") }
+            guard let quadBack = TestCase<Math>.Convex(back)
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") back quad") }
+
+            let result = quad.split(by: line)
+
+            XCTAssert(result.front?.isEqual(to: quadFront) == true)
+            XCTAssert(result.back?.isEqual(to: quadBack) == true)
+
+            XCTAssert(result.front?.isCCW == isCCW)
+            XCTAssert(result.back?.isCCW == isCCW)
+        }
+
+
+        func RunNoSplit<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool) {
+            let input = Self.quadVertices(Math.self, isCCW: isCCW)
+
+            guard let quad = TestCase<Math>.Convex(input)
+            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad") }
+
+            typealias Line = KvLine2<Math>
+
+            let testCases: [(line: Line, isFront: Bool)] = [
+                ([  0,  1,  1 ] as Line,  true), ([  0,  1, -2 ] as Line, false),
+                ([  0, -1, -1 ] as Line, false), ([  0, -1,  2 ] as Line,  true),
+                ([  1,  0,  1 ] as Line,  true), ([  1,  0, -2 ] as Line, false),
+                ([ -1,  0, -1 ] as Line, false), ([ -1,  0,  2 ] as Line,  true),
+
+                ([  0,  1, 0 ] as Line,  true), ([  0,  1, -1 ] as Line, false),
+                ([  0, -1, 0 ] as Line, false), ([  0, -1,  1 ] as Line,  true),
+                ([  1,  0, 0 ] as Line,  true), ([  1,  0, -1 ] as Line, false),
+                ([ -1,  0, 0 ] as Line, false), ([ -1,  0,  1 ] as Line,  true),
+
+                (Line(in: Math.normalize([  1, -1 ]), at: [ 0, 0 ]),  true),
+                (Line(in: Math.normalize([ -1,  1 ]), at: [ 0, 0 ]), false),
+                (Line(in: Math.normalize([  1, -1 ]), at: [ 1, 1 ]), false),
+                (Line(in: Math.normalize([ -1,  1 ]), at: [ 1, 1 ]),  true),
+
+                (Line(in: Math.normalize([  1,  1 ]), at: [ 1, 0 ]),  true),
+                (Line(in: Math.normalize([ -1, -1 ]), at: [ 1, 0 ]), false),
+                (Line(in: Math.normalize([  1,  1 ]), at: [ 0, 1 ]), false),
+                (Line(in: Math.normalize([ -1, -1 ]), at: [ 0, 1 ]),  true),
+            ]
+
+            testCases.forEach { (line, isFront) in
+                let result = quad.split(by: line)
+
+                switch isFront {
+                case true:
+                    XCTAssert(result.front != nil)
+                    XCTAssert(result.back == nil)
+
+                    XCTAssert(result.front?.isCCW == isCCW)
+
+                case false:
+                    XCTAssert(result.front == nil)
+                    XCTAssert(result.back != nil)
+
+                    XCTAssert(result.back?.isCCW == isCCW)
+                }
+            }
+        }
+
+
+        func Run<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool) {
+            RunSplit(Math.self, isCCW: isCCW)
+            RunNoSplit(Math.self, isCCW: isCCW)
+        }
+
+
+        [ true, false ].forEach { isCCW in
+            Run(KvMathFloatScope.self , isCCW: isCCW)
+            Run(KvMathDoubleScope.self, isCCW: isCCW)
         }
     }
 
