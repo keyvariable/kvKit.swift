@@ -318,3 +318,19 @@ extension KvPlane3 : Equatable { }
 // MARK: : Hashable
 
 extension KvPlane3 : Hashable { }
+
+
+
+// MARK: : ExpressibleByArrayLiteral
+
+extension KvPlane3 : ExpressibleByArrayLiteral {
+
+    /// Initializes the receiver from array if the canonical plane parameters: a, b, c, d.
+    @inlinable
+    public init(arrayLiteral abcd: Math.Scalar...) {
+        KvDebug.assert(abcd.count == 4, "Unexpected number (\(abcd.count)) of plane parameters")
+
+        self.init(normal: Vector(abcd[0], abcd[1], abcd[2]), d: abcd[3])
+    }
+
+}

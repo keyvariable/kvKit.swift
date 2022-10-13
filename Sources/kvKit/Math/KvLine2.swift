@@ -340,3 +340,19 @@ extension KvLine2 : Equatable { }
 // MARK: : Hashable
 
 extension KvLine2 : Hashable { }
+
+
+
+// MARK: : ExpressibleByArrayLiteral
+
+extension KvLine2 : ExpressibleByArrayLiteral {
+
+    /// Initializes the receiver from array if the canonical line parameters: a, b, c.
+    @inlinable
+    public init(arrayLiteral abc: Math.Scalar...) {
+        KvDebug.assert(abc.count == 3, "Unexpected number (\(abc.count)) of line parameters")
+
+        self.init(normal: Vector(abc[0], abc[1]), c: abc[2])
+    }
+
+}
