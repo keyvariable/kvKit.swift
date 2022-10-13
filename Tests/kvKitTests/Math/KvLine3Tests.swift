@@ -50,7 +50,7 @@ class KvLine3Tests : XCTestCase {
             typealias Line = KvLine3<Math>
 
             /// Quaternion when line contains the origin.
-            let q1 = Math.Quaternion(from: Line.front, to: .one)
+            let q1 = Math.Quaternion(from: Line.front, to: Math.normalize(.one))
 
             func AssertEqual(_ line: Line, _ expected: Line) {
                 XCTAssert(line.isEqual(to: expected), "Resulting \(line) line is not equal to expected \(expected) line")
@@ -60,6 +60,8 @@ class KvLine3Tests : XCTestCase {
             AssertEqual(Line(in: .one, at: .one), Line(quaternion: q1, d: 0))
 
             AssertEqual(Line(in: .one, at: .unitX), Line(in: .one, at: [ 2, 1, 1 ]))
+
+            AssertEqual(Line(in: [ 0, (0.5 as Math.Scalar).squareRoot(), 0 ], at: .zero), Line(quaternion: .init(angle: 0.5 * .pi, axis: .unitX), d: 0))
         }
 
         Run(KvMathFloatScope.self)

@@ -46,6 +46,8 @@ public struct KvLine3<Math : KvMathScope> {
     /// Memberwise initializer.
     @inlinable
     public init(quaternion: Quaternion, d: Scalar) {
+        assert(KvIs(quaternion.length, equalTo: 1), "The line quaternion have to be of unit length")
+
         self.quaternion = quaternion
         self.d = d
     }
@@ -69,11 +71,13 @@ public struct KvLine3<Math : KvMathScope> {
     /// A line having given direction and containing given coordinate.
     @inlinable
     public init(in direction: Vector, at coordinate: Coordinate) {
+        let direction = Math.normalize(direction)
+
         var left = Math.cross(coordinate, -direction)
 
         switch Math.isNonzero(left) {
         case true:
-            let front = Math.normalize(-direction)
+            let front = -direction
             left = Math.normalize(left)
             let up = Math.cross(front, left)
 
