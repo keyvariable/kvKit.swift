@@ -355,8 +355,8 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
         Process(prev: prev, next: first)
 
-        return (front: front.isValid ? Self(unsafeVertices: front.vertices) : nil,
-                back: back.isValid ? Self(unsafeVertices: back.vertices) : nil)
+        return (front: front.isValid ? Self(unsafeVertices: front.vertices, reverse: isReversed) : nil,
+                back: back.isValid ? Self(unsafeVertices: back.vertices, reverse: isReversed) : nil)
     }
 
 
