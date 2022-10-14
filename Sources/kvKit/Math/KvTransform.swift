@@ -56,7 +56,9 @@ public struct KvTransform2<Math : KvMathScope> {
 
     @inlinable
     public init(_ matrix: Matrix, inverseMatrix: Matrix) {
-        self.init(matrix, inverseMatrix, KvAffineTransform2<Math>.normalizeScaleComponent(Math.make2(inverseMatrix).transpose))
+        self.init(matrix,
+                  inverseMatrix,
+                  KvAffineTransform2<Math>.normalizedScaleComponent(for: Math.make2(inverseMatrix).transpose))
     }
 
     @usableFromInline
@@ -121,7 +123,7 @@ public struct KvTransform2<Math : KvMathScope> {
         self.init(
             Matrix(diagonal: Matrix.Diagonal(scale, 1)),
             Matrix(diagonal: Matrix.Diagonal(scale⁻¹, 1)),
-            NormalMatrix(diagonal: Math.normalize(scale⁻¹))
+            NormalMatrix(diagonal: KvAffineTransform2<Math>.normalizedScaleComponent(for: scale⁻¹))
         )
     }
 
@@ -207,7 +209,7 @@ public struct KvTransform2<Math : KvMathScope> {
             Matrix(Matrix.Column(scale⁻¹.x, 0, 0),
                    Matrix.Column(0, scale⁻¹.y, 0),
                    Matrix.Column(-translation * scale⁻¹, 1)),
-            NormalMatrix(diagonal: Math.normalize(scale⁻¹))
+            NormalMatrix(diagonal: KvAffineTransform2<Math>.normalizedScaleComponent(for: scale⁻¹))
         )
     }
 
@@ -264,7 +266,7 @@ public struct KvTransform2<Math : KvMathScope> {
     /// The inverse transform.
     @inlinable
     public var inverse: Self {
-        Self(inverseMatrix, matrix, KvAffineTransform2<Math>.normalizeScaleComponent(Math.make2(matrix).transpose))
+        Self(inverseMatrix, matrix, KvAffineTransform2<Math>.normalizedScaleComponent(for: Math.make2(matrix).transpose))
     }
 
 
@@ -295,7 +297,7 @@ public struct KvTransform2<Math : KvMathScope> {
     @inlinable
     public func assert() {
         Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(KvAffineTransform2<Math>.normalizeScaleComponent(Math.make2(inverseMatrix).transpose), normalMatrix), "The matrix and the normal matrix don't match")
+        Swift.assert(Math.isEqual(KvAffineTransform2<Math>.normalizedScaleComponent(for: Math.make2(inverseMatrix).transpose), normalMatrix), "The matrix and the normal matrix don't match")
     }
 #endif // DEBUG
 
@@ -386,7 +388,7 @@ public struct KvAffineTransform2<Math : KvMathScope> {
 
     @inlinable
     public init(_ matrix: Matrix, inverseMatrix: Matrix) {
-        self.init(matrix, inverseMatrix, KvAffineTransform2.normalizeScaleComponent(inverseMatrix.transpose))
+        self.init(matrix, inverseMatrix, KvAffineTransform2.normalizedScaleComponent(for: inverseMatrix.transpose))
     }
 
     @usableFromInline
@@ -437,7 +439,9 @@ public struct KvAffineTransform2<Math : KvMathScope> {
     public init(scale: Vector) {
         let scale⁻¹ = Math.recip(scale)
 
-        self.init(Matrix(diagonal: scale), Matrix(diagonal: scale⁻¹), NormalMatrix(diagonal: Math.normalize(scale⁻¹)))
+        self.init(Matrix(diagonal: scale),
+                  Matrix(diagonal: scale⁻¹),
+                  NormalMatrix(diagonal: KvAffineTransform2.normalizedScaleComponent(for: scale⁻¹)))
     }
 
     /// Initializes a scale transformation.
@@ -462,10 +466,18 @@ public struct KvAffineTransform2<Math : KvMathScope> {
 
     /// - Returns: Matrix produced from *m* by normalization of the scale component.
     ///
-    /// - Note: This method is to normal matrices to compensate for the effect on length of normals.
+    /// - Note: This method is to be applied to normal matrices to compensate for the effect on length of normals.
     @inlinable
-    public static func normalizeScaleComponent(_ m: Matrix) -> Matrix {
+    public static func normalizedScaleComponent(for m: NormalMatrix) -> NormalMatrix {
         m * Math.rsqrt(0.5 * (Math.length²(m[0]) + Math.length²(m[1])))
+    }
+
+    /// - Returns: A normalized scale vector.
+    ///
+    /// - SeeAlso: ``normalizedScaleComponent(for:)-76mip``
+    @inlinable
+    public static func normalizedScaleComponent(for v: Vector) -> Vector {
+        v * Math.rsqrt(0.5 * Math.length²(v))
     }
 
 
@@ -483,7 +495,7 @@ public struct KvAffineTransform2<Math : KvMathScope> {
 
 
     /// The inverse transform.
-    @inlinable public var inverse: Self { Self(inverseMatrix, matrix, Self.normalizeScaleComponent(matrix.transpose)) }
+    @inlinable public var inverse: Self { Self(inverseMatrix, matrix, KvAffineTransform2.normalizedScaleComponent(for: matrix.transpose)) }
 
 
     /// Scale component of the receiver.
@@ -507,7 +519,7 @@ public struct KvAffineTransform2<Math : KvMathScope> {
     @inlinable
     public func assert() {
         Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(Self.normalizeScaleComponent(inverseMatrix.transpose), normalMatrix), "The matrix and the normal matrix don't match")
+        Swift.assert(Math.isEqual(KvAffineTransform2.normalizedScaleComponent(for: inverseMatrix.transpose), normalMatrix), "The matrix and the normal matrix don't match")
     }
 #endif // DEBUG
 
@@ -583,7 +595,7 @@ public struct KvTransform3<Math : KvMathScope> {
 
     @inlinable
     public init(_ matrix: Matrix, inverseMatrix: Matrix) {
-        self.init(matrix, inverseMatrix, KvAffineTransform3<Math>.normalizeScaleComponent(Math.make3(inverseMatrix).transpose))
+        self.init(matrix, inverseMatrix, KvAffineTransform3<Math>.normalizedScaleComponent(for: Math.make3(inverseMatrix).transpose))
     }
 
     @usableFromInline
@@ -644,7 +656,7 @@ public struct KvTransform3<Math : KvMathScope> {
         self.init(
             Matrix(diagonal: Matrix.Diagonal(scale, 1)),
             Matrix(diagonal: Matrix.Diagonal(scale⁻¹, 1)),
-            NormalMatrix(diagonal: Math.normalize(scale⁻¹))
+            NormalMatrix(diagonal: KvAffineTransform3<Math>.normalizedScaleComponent(for: scale⁻¹))
         )
     }
 
@@ -740,7 +752,7 @@ public struct KvTransform3<Math : KvMathScope> {
                    Matrix.Column(0, scale⁻¹.y, 0, 0),
                    Matrix.Column(0, 0, scale⁻¹.z, 0),
                    Matrix.Column(-translation * scale⁻¹, 1)),
-            NormalMatrix(diagonal: Math.normalize(scale⁻¹))
+            NormalMatrix(diagonal: KvAffineTransform3<Math>.normalizedScaleComponent(for: scale⁻¹))
         )
     }
 
@@ -847,7 +859,7 @@ public struct KvTransform3<Math : KvMathScope> {
     /// The inverse transform.
     @inlinable
     public var inverse: Self {
-        Self(inverseMatrix, matrix, KvAffineTransform3<Math>.normalizeScaleComponent(Math.make3(matrix).transpose))
+        Self(inverseMatrix, matrix, KvAffineTransform3<Math>.normalizedScaleComponent(for: Math.make3(matrix).transpose))
     }
 
 
@@ -878,7 +890,7 @@ public struct KvTransform3<Math : KvMathScope> {
     @inlinable
     public func assert() {
         Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(KvAffineTransform3<Math>.normalizeScaleComponent(Math.make3(inverseMatrix).transpose), normalMatrix), "The matrix and the normal matrix don't match")
+        Swift.assert(Math.isEqual(KvAffineTransform3<Math>.normalizedScaleComponent(for: Math.make3(inverseMatrix).transpose), normalMatrix), "The matrix and the normal matrix don't match")
     }
 #endif // DEBUG
 
@@ -969,7 +981,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
 
     @inlinable
     public init(_ matrix: Matrix, inverseMatrix: Matrix) {
-        self.init(matrix, inverseMatrix, KvAffineTransform3.normalizeScaleComponent(inverseMatrix.transpose))
+        self.init(matrix, inverseMatrix, KvAffineTransform3.normalizedScaleComponent(for: inverseMatrix.transpose))
     }
 
     @usableFromInline
@@ -1021,7 +1033,9 @@ public struct KvAffineTransform3<Math : KvMathScope> {
     public init(scale: Vector) {
         let scale⁻¹ = Math.recip(scale)
 
-        self.init(Matrix(diagonal: scale), Matrix(diagonal: scale⁻¹), NormalMatrix(diagonal: Math.normalize(scale⁻¹)))
+        self.init(Matrix(diagonal: scale),
+                  Matrix(diagonal: scale⁻¹),
+                  NormalMatrix(diagonal: KvAffineTransform3.normalizedScaleComponent(for: scale⁻¹)))
     }
 
     /// Initializes a scale transformation.
@@ -1047,10 +1061,18 @@ public struct KvAffineTransform3<Math : KvMathScope> {
 
     /// - Returns: Scale factor applied to given normal matrix to compensate for the effect on length of normals.
     ///
-    /// - Note: This method is to normal matrices to compensate for the effect on length of normals.
+    /// - Note: This method is to be applied to normal matrices to compensate for the effect on length of normals.
     @inlinable
-    public static func normalizeScaleComponent(_ m: Matrix) -> Matrix {
+    public static func normalizedScaleComponent(for m: NormalMatrix) -> NormalMatrix {
         m * Math.rsqrt((Math.length²(m[0]) + Math.length²(m[1]) + Math.length²(m[2])) * ((1.0 as Scalar) / (3.0 as Scalar)))
+    }
+
+    /// - Returns: A normalized scale vector.
+    ///
+    /// - SeeAlso: ``normalizedScaleComponent(for:)-4v9ti``
+    @inlinable
+    public static func normalizedScaleComponent(for v: Vector) -> Vector {
+        v * Math.rsqrt(Math.length²(v) * ((1.0 as Scalar) / (3.0 as Scalar)))
     }
 
 
@@ -1070,7 +1092,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
 
 
     /// The inverse transform.
-    @inlinable public var inverse: Self { Self(inverseMatrix, matrix, Self.normalizeScaleComponent(matrix.transpose)) }
+    @inlinable public var inverse: Self { Self(inverseMatrix, matrix, KvAffineTransform3.normalizedScaleComponent(for: matrix.transpose)) }
 
 
     /// Scale component of the receiver.
@@ -1094,7 +1116,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
     @inlinable
     public func assert() {
         Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(Self.normalizeScaleComponent(inverseMatrix.transpose), normalMatrix), "The matrix and the normal matrix don't match")
+        Swift.assert(Math.isEqual(KvAffineTransform3.normalizedScaleComponent(for: inverseMatrix.transpose), normalMatrix), "The matrix and the normal matrix don't match")
     }
 #endif // DEBUG
 
