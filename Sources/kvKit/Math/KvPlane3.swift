@@ -82,6 +82,9 @@ public struct KvPlane3<Math : KvMathScope> {
 
     // MARK: Operations
 
+    /// The receiver's canonical parameters as a vector: (a, b, c, d).
+    @inlinable public var vector: Math.Vector4 { Math.Vector4(normal, d) }
+
     /// A coordinate on the receiver having minimum distance to the coordinate origin.
     @inlinable public var closestToOrigin: Coordinate { normal * -d }
     /// Some coordinate on the receiver.
@@ -302,7 +305,7 @@ extension KvPlane3 : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver and *rhs* are numerically equal.
     @inlinable
     public func isEqual(to rhs: Self) -> Bool {
-        KvIs(d, equalTo: rhs.d) && Math.isEqual(normal, rhs.normal)
+        Math.isCoDirectional(vector, rhs.vector)
     }
 
 }

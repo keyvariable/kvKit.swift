@@ -42,6 +42,39 @@ class KvPlane3Tests : XCTestCase {
 
 
 
+    // MARK: Equality Tests
+
+    func testIsEqual() {
+
+        func Run<Math : KvMathScope>(_ math: Math.Type) {
+            typealias P = KvPlane3<Math>
+
+            let cases: [(lhs: P, rhs: P, expected: Bool)] = [
+                ([ 0, 1, 0,  0 ], [ 0,  1, 0,  0], true),
+                ([ 0, 1, 0,  0 ], [ 0,  2, 0,  0], true),
+                ([ 0, 1, 0,  1 ], [ 0,  1, 0,  1], true),
+                ([ 0, 1, 0, -1 ], [ 0,  2, 0, -2], true),
+
+                ([ 0, 1, 0,  0 ], [ 0, -1, 0, 0], false),
+                ([ 0, 1, 0,  0 ], [ 1,  0, 0, 0], false),
+                ([ 0, 1, 0,  0 ], [ 0,  1, 0, 1], false),
+                ([ 0, 1, 0, -1 ], [ 0, -1, 0, 1], false),
+                ([ 0, 1, 0, -1 ], [ 0, -2, 0, 2], false),
+            ]
+
+            cases.forEach { (lhs, rhs, expected) in
+                if lhs.isEqual(to: rhs) != expected {
+                    XCTFail("lhs.isEqual(to: rhs) != \(expected), where lhs = «\(lhs)», rhs = «\(rhs)»")
+                }
+            }
+        }
+
+        Run(KvMathFloatScope.self)
+        Run(KvMathDoubleScope.self)
+    }
+
+
+
     // MARK: Plane-plane Intersection Test
 
     func testIntersectionWithPlane() {

@@ -149,13 +149,6 @@ public protocol KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     static func isCollinear(_ lhs: Vector4, _ rhs: Vector4) -> Bool
 
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    static func isCollinearOrZero(_ lhs: Vector2, _ rhs: Vector2) -> Bool
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    static func isCollinearOrZero(_ lhs: Vector3, _ rhs: Vector3) -> Bool
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    static func isCollinearOrZero(_ lhs: Vector4, _ rhs: Vector4) -> Bool
-
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
@@ -517,7 +510,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        KvIsPositive(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -525,7 +518,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        return KvIsPositive(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -533,7 +526,11 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        guard let lhs = safeNormalize(lhs),
+              let rhs = safeNormalize(rhs)
+        else { return false }
+
+        return isEqual(lhs, rhs)
     }
 
 
@@ -542,7 +539,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        KvIsNonzero(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -550,7 +547,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        KvIsNonzero(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -558,35 +555,11 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
-    }
+        guard let lhs = safeNormalize(lhs),
+              let rhs = safeNormalize(rhs)
+        else { return false }
 
-
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    @inlinable
-    public static func isCollinearOrZero(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        let e = max(abs(lhs), abs(rhs))
-
-        return KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
-    }
-
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    @inlinable
-    public static func isCollinearOrZero(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        let e = max(abs(lhs), abs(rhs))
-
-        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
-                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z))))
-    }
-
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    @inlinable
-    public static func isCollinearOrZero(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        let e = max(abs(lhs), abs(rhs))
-
-        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
-                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z)))
-                && KvIs(lhs.z * rhs.w, equalTo: lhs.w * rhs.z, eps: KvEps(magnitude: Swift.max(e.z, e.w))))
+        return isEqual(lhs, rhs) || isEqual(lhs, -rhs)
     }
 
 
@@ -1167,7 +1140,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        KvIsPositive(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1175,7 +1148,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        return KvIsPositive(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1183,7 +1156,11 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        guard let lhs = safeNormalize(lhs),
+              let rhs = safeNormalize(rhs)
+        else { return false }
+
+        return isEqual(lhs, rhs)
     }
 
 
@@ -1192,7 +1169,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        KvIsNonzero(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -1200,7 +1177,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
+        KvIsNonzero(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -1208,35 +1185,11 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isCollinearOrZero(lhs, rhs)
-    }
+        guard let lhs = safeNormalize(lhs),
+              let rhs = safeNormalize(rhs)
+        else { return false }
 
-
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    @inlinable
-    public static func isCollinearOrZero(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        let e = max(abs(lhs), abs(rhs))
-
-        return KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
-    }
-
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    @inlinable
-    public static func isCollinearOrZero(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        let e = max(abs(lhs), abs(rhs))
-
-        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
-                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z))))
-    }
-
-    /// - Returns: A boolean value indicating whether `lhs == scalar * rhs` or `rhs == scalar * lhs` even if *scalar* is zero.
-    @inlinable
-    public static func isCollinearOrZero(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        let e = max(abs(lhs), abs(rhs))
-
-        return (KvIs(lhs.x * rhs.y, equalTo: lhs.y * rhs.x, eps: KvEps(magnitude: Swift.max(e.x, e.y)))
-                && KvIs(lhs.y * rhs.z, equalTo: lhs.z * rhs.y, eps: KvEps(magnitude: Swift.max(e.y, e.z)))
-                && KvIs(lhs.z * rhs.w, equalTo: lhs.w * rhs.z, eps: KvEps(magnitude: Swift.max(e.z, e.w))))
+        return isEqual(lhs, rhs) || isEqual(lhs, -rhs)
     }
 
 
