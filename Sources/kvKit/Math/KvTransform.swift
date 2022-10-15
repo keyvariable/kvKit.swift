@@ -172,7 +172,7 @@ public struct KvTransform2<Math : KvMathScope> {
         var r⁻¹ = r.transpose
 
         let scale⁻¹ = Math.recip(scale)
-        let t⁻¹ = -translation
+        let t⁻¹ = (r⁻¹ * -translation) * scale⁻¹
 
         r[0] *= scale.x
         r[1] *= scale.y
@@ -186,7 +186,7 @@ public struct KvTransform2<Math : KvMathScope> {
                    Matrix.Column(translation, 1)),
             inverseMatrix: Matrix(Math.make3(r⁻¹[0]),
                                   Math.make3(r⁻¹[1]),
-                                  Matrix.Column(Math.dot(r[0], t⁻¹), Math.dot(r[1], t⁻¹), 1))
+                                  Matrix.Column(t⁻¹, 1))
         )
     }
 
@@ -709,7 +709,7 @@ public struct KvTransform3<Math : KvMathScope> {
         var r⁻¹ = r.transpose
 
         let scale⁻¹ = Math.recip(scale)
-        let t⁻¹ = -translation
+        let t⁻¹ = (r⁻¹ * -translation) * scale⁻¹
 
         r[0] *= scale.x
         r[1] *= scale.y
@@ -727,7 +727,7 @@ public struct KvTransform3<Math : KvMathScope> {
             inverseMatrix: Matrix(Math.make4(r⁻¹[0]),
                                   Math.make4(r⁻¹[1]),
                                   Math.make4(r⁻¹[2]),
-                                  Matrix.Column(Math.dot(r[0], t⁻¹), Math.dot(r[1], t⁻¹), Math.dot(r[2], t⁻¹), 1))
+                                  Matrix.Column(t⁻¹, 1))
         )
     }
 

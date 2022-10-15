@@ -28,82 +28,82 @@ import XCTest
 
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<T : KvNumericallyEquatable>(_ result: T, _ expected: T) {
-    KvAssertEqual(result, expected, by: T.isEqual(_:to:))
+func KvAssertEqual<T : KvNumericallyEquatable>(_ result: T, _ expected: T, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: T.isEqual(_:to:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<T : KvNumericallyEquatable>(_ result: T?, _ expected: T?) {
-    KvAssertEqual(result, expected, by: T.isEqual(_:to:))
+func KvAssertEqual<T : KvNumericallyEquatable>(_ result: T?, _ expected: T?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: T.isEqual(_:to:), message())
 }
 
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector2, _ expected: Math.Vector2) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector2, _ expected: Math.Vector2, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector2?, _ expected: Math.Vector2?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector2?, _ expected: Math.Vector2?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector3, _ expected: Math.Vector3) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector3, _ expected: Math.Vector3, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector3?, _ expected: Math.Vector3?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector3?, _ expected: Math.Vector3?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector4, _ expected: Math.Vector4) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector4, _ expected: Math.Vector4, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector4?, _ expected: Math.Vector4?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Vector4?, _ expected: Math.Vector4?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Quaternion, _ expected: Math.Quaternion) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Quaternion, _ expected: Math.Quaternion, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Quaternion?, _ expected: Math.Quaternion?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Quaternion?, _ expected: Math.Quaternion?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix2x2, _ expected: Math.Matrix2x2) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix2x2, _ expected: Math.Matrix2x2, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix2x2?, _ expected: Math.Matrix2x2?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix2x2?, _ expected: Math.Matrix2x2?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix3x3, _ expected: Math.Matrix3x3) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix3x3, _ expected: Math.Matrix3x3, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix3x3?, _ expected: Math.Matrix3x3?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix3x3?, _ expected: Math.Matrix3x3?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix4x4, _ expected: Math.Matrix4x4) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix4x4, _ expected: Math.Matrix4x4, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *result* and *expectation* are not numerically equal.
-func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix4x4?, _ expected: Math.Matrix4x4?) {
-    KvAssertEqual(result, expected, by: Math.isEqual(_:_:))
+func KvAssertEqual<Math : KvMathScope>(_ math: Math.Type, _ result: Math.Matrix4x4?, _ expected: Math.Matrix4x4?, _ message: @autoclosure () -> String = "") {
+    KvAssertEqual(result, expected, by: Math.isEqual(_:_:), message())
 }
