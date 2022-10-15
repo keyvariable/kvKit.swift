@@ -101,6 +101,8 @@ class KvPlane3Tests : XCTestCase {
 
                 (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -sqrt1_2, sqrt1_2 ], d: 0), L(in: [ 1, 0, 0 ], at: .zero)),
                 (P(normal: [ 0, 1, 0 ], d: 0), P(normal: [ 0, -sqrt1_2, sqrt1_2 ], d: -sqrt1_2), L(in: [ 1, 0, 0 ], at: [ 0, 0, 1 ])),
+
+                ([ 0, 1, 0, -0.5 ], [ 2, 0, 0, -2 ], L(in: .unitZ, at: [ 1, 0.5, 0 ])),
             ]
 
             cases.forEach { (lhs, rhs, expected) in

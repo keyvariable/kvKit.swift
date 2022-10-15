@@ -149,19 +149,24 @@ public struct KvPlane3<Math : KvMathScope> {
     /// - Returns: A common line of the receiver and given plane. If the receiver is equal to given plane then *nil* is returned.
     @inlinable
     public func intersection(with plane: Self) -> KvLine3<Math>? {
-        // TODO: Try to find solution without normalization of plane normals.
-        let n1 = Math.normalize(normal)
-        let n2 = Math.normalize(plane.normal)
+        let (n1, d1) = (normal, d)
+        let (n2, d2) = (plane.normal, plane.d)
 
-        let nn = Math.dot(n1, n2)
+        let front = Math.cross(n1, n2)
+        guard Math.isNonzero(front) else { return nil }
 
-        guard KvIs(Swift.abs(nn), lessThan: 1) else { return nil }
+        let common: Coordinate = {
+            let n11 = Math.length²(n1), n22 = Math.length²(n2)
+            let n12 = Math.dot(n1, n2)
 
-        let invD = 1 / (1 - nn * nn)
-        let c1 = (plane.d * nn - d) * invD
-        let c2 = (d * nn - plane.d) * invD
+            let invD = Math.recip(n11 * n22 - n12 * n12)
+            let c1 = (d2 * n12 - d1 * n22) * invD
+            let c2 = (d1 * n12 - d2 * n11) * invD
 
-        return KvLine3<Math>(in: Math.cross(n1, n2), at: c1 * n1 + c2 * n2)
+            return c1 * n1 + c2 * n2
+        }()
+
+        return KvLine3<Math>(in: Math.cross(n1, n2), at: common)
     }
 
 
