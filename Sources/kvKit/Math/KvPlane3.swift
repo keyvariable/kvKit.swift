@@ -166,7 +166,7 @@ public struct KvPlane3<Math : KvMathScope> {
             return c1 * n1 + c2 * n2
         }()
 
-        return KvLine3<Math>(in: Math.cross(n1, n2), at: common)
+        return KvLine3<Math>(in: front, at: common)
     }
 
 
