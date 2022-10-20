@@ -100,8 +100,10 @@ public struct KvLine2<Math : KvMathScope> {
 
     // MARK: Operations
 
-    /// - Returns: Some coordinate on the receiver.
-    @inlinable public var anyCoordinate: Coordinate { normal * -c }
+    /// A coordinate on the receiver having minimum distance to the coordinate origin.
+    @inlinable public var closestToOrigin: Coordinate { normal * (-c / Math.length²(normal)) }
+    /// Some coordinate on the receiver.
+    @inlinable public var anyCoordinate: Coordinate { closestToOrigin }
 
     /// - Note: The direction is the receiver's normal rotated by –90°.
     @inlinable public var front: Vector { Vector(x: normal.y, y: -normal.x) }

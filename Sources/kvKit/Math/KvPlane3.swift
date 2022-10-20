@@ -86,7 +86,7 @@ public struct KvPlane3<Math : KvMathScope> {
     @inlinable public var vector: Math.Vector4 { Math.Vector4(normal, d) }
 
     /// A coordinate on the receiver having minimum distance to the coordinate origin.
-    @inlinable public var closestToOrigin: Coordinate { normal * -d }
+    @inlinable public var closestToOrigin: Coordinate { normal * (-d / Math.length²(normal)) }
     /// Some coordinate on the receiver.
     @inlinable public var anyCoordinate: Coordinate { closestToOrigin }
 
