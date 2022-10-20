@@ -75,6 +75,46 @@ class KvPlane3Tests : XCTestCase {
 
 
 
+    // MARK: .contains Coordinate Test
+
+    func testContainsCoordinate() {
+
+        func Run<Math : KvMathScope>(_ math: Math.Type)
+        where Math.Scalar.RawSignificand : FixedWidthInteger
+        {
+            typealias P = KvPlane3<Math>
+
+            (0..<10).forEach { _ in
+                let plane = P(normal: Math.randomNonzero3(in: -10...10),
+                              at: Math.random3(in: -100...100))
+
+                let m = plane.worldMatrix!
+                let unitNormal = Math.normalize(plane.normal)
+
+                var tx: Math.Scalar = -100
+                while tx <= 100 {
+                    defer { tx += 25 }
+
+                    var ty: Math.Scalar = -100
+                    while ty <= 100 {
+                        defer { ty += 25 }
+
+                        let c_in = P.Transform.act(m, coordinate: .init(x: tx, y: ty, z: 0))
+                        XCTAssert(plane.contains(c_in), "contains: plane = (\(plane)), c = \(c_in)")
+
+                        let c_out = c_in + 1e-3 * unitNormal
+                        XCTAssert(!plane.contains(c_out), "!contains: plane = (\(plane)), c = \(c_out)")
+                    }
+                }
+            }
+        }
+
+        Run(KvMathFloatScope.self)
+        Run(KvMathDoubleScope.self)
+    }
+
+
+
     // MARK: Plane-plane Intersection Test
 
     func testIntersectionWithPlane() {

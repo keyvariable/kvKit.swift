@@ -206,7 +206,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = 2 * KvEps(for: 1 as S<Math>)
+            let bound = Math.Eps.zero.value
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -239,7 +239,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = 2 * KvEps(for: 1 as S<Math>)
+            let bound = Math.Eps.zero.value
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -272,7 +272,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = 2 * KvEps(for: 1 as S<Math>)
+            let bound = Math.Eps.zero.value
             let range = -bound...bound
 
             (0 ..< 10_000)

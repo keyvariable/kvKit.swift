@@ -131,7 +131,7 @@ public struct KvRay2<Vertex : KvVertex2Protocol> {
 
         guard KvIsNonzero(denominator) else { return nil }
 
-        let recip_d = Math.recip(denominator)
+        let recip_d = 1 / denominator
         let dOrigin = ray.origin.coordinate - origin.coordinate
 
         let t = (dOrigin.y * ray.direction.x - dOrigin.x * ray.direction.y) * recip_d

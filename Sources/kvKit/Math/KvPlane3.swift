@@ -93,11 +93,31 @@ public struct KvPlane3<Math : KvMathScope> {
     @inlinable public var isDegenerate: Bool { Math.isZero(normal) }
 
 
-    //// - Returns: Value of the canonical equation at *x*: *normal* · *x* + *d*.
+    /// A transformation matrix from z = 0 plane to the receiver.
+    @inlinable
+    public var worldMatrix: Transform.Matrix? {
+        guard let unitNormal = Math.safeNormalize(normal) else { return nil }
+
+        return Transform.makeMatrix(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: unitNormal))
+    }
+    /// A transfromation from z = 0 plane to the receiver.
+    @inlinable
+    public var worldTransform: Transform? {
+        guard let unitNormal = Math.safeNormalize(normal) else { return nil }
+
+        return Transform(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: unitNormal))
+    }
+
+
+    /// - Returns: Value of the canonical equation at *x*: *normal* · *x* + *d*.
     ///
     /// - Note: Returned value is the signed offset. It's positive when *x* is in the halfspace the normal is aimed at.
     /// - Note: Signed offset matches signed distance when the normal is a unit vector.
     @inlinable public func at(_ x: Coordinate) -> Scalar { Math.dot(normal, x) + d }
+
+
+    /// - Returns: A numeric tolerance for result of ``at(_:)`` with given coordinate.
+    @inlinable public func epsArg(at x: Coordinate) -> Math.EpsArg { Math.epsArg(normal).dot(Math.epsArg(x)) + Math.EpsArg(d) }
 
 
     /// Alias to ``at``(method).
@@ -114,31 +134,35 @@ public struct KvPlane3<Math : KvMathScope> {
     ///
     /// - SeeAlso: ``isInNegative``
     /// - Note: A half-space is positive or negative whether the normal vector is in it.
-    @inlinable public func isInPositive(_ x: Coordinate) -> Bool { KvIsPositive(at(x)) }
+    @inlinable public func isInPositive(_ x: Coordinate) -> Bool { KvIsPositive(at(x), eps: epsArg(at: x).tolerance) }
 
 
     /// - Returns: A boolean value indicating whether given coordinate is in the negative half-space.
     ///
     /// - SeeAlso: ``isInPositive``
     /// - Note: A half-space is positive or negative whether the normal vector is in it.
-    @inlinable public func isInNegative(_ x: Coordinate) -> Bool { KvIsNegative(at(x)) }
+    @inlinable public func isInNegative(_ x: Coordinate) -> Bool { KvIsNegative(at(x), eps: epsArg(at: x).tolerance) }
 
 
     /// - Returns: A boolean value indicating whether the receiver contains given coordinate.
-    @inlinable public func contains(_ x: Coordinate) -> Bool { KvIsZero(at(x)) }
+    @inlinable public func contains(_ x: Coordinate) -> Bool { KvIsZero(at(x), eps: epsArg(at: x).tolerance) }
 
     /// - Returns: A boolean value indicating whether the receiver contains coordinates of given ray.
     @inlinable
     public func contains<V>(_ ray: KvRay3<V>) -> Bool
     where V : KvVertex3Protocol, V.Math == Math
     {
-        contains(ray.origin.coordinate) && KvIsZero(Math.dot(normal, ray.direction))
+        contains(ray.origin.coordinate)
+        && KvIsZero(Math.dot(normal, ray.direction),
+                    eps: Math.epsArg(normal).dot(Math.epsArg(ray.direction)).tolerance)
     }
 
     /// - Returns: A boolean value indicating whether the receiver contains given line.
     @inlinable
     public func contains(_ line: KvLine3<Math>) -> Bool {
-        contains(line.anyCoordinate) && KvIsZero(Math.dot(line.front, normal))
+        contains(line.anyCoordinate)
+        && KvIsZero(Math.dot(line.front, normal),
+                    eps: Math.epsArg(line.front).dot(Math.epsArg(normal)).tolerance)
     }
 
 
@@ -159,7 +183,7 @@ public struct KvPlane3<Math : KvMathScope> {
             let n11 = Math.length²(n1), n22 = Math.length²(n2)
             let n12 = Math.dot(n1, n2)
 
-            let invD = Math.recip(n11 * n22 - n12 * n12)
+            let invD = 1 / (n11 * n22 - n12 * n12)
             let c1 = (d2 * n12 - d1 * n22) * invD
             let c2 = (d1 * n12 - d2 * n11) * invD
 

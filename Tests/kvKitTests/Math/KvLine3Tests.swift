@@ -29,6 +29,10 @@ import XCTest
 
 class KvLine3Tests : XCTestCase {
 
+    typealias L<Math : KvMathScope> = KvLine3<Math>
+
+
+
     // MARK: : XCTestCase
 
     override func setUpWithError() throws {
@@ -47,25 +51,59 @@ class KvLine3Tests : XCTestCase {
     func testInitWithDirectionAndCoordinate() {
 
         func Run<Math : KvMathScope>(_ math: Math.Type) {
-            typealias Line = KvLine3<Math>
-
             /// Quaternion when line contains the origin.
-            let q1 = Math.Quaternion(from: Line.front, to: Math.normalize(.one))
+            let q1 = Math.Quaternion(from: L<Math>.front, to: Math.normalize(.one))
 
-            func AssertEqual(_ line: Line, _ expected: Line) {
-                XCTAssert(line.isEqual(to: expected), "Resulting \(line) line is not equal to expected \(expected) line")
-            }
 
-            AssertEqual(Line(in: .one, at: .zero), Line(quaternion: q1, d: 0))
-            AssertEqual(Line(in: .one, at: .one), Line(quaternion: q1, d: 0))
 
-            AssertEqual(Line(in: .one, at: .unitX), Line(in: .one, at: [ 2, 1, 1 ]))
+            assertEqual(L<Math>(in: .one, at: .zero), .init(quaternion: q1, d: 0))
+            assertEqual(L<Math>(in: .one, at: .one), .init(quaternion: q1, d: 0))
 
-            AssertEqual(Line(in: [ 0, (0.5 as Math.Scalar).squareRoot(), 0 ], at: .zero), Line(quaternion: .init(angle: 0.5 * .pi, axis: .unitX), d: 0))
+            assertEqual(L<Math>(in: .one, at: .unitX), .init(in: .one, at: [ 2, 1, 1 ]))
+
+            assertEqual(L<Math>(in: [ 0, (0.5 as Math.Scalar).squareRoot(), 0 ], at: .zero), .init(quaternion: .init(angle: 0.5 * .pi, axis: .unitX), d: 0))
         }
 
         Run(KvMathFloatScope.self)
         Run(KvMathDoubleScope.self)
+    }
+
+
+
+    // MARK: .contains Coordiante Tests
+
+    func testContainsCoordinate() {
+
+        func Run<Math : KvMathScope>(_ math: Math.Type)
+        where Math.Scalar.RawSignificand : FixedWidthInteger
+        {
+            (0..<50).forEach { _ in
+                let line = L<Math>(in: Math.randomNonzero3(in: -10...10),
+                                   at: Math.random3(in: -100...100))
+
+                var t: Math.Scalar = -100
+                while t <= 100 {
+                    defer { t += 25 }
+
+                    let c_in = line.closestToOrigin + t * line.front
+                    XCTAssert(line.contains(c_in), "contains: line = (in: \(line.front), at: \(line.closestToOrigin)), c = \(c_in)")
+
+                    let c_out = c_in + 1e-3 * line.up
+                    XCTAssert(!line.contains(c_out), "!contains: line = (in: \(line.front), at: \(line.closestToOrigin)), c = \(c_out)")
+                }
+            }
+        }
+
+        Run(KvMathFloatScope.self)
+        Run(KvMathDoubleScope.self)
+    }
+
+
+
+    // MARK: Auxiliaries
+
+    func assertEqual<Math>(_ line: L<Math>, _ expected: L<Math>) {
+        XCTAssert(line.isEqual(to: expected), "Resulting \(line) line is not equal to expected \(expected) line")
     }
 
 }

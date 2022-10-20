@@ -132,6 +132,14 @@ public struct KvLine3<Math : KvMathScope> {
     @inlinable public var isDegenerate: Bool { Math.isZero(quaternion) }
 
 
+    /// - Returns: A boolean value indicating whether the receiver contains given coordinate.
+    @inlinable public func contains(_ c: Coordinate) -> Bool {
+        let c = c - closestToOrigin
+        return Math.isZero(Math.cross(front, c),
+                           eps: Math.epsArg(front).cross(Math.epsArg(c)).tolerance)
+    }
+
+
     /// Translates all the receiver's ponts by *offset*.
     ///
     /// - Note: It's faster then apply arbitraty transformation.

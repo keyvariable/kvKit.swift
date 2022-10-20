@@ -116,12 +116,12 @@ public protocol KvMathScope {
     static func dot(_ lhs: Vector3, _ rhs: Vector3) -> Scalar
     static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    static func eps(for v1: Vector2, _ v2: Vector2) -> Scalar
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    static func eps(for v1: Vector3, _ v2: Vector3) -> Scalar
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    static func eps(for v1: Vector4, _ v2: Vector4) -> Scalar
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    static func epsArg(_ v: Vector2) -> EpsArg2
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    static func epsArg(_ v: Vector3) -> EpsArg3
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    static func epsArg(_ v: Vector4) -> EpsArg4
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
     ///
@@ -152,62 +152,118 @@ public protocol KvMathScope {
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    static func isInequal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
     static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    static func isInequal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
     static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    static func isInequal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given quaternions are inequal.
     static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool
+    /// - Returns: A boolean value indicating wheather given quaternions are inequal.
+    static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
     static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
     static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vectors are equal.
+    static func isEqual(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
     static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool
     /// - Returns: A boolean value indicating wheather given vectors are equal.
+    static func isEqual(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
     static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    static func isEqual(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given quaternions are equal.
     static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool
+    /// - Returns: A boolean value indicating wheather given quaternions are equal.
+    static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool
     /// - Returns: A boolean value indicating wheather given matrices are equal.
+    static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
     static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool
     /// - Returns: A boolean value indicating wheather given matrices are equal.
+    static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
     static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
     static func isNonzero(_ v: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
+    static func isNonzero(_ v: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
     static func isNonzero(_ v: Vector3) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
+    static func isNonzero(_ v: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
     static func isNonzero(_ v: Vector4) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
+    static func isNonzero(_ v: Vector4, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given quaternion is numerically inequal to zero quaternion.
     static func isNonzero(_ q: Quaternion) -> Bool
+    /// - Returns: A boolean value indicating wheather given quaternion is numerically inequal to zero quaternion.
+    static func isNonzero(_ q: Quaternion, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     static func isNonzero(_ m: Matrix2x2) -> Bool
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    static func isNonzero(_ m: Matrix2x2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     static func isNonzero(_ m: Matrix3x3) -> Bool
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    static func isNonzero(_ m: Matrix3x3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     static func isNonzero(_ m: Matrix4x4) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
     static func isZero(_ v: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
+    static func isZero(_ v: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
     static func isZero(_ v: Vector3) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
+    static func isZero(_ v: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
     static func isZero(_ v: Vector4) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
+    static func isZero(_ v: Vector4, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero quaternion.
     static func isZero(_ q: Quaternion) -> Bool
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero quaternion.
+    static func isZero(_ q: Quaternion, eps: Eps) -> Bool
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     static func isZero(_ m: Matrix2x2) -> Bool
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    static func isZero(_ m: Matrix2x2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     static func isZero(_ m: Matrix3x3) -> Bool
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    static func isZero(_ m: Matrix3x3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     static func isZero(_ m: Matrix4x4) -> Bool
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    static func isZero(_ m: Matrix4x4, eps: Eps) -> Bool
 
     static func length(_ v: Vector2) -> Scalar
     static func length(_ v: Vector3) -> Scalar
@@ -281,11 +337,6 @@ public protocol KvMathScope {
     static func normalize(_ v: Vector3) -> Vector3
     static func normalize(_ v: Vector4) -> Vector4
 
-    static func recip(_ x: Scalar) -> Scalar
-    static func recip(_ v: Vector2) -> Vector2
-    static func recip(_ v: Vector3) -> Vector3
-    static func recip(_ v: Vector4) -> Vector4
-
     static func rsqrt(_ x: Scalar) -> Scalar
     static func rsqrt(_ v: Vector2) -> Vector2
     static func rsqrt(_ v: Vector3) -> Vector3
@@ -346,6 +397,185 @@ public protocol KvMathScope {
     static func tanpi(_ v: Vector3) -> Vector3
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     static func tanpi(_ v: Vector4) -> Vector4
+
+}
+
+
+
+// MARK: Auxiliaries
+
+extension KvMathScope {
+
+    public typealias Eps = KvEps<Scalar>
+    public typealias EpsArg = KvEps<Scalar>.Argument
+
+    public typealias EpsArg2 = KvNumericalToleranceVectorArgument2<Self>
+    public typealias EpsArg3 = KvNumericalToleranceVectorArgument3<Self>
+    public typealias EpsArg4 = KvNumericalToleranceVectorArgument4<Self>
+
+}
+
+
+
+// MARK: Random Vectors
+
+extension KvMathScope where Scalar.RawSignificand : FixedWidthInteger {
+
+    /// - Returns: A vector of random values within the specified range.
+    @inlinable
+    public static func random2(in range: Range<Scalar>) -> Vector2 {
+        Vector2(.random(in: range), .random(in: range))
+    }
+
+    /// - Returns: A vector of random values within the specified range.
+    @inlinable
+    public static func random3(in range: Range<Scalar>) -> Vector3 {
+        Vector3(.random(in: range), .random(in: range), .random(in: range))
+    }
+
+    /// - Returns: A vector of random values within the specified range.
+    @inlinable
+    public static func random4(in range: Range<Scalar>) -> Vector4 {
+        Vector4(.random(in: range), .random(in: range), .random(in: range), .random(in: range))
+    }
+
+
+    /// - Returns: A vector of random values within the specified range.
+    @inlinable
+    public static func random2(in range: ClosedRange<Scalar>) -> Vector2 {
+        Vector2(.random(in: range), .random(in: range))
+    }
+
+    /// - Returns: A vector of random values within the specified range.
+    @inlinable
+    public static func random3(in range: ClosedRange<Scalar>) -> Vector3 {
+        Vector3(.random(in: range), .random(in: range), .random(in: range))
+    }
+
+    /// - Returns: A vector of random values within the specified range.
+    @inlinable
+    public static func random4(in range: ClosedRange<Scalar>) -> Vector4 {
+        Vector4(.random(in: range), .random(in: range), .random(in: range), .random(in: range))
+    }
+
+
+    /// - Returns: A vector of random values within the specified range, using the given generator as a source for randomness.
+    @inlinable
+    public static func random2<G : RandomNumberGenerator>(in range: Range<Scalar>, using generator: inout G) -> Vector2 {
+        Vector2(.random(in: range, using: &generator), .random(in: range, using: &generator))
+    }
+
+    /// - Returns: A vector of random values within the specified range, using the given generator as a source for randomness.
+    @inlinable
+    public static func random3<G : RandomNumberGenerator>(in range: Range<Scalar>, using generator: inout G) -> Vector3 {
+        Vector3(.random(in: range, using: &generator), .random(in: range, using: &generator), .random(in: range, using: &generator))
+    }
+
+    /// - Returns: A vector of random values within the specified range, using the given generator as a source for randomness.
+    @inlinable
+    public static func random4<G : RandomNumberGenerator>(in range: Range<Scalar>, using generator: inout G) -> Vector4 {
+        Vector4(.random(in: range, using: &generator), .random(in: range, using: &generator), .random(in: range, using: &generator), .random(in: range, using: &generator))
+    }
+
+
+    /// - Returns: A vector of random values within the specified range, using the given generator as a source for randomness.
+    @inlinable
+    public static func random2<G : RandomNumberGenerator>(in range: ClosedRange<Scalar>, using generator: inout G) -> Vector2 {
+        Vector2(.random(in: range, using: &generator), .random(in: range, using: &generator))
+    }
+
+    /// - Returns: A vector of random values within the specified range, using the given generator as a source for randomness.
+    @inlinable
+    public static func random3<G : RandomNumberGenerator>(in range: ClosedRange<Scalar>, using generator: inout G) -> Vector3 {
+        Vector3(.random(in: range, using: &generator), .random(in: range, using: &generator), .random(in: range, using: &generator))
+    }
+
+    /// - Returns: A vector of random values within the specified range, using the given generator as a source for randomness.
+    @inlinable
+    public static func random4<G : RandomNumberGenerator>(in range: ClosedRange<Scalar>, using generator: inout G) -> Vector4 {
+        Vector4(.random(in: range, using: &generator), .random(in: range, using: &generator), .random(in: range, using: &generator), .random(in: range, using: &generator))
+    }
+
+
+    /// - Returns: Random nonzero value within the specified range.
+    @usableFromInline
+    internal static func randomNonzero(in range: Range<Scalar>) -> Scalar {
+        let s = Scalar.random(in: range)
+        let eps = 2 * Eps.zero.value
+
+        return s.sign == .plus ? Swift.max(s, eps) : Swift.min(s, -eps)
+    }
+
+    /// - Returns: Random nonzero value within the specified range.
+    @usableFromInline
+    internal static func randomNonzero(in range: ClosedRange<Scalar>) -> Scalar {
+        let s = Scalar.random(in: range)
+        let eps = 2 * Eps.zero.value
+
+        return s.sign == .plus ? Swift.max(s, eps) : Swift.min(s, -eps)
+    }
+
+
+    /// - Returns: A nonzero vector of random values within the specified range.
+    @inlinable
+    public static func randomNonzero2(in range: Range<Scalar>) -> Vector2 {
+        // Case of all-zero flags (0b11) is excluded.
+        let zeroFlags = Int.random(in: 0...2)
+        return Vector2((zeroFlags & 1) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 2) != 0 ? .random(in: range) : randomNonzero(in: range))
+    }
+
+    /// - Returns: A nonzero vector of random values within the specified range.
+    @inlinable
+    public static func randomNonzero3(in range: Range<Scalar>) -> Vector3 {
+        // Case of all-zero flags (0b111) is excluded.
+        let zeroFlags = Int.random(in: 0...6)
+        return Vector3((zeroFlags & 1) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 2) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 4) != 0 ? .random(in: range) : randomNonzero(in: range))
+    }
+
+    /// - Returns: A nonzero vector of random values within the specified range.
+    @inlinable
+    public static func randomNonzero4(in range: Range<Scalar>) -> Vector4 {
+        // Case of all-zero flags (0b1111) is excluded.
+        let zeroFlags = Int.random(in: 0...14)
+        return Vector4((zeroFlags & 1) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 2) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 4) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 8) != 0 ? .random(in: range) : randomNonzero(in: range))
+    }
+
+
+    /// - Returns: A nonzero vector of random values within the specified range.
+    @inlinable
+    public static func randomNonzero2(in range: ClosedRange<Scalar>) -> Vector2 {
+        // Case of all-zero flags (0b11) is excluded.
+        let zeroFlags = Int.random(in: 0...2)
+        return Vector2((zeroFlags & 1) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 2) != 0 ? .random(in: range) : randomNonzero(in: range))
+    }
+
+    /// - Returns: A nonzero vector of random values within the specified range.
+    @inlinable
+    public static func randomNonzero3(in range: ClosedRange<Scalar>) -> Vector3 {
+        // Case of all-zero flags (0b111) is excluded.
+        let zeroFlags = Int.random(in: 0...6)
+        return Vector3((zeroFlags & 1) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 2) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 4) != 0 ? .random(in: range) : randomNonzero(in: range))
+    }
+
+    /// - Returns: A nonzero vector of random values within the specified range.
+    @inlinable
+    public static func randomNonzero4(in range: ClosedRange<Scalar>) -> Vector4 {
+        // Case of all-zero flags (0b1111) is excluded.
+        let zeroFlags = Int.random(in: 0...14)
+        return Vector4((zeroFlags & 1) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 2) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 4) != 0 ? .random(in: range) : randomNonzero(in: range),
+                       (zeroFlags & 8) != 0 ? .random(in: range) : randomNonzero(in: range))
+    }
 
 }
 
@@ -486,23 +716,14 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd.dot(lhs, rhs) }
 
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    @inlinable
-    public static func eps(for v1: Vector2, _ v2: Vector2) -> Scalar {
-        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
-    }
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    @inlinable public static func epsArg(_ v: Vector2) -> EpsArg2 { EpsArg2(v) }
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    @inlinable
-    public static func eps(for v1: Vector3, _ v2: Vector3) -> Scalar {
-        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
-    }
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    @inlinable public static func epsArg(_ v: Vector3) -> EpsArg3 { EpsArg3(v) }
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    @inlinable
-    public static func eps(for v1: Vector4, _ v2: Vector4) -> Scalar {
-        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
-    }
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    @inlinable public static func epsArg(_ v: Vector4) -> EpsArg4 { EpsArg4(v) }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -510,7 +731,8 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
+        KvIsPositive(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && KvIsZero(cross(lhs, rhs).z, eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -518,7 +740,8 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        return KvIsPositive(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && isZero(cross(lhs, rhs), eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -539,7 +762,8 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && KvIsZero(cross(lhs, rhs).z, eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -547,7 +771,8 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && isZero(cross(lhs, rhs), eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -566,29 +791,57 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     @inlinable
     public static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isInequal(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     @inlinable
     public static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isInequal(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     @inlinable
     public static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isInequal(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given quaternions are inequal.
     @inlinable public static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isInequal(lhs.vector, rhs.vector) }
+
+    /// - Returns: A boolean value indicating wheather given quaternions are inequal.
+    @inlinable public static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion, eps: Eps) -> Bool { isInequal(lhs.vector, rhs.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
         isInequal(lhs[0], rhs[0])
         || isInequal(lhs[1], rhs[1])
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2, eps: Eps) -> Bool {
+        isInequal(lhs[0], rhs[0], eps: eps)
+        || isInequal(lhs[1], rhs[1], eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -601,6 +854,14 @@ public struct KvMathFloatScope : KvMathScope {
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
+    public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3, eps: Eps) -> Bool {
+        isInequal(lhs[0], rhs[0], eps: eps)
+        || isInequal(lhs[1], rhs[1], eps: eps)
+        || isInequal(lhs[2], rhs[2], eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    @inlinable
     public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
         isInequal(lhs[0], rhs[0])
         || isInequal(lhs[1], rhs[1])
@@ -608,33 +869,70 @@ public struct KvMathFloatScope : KvMathScope {
         || isInequal(lhs[3], rhs[3])
     }
 
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool {
+        isInequal(lhs[0], rhs[0], eps: eps)
+        || isInequal(lhs[1], rhs[1], eps: eps)
+        || isInequal(lhs[2], rhs[2], eps: eps)
+        || isInequal(lhs[3], rhs[3], eps: eps)
+    }
+
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     @inlinable
     public static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isEqual(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     @inlinable
     public static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isEqual(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     @inlinable
     public static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isEqual(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given quaternions are equal.
     @inlinable public static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isEqual(lhs.vector, rhs.vector) }
+
+    /// - Returns: A boolean value indicating wheather given quaternions are equal.
+    @inlinable public static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion, eps: Eps) -> Bool { isEqual(lhs.vector, rhs.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
         isEqual(lhs[0], rhs[0])
         && isEqual(lhs[1], rhs[1])
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2, eps: Eps) -> Bool {
+        isEqual(lhs[0], rhs[0], eps: eps)
+        && isEqual(lhs[1], rhs[1], eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -647,6 +945,14 @@ public struct KvMathFloatScope : KvMathScope {
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
+    public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3, eps: Eps) -> Bool {
+        isEqual(lhs[0], rhs[0], eps: eps)
+        && isEqual(lhs[1], rhs[1], eps: eps)
+        && isEqual(lhs[2], rhs[2], eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    @inlinable
     public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
         isEqual(lhs[0], rhs[0])
         && isEqual(lhs[1], rhs[1])
@@ -654,49 +960,100 @@ public struct KvMathFloatScope : KvMathScope {
         && isEqual(lhs[3], rhs[3])
     }
 
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool {
+        isEqual(lhs[0], rhs[0], eps: eps)
+        && isEqual(lhs[1], rhs[1], eps: eps)
+        && isEqual(lhs[2], rhs[2], eps: eps)
+        && isEqual(lhs[3], rhs[3], eps: eps)
+    }
+
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector2) -> Bool { KvIsNonzero(abs(v).max()) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
+    @inlinable public static func isNonzero(_ v: Vector2, eps: Eps) -> Bool { KvIsNonzero(abs(v).max(), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector3) -> Bool { KvIsNonzero(abs(v).max()) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
+    @inlinable public static func isNonzero(_ v: Vector3, eps: Eps) -> Bool { KvIsNonzero(abs(v).max(), eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector4) -> Bool { KvIsNonzero(abs(v).max()) }
 
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
+    @inlinable public static func isNonzero(_ v: Vector4, eps: Eps) -> Bool { KvIsNonzero(abs(v).max(), eps: eps) }
+
     /// - Returns: A boolean value indicating wheather given quaternion is numerically inequal to zero quaternion.
     @inlinable public static func isNonzero(_ q: Quaternion) -> Bool { isNonzero(q.vector) }
+
+    /// - Returns: A boolean value indicating wheather given quaternion is numerically inequal to zero quaternion.
+    @inlinable public static func isNonzero(_ q: Quaternion, eps: Eps) -> Bool { isNonzero(q.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix2x2) -> Bool { KvIsNonzero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    @inlinable public static func isNonzero(_ m: Matrix2x2, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix3x3) -> Bool { KvIsNonzero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    @inlinable public static func isNonzero(_ m: Matrix3x3, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix4x4) -> Bool { KvIsNonzero(max(abs(m))) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    @inlinable public static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
 
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector2) -> Bool { KvIsZero(abs(v).max()) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
+    @inlinable public static func isZero(_ v: Vector2, eps: Eps) -> Bool { KvIsZero(abs(v).max(), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector3) -> Bool { KvIsZero(abs(v).max()) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
+    @inlinable public static func isZero(_ v: Vector3, eps: Eps) -> Bool { KvIsZero(abs(v).max(), eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector4) -> Bool { KvIsZero(abs(v).max()) }
 
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
+    @inlinable public static func isZero(_ v: Vector4, eps: Eps) -> Bool { KvIsZero(abs(v).max(), eps: eps) }
+
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero quaternion.
     @inlinable public static func isZero(_ q: Quaternion) -> Bool { isZero(q.vector) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero quaternion.
+    @inlinable public static func isZero(_ q: Quaternion, eps: Eps) -> Bool { isZero(q.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     @inlinable public static func isZero(_ m: Matrix2x2) -> Bool { KvIsZero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    @inlinable public static func isZero(_ m: Matrix2x2, eps: Eps) -> Bool { KvIsZero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     @inlinable public static func isZero(_ m: Matrix3x3) -> Bool { KvIsZero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    @inlinable public static func isZero(_ m: Matrix3x3, eps: Eps) -> Bool { KvIsZero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     @inlinable public static func isZero(_ m: Matrix4x4) -> Bool { KvIsZero(max(abs(m))) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    @inlinable public static func isZero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsZero(max(abs(m)), eps: eps) }
 
 
     @inlinable public static func length(_ v: Vector2) -> Scalar { simd_length(v) }
@@ -848,15 +1205,6 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func normalize(_ v: Vector3) -> Vector3 { simd_normalize(v) }
 
     @inlinable public static func normalize(_ v: Vector4) -> Vector4 { simd_normalize(v) }
-
-
-    @inlinable public static func recip(_ x: Scalar) -> Scalar { simd_recip(x) }
-
-    @inlinable public static func recip(_ v: Vector2) -> Vector2 { simd_recip(v) }
-
-    @inlinable public static func recip(_ v: Vector3) -> Vector3 { simd_recip(v) }
-
-    @inlinable public static func recip(_ v: Vector4) -> Vector4 { simd_recip(v) }
 
 
     @inlinable public static func rsqrt(_ x: Scalar) -> Scalar { simd_rsqrt(x) }
@@ -1116,23 +1464,14 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd.dot(lhs, rhs) }
 
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    @inlinable
-    public static func eps(for v1: Vector2, _ v2: Vector2) -> Scalar {
-        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
-    }
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    @inlinable public static func epsArg(_ v: Vector2) -> EpsArg2 { EpsArg2(v) }
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    @inlinable
-    public static func eps(for v1: Vector3, _ v2: Vector3) -> Scalar {
-        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
-    }
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    @inlinable public static func epsArg(_ v: Vector3) -> EpsArg3 { EpsArg3(v) }
 
-    /// - Returns: The tolerance for numerical comparisons depending on two values.
-    @inlinable
-    public static func eps(for v1: Vector4, _ v2: Vector4) -> Scalar {
-        KvEps(magnitude: Swift.max(abs(v1).max(), abs(v2).max()))
-    }
+    /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
+    @inlinable public static func epsArg(_ v: Vector4) -> EpsArg4 { EpsArg4(v) }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1140,7 +1479,8 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsPositive(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
+        KvIsPositive(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && KvIsZero(cross(lhs, rhs).z, eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1148,7 +1488,8 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: Two zero vectors are not co-directional.
     @inlinable
     public static func isCoDirectional(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        return KvIsPositive(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
+        KvIsPositive(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && isZero(cross(lhs, rhs), eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1169,7 +1510,8 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && KvIsZero(cross(lhs, rhs).z)
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && KvIsZero(cross(lhs, rhs).z, eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -1177,7 +1519,8 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs)) && isZero(cross(lhs, rhs))
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        && isZero(cross(lhs, rhs), eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are collinear.
@@ -1196,29 +1539,57 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     @inlinable
     public static func isInequal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isInequal(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     @inlinable
     public static func isInequal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isInequal(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are inequal.
     @inlinable
     public static func isInequal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsNonzero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isInequal(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsNonzero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given quaternions are inequal.
     @inlinable public static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isInequal(lhs.vector, rhs.vector) }
+
+    /// - Returns: A boolean value indicating wheather given quaternions are inequal.
+    @inlinable public static func isInequal(_ lhs: Quaternion, _ rhs: Quaternion, eps: Eps) -> Bool { isInequal(lhs.vector, rhs.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
         isInequal(lhs[0], rhs[0])
         || isInequal(lhs[1], rhs[1])
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2, eps: Eps) -> Bool {
+        isInequal(lhs[0], rhs[0], eps: eps)
+        || isInequal(lhs[1], rhs[1], eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -1231,6 +1602,14 @@ public struct KvMathDoubleScope : KvMathScope {
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
+    public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3, eps: Eps) -> Bool {
+        isInequal(lhs[0], rhs[0], eps: eps)
+        || isInequal(lhs[1], rhs[1], eps: eps)
+        || isInequal(lhs[2], rhs[2], eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    @inlinable
     public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
         isInequal(lhs[0], rhs[0])
         || isInequal(lhs[1], rhs[1])
@@ -1238,33 +1617,70 @@ public struct KvMathDoubleScope : KvMathScope {
         || isInequal(lhs[3], rhs[3])
     }
 
+    /// - Returns: A boolean value indicating wheather given matrices are inequal.
+    @inlinable
+    public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool {
+        isInequal(lhs[0], rhs[0], eps: eps)
+        || isInequal(lhs[1], rhs[1], eps: eps)
+        || isInequal(lhs[2], rhs[2], eps: eps)
+        || isInequal(lhs[3], rhs[3], eps: eps)
+    }
+
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     @inlinable
     public static func isEqual(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isEqual(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     @inlinable
     public static func isEqual(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isEqual(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given vectors are equal.
     @inlinable
     public static func isEqual(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
-        KvIsZero(abs(rhs - lhs).max(), eps: eps(for: lhs, rhs))
+        isEqual(lhs, rhs, eps: (epsArg(lhs) - epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating wheather given vectors are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsZero(abs(rhs - lhs).max(), eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given quaternions are equal.
     @inlinable public static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion) -> Bool { isEqual(lhs.vector, rhs.vector) }
+
+    /// - Returns: A boolean value indicating wheather given quaternions are equal.
+    @inlinable public static func isEqual(_ lhs: Quaternion, _ rhs: Quaternion, eps: Eps) -> Bool { isEqual(lhs.vector, rhs.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
         isEqual(lhs[0], rhs[0])
         && isEqual(lhs[1], rhs[1])
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2, eps: Eps) -> Bool {
+        isEqual(lhs[0], rhs[0], eps: eps)
+        && isEqual(lhs[1], rhs[1], eps: eps)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -1277,6 +1693,14 @@ public struct KvMathDoubleScope : KvMathScope {
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
+    public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3, eps: Eps) -> Bool {
+        isEqual(lhs[0], rhs[0], eps: eps)
+        && isEqual(lhs[1], rhs[1], eps: eps)
+        && isEqual(lhs[2], rhs[2], eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    @inlinable
     public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
         isEqual(lhs[0], rhs[0])
         && isEqual(lhs[1], rhs[1])
@@ -1284,49 +1708,100 @@ public struct KvMathDoubleScope : KvMathScope {
         && isEqual(lhs[3], rhs[3])
     }
 
+    /// - Returns: A boolean value indicating wheather given matrices are equal.
+    @inlinable
+    public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool {
+        isEqual(lhs[0], rhs[0], eps: eps)
+        && isEqual(lhs[1], rhs[1], eps: eps)
+        && isEqual(lhs[2], rhs[2], eps: eps)
+        && isEqual(lhs[3], rhs[3], eps: eps)
+    }
+
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector2) -> Bool { KvIsNonzero(abs(v).max()) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
+    @inlinable public static func isNonzero(_ v: Vector2, eps: Eps) -> Bool { KvIsNonzero(abs(v).max(), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector3) -> Bool { KvIsNonzero(abs(v).max()) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
+    @inlinable public static func isNonzero(_ v: Vector3, eps: Eps) -> Bool { KvIsNonzero(abs(v).max(), eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector4) -> Bool { KvIsNonzero(abs(v).max()) }
 
+    /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
+    @inlinable public static func isNonzero(_ v: Vector4, eps: Eps) -> Bool { KvIsNonzero(abs(v).max(), eps: eps) }
+
     /// - Returns: A boolean value indicating wheather given quaternion is numerically inequal to zero quaternion.
     @inlinable public static func isNonzero(_ q: Quaternion) -> Bool { isNonzero(q.vector) }
+
+    /// - Returns: A boolean value indicating wheather given quaternion is numerically inequal to zero quaternion.
+    @inlinable public static func isNonzero(_ q: Quaternion, eps: Eps) -> Bool { isNonzero(q.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix2x2) -> Bool { KvIsNonzero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    @inlinable public static func isNonzero(_ m: Matrix2x2, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix3x3) -> Bool { KvIsNonzero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    @inlinable public static func isNonzero(_ m: Matrix3x3, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix4x4) -> Bool { KvIsNonzero(max(abs(m))) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
+    @inlinable public static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
 
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector2) -> Bool { KvIsZero(abs(v).max()) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
+    @inlinable public static func isZero(_ v: Vector2, eps: Eps) -> Bool { KvIsZero(abs(v).max(), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector3) -> Bool { KvIsZero(abs(v).max()) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
+    @inlinable public static func isZero(_ v: Vector3, eps: Eps) -> Bool { KvIsZero(abs(v).max(), eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector4) -> Bool { KvIsZero(abs(v).max()) }
 
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
+    @inlinable public static func isZero(_ v: Vector4, eps: Eps) -> Bool { KvIsZero(abs(v).max(), eps: eps) }
+
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero quaternion.
     @inlinable public static func isZero(_ q: Quaternion) -> Bool { isZero(q.vector) }
+
+    /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero quaternion.
+    @inlinable public static func isZero(_ q: Quaternion, eps: Eps) -> Bool { isZero(q.vector, eps: eps) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     @inlinable public static func isZero(_ m: Matrix2x2) -> Bool { KvIsZero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    @inlinable public static func isZero(_ m: Matrix2x2, eps: Eps) -> Bool { KvIsZero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     @inlinable public static func isZero(_ m: Matrix3x3) -> Bool { KvIsZero(max(abs(m))) }
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    @inlinable public static func isZero(_ m: Matrix3x3, eps: Eps) -> Bool { KvIsZero(max(abs(m)), eps: eps) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
     @inlinable public static func isZero(_ m: Matrix4x4) -> Bool { KvIsZero(max(abs(m))) }
+
+    /// - Returns: A boolean value indicating wheather given matrix is numerically equal to zero matrix.
+    @inlinable public static func isZero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsZero(max(abs(m)), eps: eps) }
 
 
     @inlinable public static func length(_ v: Vector2) -> Scalar { simd_length(v) }
@@ -1480,15 +1955,6 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func normalize(_ v: Vector4) -> Vector4 { simd_normalize(v) }
 
 
-    @inlinable public static func recip(_ x: Scalar) -> Scalar { simd_recip(x) }
-
-    @inlinable public static func recip(_ v: Vector2) -> Vector2 { simd_recip(v) }
-
-    @inlinable public static func recip(_ v: Vector3) -> Vector3 { simd_recip(v) }
-
-    @inlinable public static func recip(_ v: Vector4) -> Vector4 { simd_recip(v) }
-
-
     @inlinable public static func rsqrt(_ x: Scalar) -> Scalar { simd_rsqrt(x) }
 
     @inlinable public static func rsqrt(_ v: Vector2) -> Vector2 { simd_rsqrt(v) }
@@ -1606,5 +2072,319 @@ public struct KvMathDoubleScope : KvMathScope {
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tanpi(_ v: Vector4) -> Vector4 { simd.tanpi(v) }
+
+}
+
+
+
+// MARK: - .KvNumericalToleranceVectorArgument2
+
+/// Vector tolerance argument.
+public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
+
+    public typealias Tolerance = Math.Eps
+
+    public typealias Vector = Math.Vector2
+
+
+    public let x: Math.EpsArg
+    public let y: Math.EpsArg
+
+
+    @usableFromInline
+    internal init(x: Math.EpsArg, y: Math.EpsArg) {
+        self.x = x
+        self.y = y
+    }
+
+    /// Initializes single argument tolerance.
+    @inlinable
+    public init(_ arg: Vector) {
+        self.init(x: Math.EpsArg(arg.x),
+                  y: Math.EpsArg(arg.y))
+    }
+
+    /// Initializes tolerance by simple combination of two arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x),
+                  y: Math.EpsArg(a1.y, a2.y))
+    }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x),
+                  y: Math.EpsArg(a1.y, a2.y, a3.y))
+    }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x, a4.x),
+                  y: Math.EpsArg(a1.y, a2.y, a3.y, a4.y))
+    }
+
+
+    // MARK: Operations
+
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(values: x.value, y.value) }
+
+    @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
+
+
+    /// - Returns: A tolerance of a sum.
+    @inlinable
+    public static func +(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x + rhs.x,
+             y: lhs.y + rhs.y)
+    }
+
+    /// - Returns: A tolerance of a subtraction.
+    @inlinable
+    public static func -(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x - rhs.x,
+             y: lhs.y - rhs.y)
+    }
+
+    /// - Returns: A tolerance of a product.
+    @inlinable
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x * rhs.x,
+             y: lhs.y * rhs.y)
+    }
+
+    /// - Returns: A tolerance of a devesion.
+    @inlinable
+    public static func /(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x / rhs.x,
+             y: lhs.y / rhs.y)
+    }
+
+    /// - Returns: A tolerance of a dot product
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { x * rhs.x + y * rhs.y }
+
+    /// - Returns: A tolerance of a dot product
+    @inlinable public func cross(_ rhs: Self) -> Math.EpsArg { x * rhs.y - y * rhs.x }
+
+}
+
+
+
+// MARK: - .KvNumericalToleranceVectorArgument3
+
+/// Vector tolerance argument.
+public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
+
+    public typealias Tolerance = Math.Eps
+
+    public typealias Vector = Math.Vector3
+
+
+    public let x: Math.EpsArg
+    public let y: Math.EpsArg
+    public let z: Math.EpsArg
+
+
+    @usableFromInline
+    internal init(x: Math.EpsArg, y: Math.EpsArg, z: Math.EpsArg) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    /// Initializes single argument tolerance.
+    @inlinable
+    public init(_ arg: Vector) {
+        self.init(x: Math.EpsArg(arg.x),
+                  y: Math.EpsArg(arg.y),
+                  z: Math.EpsArg(arg.z))
+    }
+
+    /// Initializes tolerance by simple combination of two arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x),
+                  y: Math.EpsArg(a1.y, a2.y),
+                  z: Math.EpsArg(a1.z, a2.z))
+    }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x),
+                  y: Math.EpsArg(a1.y, a2.y, a3.y),
+                  z: Math.EpsArg(a1.z, a2.z, a3.z))
+    }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x, a4.x),
+                  y: Math.EpsArg(a1.y, a2.y, a3.y, a4.y),
+                  z: Math.EpsArg(a1.z, a2.z, a3.z, a4.z))
+    }
+
+
+    // MARK: Operations
+
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(values: x.value, y.value, z.value) }
+
+    @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
+
+
+    /// - Returns: A tolerance of a sum.
+    @inlinable
+    public static func +(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x + rhs.x,
+             y: lhs.y + rhs.y,
+             z: lhs.z + rhs.z)
+    }
+
+    /// - Returns: A tolerance of a subtraction.
+    @inlinable
+    public static func -(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x - rhs.x,
+             y: lhs.y - rhs.y,
+             z: lhs.z - rhs.z)
+    }
+
+    /// - Returns: A tolerance of a product.
+    @inlinable
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x * rhs.x,
+             y: lhs.y * rhs.y,
+             z: lhs.z * rhs.z)
+    }
+
+    /// - Returns: A tolerance of a devesion.
+    @inlinable
+    public static func /(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x / rhs.x,
+             y: lhs.y / rhs.y,
+             z: lhs.z / rhs.z)
+    }
+
+    /// - Returns: A tolerance of a dot product
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { x * rhs.x + y * rhs.y + z * rhs.z }
+
+    /// - Returns: A tolerance of a dot product
+    @inlinable
+    public func cross(_ rhs: Self) -> Self {
+        Self(x: y * rhs.z - z * rhs.y,
+             y: z * rhs.x - x * rhs.z,
+             z: x * rhs.y - y * rhs.x)
+    }
+
+}
+
+
+
+// MARK: - .KvNumericalToleranceVectorArgument4
+
+/// Vector tolerance argument.
+public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> {
+
+    public typealias Tolerance = Math.Eps
+
+    public typealias Vector = Math.Vector4
+
+
+    public let x: Math.EpsArg
+    public let y: Math.EpsArg
+    public let z: Math.EpsArg
+    public let w: Math.EpsArg
+
+
+    @usableFromInline
+    internal init(x: Math.EpsArg, y: Math.EpsArg, z: Math.EpsArg, w: Math.EpsArg) {
+        self.x = x
+        self.y = y
+        self.z = z
+        self.w = w
+    }
+
+    /// Initializes single argument tolerance.
+    @inlinable
+    public init(_ arg: Vector) {
+        self.init(x: Math.EpsArg(arg.x),
+                  y: Math.EpsArg(arg.y),
+                  z: Math.EpsArg(arg.z),
+                  w: Math.EpsArg(arg.w))
+    }
+
+    /// Initializes tolerance by simple combination of two arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x),
+                  y: Math.EpsArg(a1.y, a2.y),
+                  z: Math.EpsArg(a1.z, a2.z),
+                  w: Math.EpsArg(a1.w, a2.w))
+    }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x),
+                  y: Math.EpsArg(a1.y, a2.y, a3.y),
+                  z: Math.EpsArg(a1.z, a2.z, a3.z),
+                  w: Math.EpsArg(a1.w, a2.w, a3.w))
+    }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable
+    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) {
+        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x, a4.x),
+                  y: Math.EpsArg(a1.y, a2.y, a3.y, a4.y),
+                  z: Math.EpsArg(a1.z, a2.z, a3.z, a4.z),
+                  w: Math.EpsArg(a1.w, a2.w, a3.w, a4.w))
+    }
+
+
+    // MARK: Operations
+
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(values: x.value, y.value, z.value, w.value) }
+
+    @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
+
+
+    /// - Returns: A tolerance of a sum.
+    @inlinable
+    public static func +(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x + rhs.x,
+             y: lhs.y + rhs.y,
+             z: lhs.z + rhs.z,
+             w: lhs.w + rhs.w)
+    }
+
+    /// - Returns: A tolerance of a subtraction.
+    @inlinable
+    public static func -(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x - rhs.x,
+             y: lhs.y - rhs.y,
+             z: lhs.z - rhs.z,
+             w: lhs.w - rhs.w)
+    }
+
+    /// - Returns: A tolerance of a product.
+    @inlinable
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x * rhs.x,
+             y: lhs.y * rhs.y,
+             z: lhs.z * rhs.z,
+             w: lhs.w * rhs.w)
+    }
+
+    /// - Returns: A tolerance of a devesion.
+    @inlinable
+    public static func /(lhs: Self, rhs: Self) -> Self {
+        Self(x: lhs.x / rhs.x,
+             y: lhs.y / rhs.y,
+             z: lhs.z / rhs.z,
+             w: lhs.w / rhs.w)
+    }
+
+    /// - Returns: A tolerance of a dot product
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w }
 
 }

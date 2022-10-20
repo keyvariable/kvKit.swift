@@ -116,6 +116,10 @@ public struct KvLine2<Math : KvMathScope> {
     @inlinable public func at(_ x: Coordinate) -> Scalar { Math.dot(normal, x) + c }
 
 
+    /// - Returns: A numeric tolerance for result of ``at(_:)`` with given coordinate.
+    @inlinable public func epsArg(at x: Coordinate) -> Math.EpsArg { Math.epsArg(normal).dot(Math.epsArg(x)) + Math.EpsArg(c) }
+
+
     /// - Returns: Y coodinate where vertical line at *x* intersects the receiver.
     @inlinable
     public func y(x: Scalar) -> Scalar? {
@@ -147,24 +151,25 @@ public struct KvLine2<Math : KvMathScope> {
     ///
     /// - SeeAlso: ``isInNegative``
     /// - Note: A half-space is positive or negative whether the normal vector is in it.
-    @inlinable public func isInPositive(_ x: Coordinate) -> Bool { KvIsPositive(at(x)) }
+    @inlinable public func isInPositive(_ x: Coordinate) -> Bool { KvIsPositive(at(x), eps: epsArg(at: x).tolerance) }
 
 
     /// - Returns: A boolean value indicating whether given coordinate is in the negative half-space.
     ///
     /// - SeeAlso: ``isInPositive``
     /// - Note: A half-space is positive or negative whether the normal vector is in it.
-    @inlinable public func isInNegative(_ x: Coordinate) -> Bool { KvIsNegative(at(x)) }
+    @inlinable public func isInNegative(_ x: Coordinate) -> Bool { KvIsNegative(at(x), eps: epsArg(at: x).tolerance) }
 
 
     /// - Returns: A boolean value indicating whether the receiver contains given coordinate.
-    @inlinable public func contains(_ x: Coordinate) -> Bool { KvIsZero(at(x)) }
+    @inlinable public func contains(_ x: Coordinate) -> Bool { KvIsZero(at(x), eps: epsArg(at: x).tolerance) }
 
     /// - Returns: A boolean value indicating whether the receiver contains coordinates of given ray.
     @inlinable public func contains<V>(_ ray: KvRay2<V>) -> Bool
     where V : KvVertex2Protocol, V.Math == Math
     {
-        contains(ray.origin.coordinate) && KvIsZero(Math.dot(normal, ray.direction))
+        contains(ray.origin.coordinate)
+        && KvIsZero(Math.dot(normal, ray.direction), eps: Math.epsArg(normal).dot(Math.epsArg(ray.direction)).tolerance)
     }
 
 
