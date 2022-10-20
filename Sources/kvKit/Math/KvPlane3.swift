@@ -108,7 +108,7 @@ public struct KvPlane3<Math : KvMathScope> {
     ///
     /// - SeeAlso: ``worldMatrix``,  ``safeWorldMatrix``, ``safeWorldTransform``
     @inlinable
-    public var worldTransform: Transform? {
+    public var worldTransform: Transform {
         Transform(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: Math.normalize(normal)))
     }
 
