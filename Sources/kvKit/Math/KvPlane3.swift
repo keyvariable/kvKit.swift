@@ -94,15 +94,38 @@ public struct KvPlane3<Math : KvMathScope> {
 
 
     /// A transformation matrix from z = 0 plane to the receiver.
+    ///
+    /// - Note: Result is undefined when the receiver is degenerate.
+    ///
+    /// - SeeAlso: ``worldTransform``,  ``safeWorldMatrix``, ``safeWorldTransform``
     @inlinable
-    public var worldMatrix: Transform.Matrix? {
+    public var worldMatrix: Transform.Matrix {
+        Transform.makeMatrix(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: Math.normalize(normal)))
+    }
+    /// A transfromation from z = 0 plane to the receiver.
+    ///
+    /// - Note: Result is undefined when the receiver is degenerate.
+    ///
+    /// - SeeAlso: ``worldMatrix``,  ``safeWorldMatrix``, ``safeWorldTransform``
+    @inlinable
+    public var worldTransform: Transform? {
+        Transform(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: Math.normalize(normal)))
+    }
+
+    /// A transformation matrix from z = 0 plane to the receiver whether exists.
+    ///
+    /// - SeeAlso: ``safeWorldTransform``,  ``worldMatrix``, ``worldTransform``
+    @inlinable
+    public var safeWorldMatrix: Transform.Matrix? {
         guard let unitNormal = Math.safeNormalize(normal) else { return nil }
 
         return Transform.makeMatrix(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: unitNormal))
     }
-    /// A transfromation from z = 0 plane to the receiver.
+    /// A transfromation from z = 0 plane to the receiver whether exists.
+    ///
+    /// - SeeAlso: ``safeWorldMatrix``,  ``worldMatrix``, ``worldTransform``
     @inlinable
-    public var worldTransform: Transform? {
+    public var safeWorldTransform: Transform? {
         guard let unitNormal = Math.safeNormalize(normal) else { return nil }
 
         return Transform(translation: closestToOrigin, quaternion: Math.Quaternion(from: .unitZ, to: unitNormal))

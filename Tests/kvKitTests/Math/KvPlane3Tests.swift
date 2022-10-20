@@ -88,7 +88,7 @@ class KvPlane3Tests : XCTestCase {
                 let plane = P(normal: Math.randomNonzero3(in: -10...10),
                               at: Math.random3(in: -100...100))
 
-                let m = plane.worldMatrix!
+                let m = plane.worldMatrix
                 let unitNormal = Math.normalize(plane.normal)
 
                 var tx: Math.Scalar = -100
