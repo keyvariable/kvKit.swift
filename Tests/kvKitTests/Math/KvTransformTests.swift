@@ -370,45 +370,45 @@ class KvTransformTests : XCTestCase {
     // MARK: Auxliaries
 
     private func s2<Math : KvMathScope>(_ math: Math.Type, _ scale: Math.Vector2) -> Math.Matrix2x2 {
-        .init(diagonal: scale)
+        AT2<Math>.makeMatrix(scale: scale)
     }
 
     private func s3<Math : KvMathScope>(_ math: Math.Type, _ scale: Math.Vector2) -> Math.Matrix3x3 {
-        .init(diagonal: .init(scale, 1))
+        T2<Math>.makeMatrix(scale: scale)
     }
 
     private func s3<Math : KvMathScope>(_ math: Math.Type, _ scale: Math.Vector3) -> Math.Matrix3x3 {
-        .init(diagonal: scale)
+        AT3<Math>.makeMatrix(scale: scale)
     }
 
     private func s4<Math : KvMathScope>(_ math: Math.Type, _ scale: Math.Vector3) -> Math.Matrix4x4 {
-        .init(diagonal: .init(scale, 1))
+        T3<Math>.makeMatrix(scale: scale)
     }
 
 
     private func r2<Math : KvMathScope>(_ math: Math.Type, _ angle: Math.Scalar) -> Math.Matrix2x2 {
-        .init(angle: angle)
+        AT2<Math>.makeMatrix(angle: angle)
     }
 
     private func r3<Math : KvMathScope>(_ math: Math.Type, _ angle: Math.Scalar) -> Math.Matrix3x3 {
-        .init(Math.Quaternion(angle: angle, axis: .unitZ))
+        T2<Math>.makeMatrix(angle: angle)
     }
 
     private func r3<Math : KvMathScope>(_ math: Math.Type, _ quaternion: Math.Quaternion) -> Math.Matrix3x3 {
-        .init(quaternion)
+        AT3<Math>.makeMatrix(quaternion: quaternion)
     }
 
     private func r4<Math : KvMathScope>(_ math: Math.Type, _ quaternion: Math.Quaternion) -> Math.Matrix4x4 {
-        .init(quaternion)
+        T3<Math>.makeMatrix(quaternion: quaternion)
     }
 
 
     private func t<Math : KvMathScope>(_ math: Math.Type, _ translation: Math.Vector2) -> T2<Math>.Matrix {
-        .init([ 1, 0, 0 ], [ 0, 1, 0 ], .init(translation, 1))
+        T2<Math>.makeMatrix(translation: translation)
     }
 
     private func t<Math : KvMathScope>(_ math: Math.Type, _ translation: Math.Vector3) -> T3<Math>.Matrix {
-        .init([ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0 ], .init(translation, 1))
+        T3<Math>.makeMatrix(translation: translation)
     }
 
 }

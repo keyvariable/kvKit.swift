@@ -98,7 +98,7 @@ public struct KvTransform2<Math : KvMathScope> {
     /// Initializes product of rotation and scale transformations.
     @inlinable
     public init(angle: Scalar, scale: Vector) {
-        let scale⁻¹ = Matrix.Column(Math.recip(scale), 1)
+        let scale⁻¹ = Matrix.Column(1 / scale, 1)
         let (sine, cosine) = Math.sincos(angle)
 
         self.init(
@@ -118,7 +118,7 @@ public struct KvTransform2<Math : KvMathScope> {
     /// Initializes a scale transformation.
     @inlinable
     public init(scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         self.init(
             Matrix(diagonal: Matrix.Diagonal(scale, 1)),
@@ -171,7 +171,7 @@ public struct KvTransform2<Math : KvMathScope> {
         var r = NormalMatrix(angle: angle)
         var r⁻¹ = r.transpose
 
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
         let t⁻¹ = (r⁻¹ * -translation) * scale⁻¹
 
         r[0] *= scale.x
@@ -200,7 +200,7 @@ public struct KvTransform2<Math : KvMathScope> {
     /// Initializes product of translation and scale transformations.
     @inlinable
     public init(translation: Vector, scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         self.init(
             Matrix(Matrix.Column(scale.x, 0, 0),
@@ -248,6 +248,78 @@ public struct KvTransform2<Math : KvMathScope> {
     public static func act(_ matrix: Matrix, vector v: Vector) -> Vector {
         Math.make2(matrix * Math.make3(v))
     }
+
+
+    /// - Returns: Rotation transformation matrix.
+    @inlinable
+    public static func makeMatrix(angle: Scalar) -> Matrix {
+        let (sine, cosine) = Math.sincos(angle)
+        return Matrix(Matrix.Column(cosine, sine, 0),
+                      Matrix.Column(-sine, cosine, 0),
+                      .unitZ)
+    }
+
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(angle: Scalar, scale: Vector) -> Matrix {
+        let (sine, cosine) = Math.sincos(angle)
+        return Matrix(Matrix.Column(cosine, sine, 0) * scale.x,
+                      Matrix.Column(-sine, cosine, 0) * scale.y,
+                      .unitZ)
+    }
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable public static func makeMatrix(angle: Scalar, scale: Scalar) -> Matrix { makeMatrix(angle: angle, scale: Vector(repeating: scale)) }
+
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Vector) -> Matrix { Matrix(diagonal: Matrix.Diagonal(scale, 1)) }
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Scalar) -> Matrix { Matrix(diagonal: Matrix.Diagonal(scale, scale, 1)) }
+
+
+    /// - Returns: Translation transformation matrix.
+    @inlinable public static func makeMatrix(translation: Vector) -> Matrix { Matrix(.unitX, .unitY, Matrix.Column(translation, 1)) }
+
+
+    /// - Returns: Translation-rotation transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, angle: Scalar) -> Matrix {
+        let (sine, cosine) = Math.sincos(angle)
+        return Matrix(Matrix.Column(cosine, sine, 0),
+                      Matrix.Column(-sine, cosine, 0),
+                      Matrix.Column(translation, 1))
+    }
+
+
+    /// - Returns: Translation-rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, angle: Scalar, scale: Vector) -> Matrix {
+        let (sine, cosine) = Math.sincos(angle)
+        return Matrix(Matrix.Column(cosine, sine, 0) * scale.x,
+                      Matrix.Column(-sine, cosine, 0) * scale.y,
+                      Matrix.Column(translation, 1))
+    }
+
+    /// - Returns: Translation-rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, angle: Scalar, scale: Scalar) -> Matrix {
+        makeMatrix(translation: translation, angle: angle, scale: Vector(repeating: scale))
+    }
+
+
+    /// - Returns: Translation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, scale: Vector) -> Matrix {
+        Matrix(Matrix.Column(scale.x, 0, 0),
+               Matrix.Column(0, scale.y, 0),
+               Matrix.Column(translation, 1))
+    }
+
+    /// - Returns: Translation-scale transformation matrix.
+    @inlinable public static func makeMatrix(translation: Vector, scale: Scalar) -> Matrix { makeMatrix(scale: Vector(repeating: scale)) }
 
 
 
@@ -416,7 +488,7 @@ public struct KvAffineTransform2<Math : KvMathScope> {
     /// Initializes product of rotation and scale transformations.
     @inlinable
     public init(angle: Scalar, scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         var m = Matrix(angle: angle)
         var m⁻¹ = m.transpose
@@ -437,7 +509,7 @@ public struct KvAffineTransform2<Math : KvMathScope> {
     /// Initializes a scale transformation.
     @inlinable
     public init(scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         self.init(Matrix(diagonal: scale),
                   Matrix(diagonal: scale⁻¹),
@@ -479,6 +551,30 @@ public struct KvAffineTransform2<Math : KvMathScope> {
     public static func normalizedScaleComponent(for v: Vector) -> Vector {
         v * Math.rsqrt(0.5 * Math.length²(v))
     }
+
+
+    /// - Returns: Rotation transformation matrix.
+    @inlinable
+    public static func makeMatrix(angle: Scalar) -> Matrix { Matrix(angle: angle) }
+
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(angle: Scalar, scale: Vector) -> Matrix {
+        let (sine, cosine) = Math.sincos(angle)
+        return Matrix(Matrix.Column(cosine, sine) * scale.x,
+                      Matrix.Column(-sine, cosine) * scale.y)
+    }
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable public static func makeMatrix(angle: Scalar, scale: Scalar) -> Matrix { makeMatrix(angle: angle, scale: Vector(repeating: scale)) }
+
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Vector) -> Matrix { Matrix(diagonal: scale) }
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Scalar) -> Matrix { makeMatrix(scale: Vector(repeating: scale)) }
 
 
 
@@ -628,7 +724,7 @@ public struct KvTransform3<Math : KvMathScope> {
     /// Initializes product of rotation and scale transformations.
     @inlinable
     public init(quaternion: Math.Quaternion, scale: Vector) {
-        let scale⁻¹ = Matrix.Column(Math.recip(scale), 1)
+        let scale⁻¹ = Matrix.Column(1 / scale, 1)
 
         var m = Matrix(quaternion)
         var m⁻¹ = m.transpose
@@ -651,7 +747,7 @@ public struct KvTransform3<Math : KvMathScope> {
     /// Initializes a scale transformation.
     @inlinable
     public init(scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         self.init(
             Matrix(diagonal: Matrix.Diagonal(scale, 1)),
@@ -708,7 +804,7 @@ public struct KvTransform3<Math : KvMathScope> {
         var r = NormalMatrix(quaternion)
         var r⁻¹ = r.transpose
 
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
         let t⁻¹ = (r⁻¹ * -translation) * scale⁻¹
 
         r[0] *= scale.x
@@ -741,7 +837,7 @@ public struct KvTransform3<Math : KvMathScope> {
     /// Initializes product of translation and scale transformations.
     @inlinable
     public init(translation: Vector, scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         self.init(
             Matrix(Matrix.Column(scale.x, 0, 0, 0),
@@ -794,13 +890,80 @@ public struct KvTransform3<Math : KvMathScope> {
     }
 
 
+    /// - Returns: Rotation transformation matrix.
+    @inlinable
+    public static func makeMatrix(quaternion: Math.Quaternion) -> Matrix { Matrix(quaternion) }
+
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(quaternion: Math.Quaternion, scale: Vector) -> Matrix {
+        var m = Matrix(quaternion)
+        m[0] *= scale.x
+        m[1] *= scale.y
+        m[2] *= scale.z
+        return m
+    }
+
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Vector) -> Matrix { Matrix(diagonal: Matrix.Diagonal(scale, 1)) }
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Scalar) -> Matrix { Matrix(diagonal: Matrix.Diagonal(scale, scale, scale, 1)) }
+
+
+    /// - Returns: Translation transformation matrix.
+    @inlinable public static func makeMatrix(translation: Vector) -> Matrix { Matrix(.unitX, .unitY, .unitZ, Matrix.Column(translation, 1)) }
+
+
+    /// - Returns: Translation-rotation transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, quaternion: Math.Quaternion) -> Matrix {
+        var m = Matrix(quaternion)
+        m[3] = Matrix.Column(translation, 1)
+        return m
+    }
+
+
+    /// - Returns: Translation-rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, quaternion: Math.Quaternion, scale: Vector) -> Matrix {
+        var m = Matrix(quaternion)
+        m[0] *= scale.x
+        m[1] *= scale.y
+        m[2] *= scale.z
+        m[3] = Matrix.Column(translation, 1)
+        return m
+    }
+
+    /// - Returns: Translation-rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, quaternion: Math.Quaternion, scale: Scalar) -> Matrix {
+        makeMatrix(translation: translation, quaternion: quaternion, scale: Vector(repeating: scale))
+    }
+
+
+    /// - Returns: Translation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(translation: Vector, scale: Vector) -> Matrix {
+        Matrix(Matrix.Column(scale.x, 0, 0, 0),
+               Matrix.Column(0, scale.y, 0, 0),
+               Matrix.Column(0, 0, scale.z, 0),
+               Matrix.Column(translation, 1))
+    }
+
+    /// - Returns: Translation-scale transformation matrix.
+    @inlinable public static func makeMatrix(translation: Vector, scale: Scalar) -> Matrix { makeMatrix(scale: Vector(repeating: scale)) }
+
+
 
     // MARK: Projections
 
     /// - Returns: Matrix of standard orthogonal projection.
     @inlinable
     public static func orthogonalProjection(left: Scalar, right: Scalar, top: Scalar, bottom: Scalar, near: Scalar, far: Scalar) -> Matrix {
-        Matrix(diagonal: Math.recip(Matrix.Diagonal(left - right, bottom - top, near - far, 1)))
+        Matrix(diagonal: 1 / Matrix.Diagonal(left - right, bottom - top, near - far, 1))
         * Matrix([ -2,  0, 0, 0 ],
                  [  0, -2, 0, 0 ],
                  [  0,  0, 2, 0 ],
@@ -816,7 +979,7 @@ public struct KvTransform3<Math : KvMathScope> {
     public static func perspectiveProjection(aspect: Scalar, fov: Scalar, near: Scalar, far: Scalar) -> Matrix {
         let tg = Math.tan(0.5 * fov)
 
-        return (Matrix(diagonal: Math.recip(Matrix.Diagonal(aspect * tg, tg, near - far, 1)))
+        return (Matrix(diagonal: 1 / Matrix.Diagonal(aspect * tg, tg, near - far, 1))
                 * Matrix(Matrix.Column.unitX,
                          Matrix.Column.unitY,
                          Matrix.Column(0,  0,  (far + near)  , -1),
@@ -1008,7 +1171,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
     /// Initializes product of rotation and scale transformations.
     @inlinable
     public init(quaternion: Math.Quaternion, scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         var m = Matrix(quaternion)
         var m⁻¹ = m.transpose
@@ -1031,7 +1194,7 @@ public struct KvAffineTransform3<Math : KvMathScope> {
     /// Initializes a scale transformation.
     @inlinable
     public init(scale: Vector) {
-        let scale⁻¹ = Math.recip(scale)
+        let scale⁻¹ = 1 / scale
 
         self.init(Matrix(diagonal: scale),
                   Matrix(diagonal: scale⁻¹),
@@ -1074,6 +1237,33 @@ public struct KvAffineTransform3<Math : KvMathScope> {
     public static func normalizedScaleComponent(for v: Vector) -> Vector {
         v * Math.rsqrt(Math.length²(v) * ((1.0 as Scalar) / (3.0 as Scalar)))
     }
+
+
+    /// - Returns: Rotation transformation matrix.
+    @inlinable
+    public static func makeMatrix(quaternion: Math.Quaternion) -> Matrix { Matrix(quaternion) }
+
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(quaternion: Math.Quaternion, scale: Vector) -> Matrix {
+        var m = Matrix(quaternion)
+        m[0] *= scale.x
+        m[1] *= scale.y
+        m[2] *= scale.z
+        return m
+    }
+
+    /// - Returns: Rotation-scale transformation matrix.
+    @inlinable
+    public static func makeMatrix(quaternion: Math.Quaternion, scale: Scalar) -> Matrix { makeMatrix(quaternion: quaternion, scale: Vector(repeating: scale)) }
+
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Vector) -> Matrix { Matrix(diagonal: scale) }
+
+    /// - Returns: Scale transformation matrix.
+    @inlinable public static func makeMatrix(scale: Scalar) -> Matrix { makeMatrix(scale: Vector(repeating: scale)) }
 
 
 
