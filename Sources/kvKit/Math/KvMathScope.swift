@@ -833,8 +833,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
-        isInequal(lhs[0], rhs[0])
-        || isInequal(lhs[1], rhs[1])
+        isInequal(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -847,9 +846,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
-        isInequal(lhs[0], rhs[0])
-        || isInequal(lhs[1], rhs[1])
-        || isInequal(lhs[2], rhs[2])
+        isInequal(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -863,10 +860,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
-        isInequal(lhs[0], rhs[0])
-        || isInequal(lhs[1], rhs[1])
-        || isInequal(lhs[2], rhs[2])
-        || isInequal(lhs[3], rhs[3])
+        isInequal(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -924,8 +918,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
-        isEqual(lhs[0], rhs[0])
-        && isEqual(lhs[1], rhs[1])
+        isEqual(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -938,9 +931,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
-        isEqual(lhs[0], rhs[0])
-        && isEqual(lhs[1], rhs[1])
-        && isEqual(lhs[2], rhs[2])
+        isEqual(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -954,10 +945,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
-        isEqual(lhs[0], rhs[0])
-        && isEqual(lhs[1], rhs[1])
-        && isEqual(lhs[2], rhs[2])
-        && isEqual(lhs[3], rhs[3])
+        isEqual(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
