@@ -122,6 +122,12 @@ public protocol KvMathScope {
     static func epsArg(_ v: Vector3) -> EpsArg3
     /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
     static func epsArg(_ v: Vector4) -> EpsArg4
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    static func epsArg(_ m: Matrix2x2) -> EpsArg2x2
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    static func epsArg(_ m: Matrix3x3) -> EpsArg3x3
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    static func epsArg(_ m: Matrix4x4) -> EpsArg4x4
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
     ///
@@ -310,6 +316,9 @@ public protocol KvMathScope {
     static func max(_ lhs: Vector2, _ rhs: Vector2) -> Vector2
     static func max(_ lhs: Vector3, _ rhs: Vector3) -> Vector3
     static func max(_ lhs: Vector4, _ rhs: Vector4) -> Vector4
+    static func max(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Matrix2x2
+    static func max(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Matrix3x3
+    static func max(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Matrix4x4
 
     /// - Returns: Minimum element in the receiver.
     static func min(_ m: Matrix2x2) -> Scalar
@@ -321,6 +330,9 @@ public protocol KvMathScope {
     static func min(_ lhs: Vector2, _ rhs: Vector2) -> Vector2
     static func min(_ lhs: Vector3, _ rhs: Vector3) -> Vector3
     static func min(_ lhs: Vector4, _ rhs: Vector4) -> Vector4
+    static func min(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Matrix2x2
+    static func min(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Matrix3x3
+    static func min(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Matrix4x4
 
     static func mix(_ lhs: Scalar, _ rhs: Scalar, t: Scalar) -> Scalar
     static func mix(_ lhs: Vector2, _ rhs: Vector2, t: Vector2) -> Vector2
@@ -412,6 +424,10 @@ extension KvMathScope {
     public typealias EpsArg2 = KvNumericalToleranceVectorArgument2<Self>
     public typealias EpsArg3 = KvNumericalToleranceVectorArgument3<Self>
     public typealias EpsArg4 = KvNumericalToleranceVectorArgument4<Self>
+
+    public typealias EpsArg2x2 = KvNumericalToleranceVectorArgument2x2<Self>
+    public typealias EpsArg3x3 = KvNumericalToleranceVectorArgument3x3<Self>
+    public typealias EpsArg4x4 = KvNumericalToleranceVectorArgument4x4<Self>
 
 }
 
@@ -724,6 +740,15 @@ public struct KvMathFloatScope : KvMathScope {
 
     /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
     @inlinable public static func epsArg(_ v: Vector4) -> EpsArg4 { EpsArg4(v) }
+
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    @inlinable public static func epsArg(_ m: Matrix2x2) -> EpsArg2x2 { EpsArg2x2(m) }
+
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    @inlinable public static func epsArg(_ m: Matrix3x3) -> EpsArg3x3 { EpsArg3x3(m) }
+
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    @inlinable public static func epsArg(_ m: Matrix4x4) -> EpsArg4x4 { EpsArg4x4(m) }
 
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
@@ -1149,6 +1174,12 @@ public struct KvMathFloatScope : KvMathScope {
 
     @inlinable public static func max(_ lhs: Vector4, _ rhs: Vector4) -> Vector4 { simd_max(lhs, rhs) }
 
+    @inlinable public static func max(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Matrix2x2 { Matrix2x2(max(lhs[0], rhs[0]), max(lhs[1], rhs[1])) }
+
+    @inlinable public static func max(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Matrix3x3 { Matrix3x3(max(lhs[0], rhs[0]), max(lhs[1], rhs[1]), max(lhs[2], rhs[2])) }
+
+    @inlinable public static func max(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Matrix4x4 { Matrix4x4(max(lhs[0], rhs[0]), max(lhs[1], rhs[1]), max(lhs[2], rhs[2]), max(lhs[3], rhs[3])) }
+
 
     /// - Returns: Minimum element in the receiver.
     @inlinable public static func min(_ m: Matrix2x2) -> Scalar { Swift.min(m[0].min(), m[1].min()) }
@@ -1165,6 +1196,12 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func min(_ lhs: Vector3, _ rhs: Vector3) -> Vector3 { simd_min(lhs, rhs) }
 
     @inlinable public static func min(_ lhs: Vector4, _ rhs: Vector4) -> Vector4 { simd_min(lhs, rhs) }
+
+    @inlinable public static func min(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Matrix2x2 { Matrix2x2(min(lhs[0], rhs[0]), min(lhs[1], rhs[1])) }
+
+    @inlinable public static func min(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Matrix3x3 { Matrix3x3(min(lhs[0], rhs[0]), min(lhs[1], rhs[1]), min(lhs[2], rhs[2])) }
+
+    @inlinable public static func min(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Matrix4x4 { Matrix4x4(min(lhs[0], rhs[0]), min(lhs[1], rhs[1]), min(lhs[2], rhs[2]), min(lhs[3], rhs[3])) }
 
 
     @inlinable public static func mix(_ lhs: Scalar, _ rhs: Scalar, t: Scalar) -> Scalar { simd_mix(lhs, rhs, t) }
@@ -1461,6 +1498,15 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
     @inlinable public static func epsArg(_ v: Vector4) -> EpsArg4 { EpsArg4(v) }
 
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    @inlinable public static func epsArg(_ m: Matrix2x2) -> EpsArg2x2 { EpsArg2x2(m) }
+
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    @inlinable public static func epsArg(_ m: Matrix3x3) -> EpsArg3x3 { EpsArg3x3(m) }
+
+    /// - Returns: Tolerance argument for numerical comparisons depending on a matrix value.
+    @inlinable public static func epsArg(_ m: Matrix4x4) -> EpsArg4x4 { EpsArg4x4(m) }
+
 
     /// - Returns: A boolean value indicating wheather given vectors are co-directional.
     ///
@@ -1569,8 +1615,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
-        isInequal(lhs[0], rhs[0])
-        || isInequal(lhs[1], rhs[1])
+        isInequal(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -1583,9 +1628,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
-        isInequal(lhs[0], rhs[0])
-        || isInequal(lhs[1], rhs[1])
-        || isInequal(lhs[2], rhs[2])
+        isInequal(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -1599,10 +1642,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
     @inlinable
     public static func isInequal(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
-        isInequal(lhs[0], rhs[0])
-        || isInequal(lhs[1], rhs[1])
-        || isInequal(lhs[2], rhs[2])
-        || isInequal(lhs[3], rhs[3])
+        isInequal(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are inequal.
@@ -1660,8 +1700,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Bool {
-        isEqual(lhs[0], rhs[0])
-        && isEqual(lhs[1], rhs[1])
+        isEqual(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -1674,9 +1713,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Bool {
-        isEqual(lhs[0], rhs[0])
-        && isEqual(lhs[1], rhs[1])
-        && isEqual(lhs[2], rhs[2])
+        isEqual(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -1690,10 +1727,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     @inlinable
     public static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Bool {
-        isEqual(lhs[0], rhs[0])
-        && isEqual(lhs[1], rhs[1])
-        && isEqual(lhs[2], rhs[2])
-        && isEqual(lhs[3], rhs[3])
+        isEqual(lhs, rhs, eps: EpsArg(max(abs(lhs)), max(abs(rhs))).tolerance)
     }
 
     /// - Returns: A boolean value indicating wheather given matrices are equal.
@@ -1897,6 +1931,12 @@ public struct KvMathDoubleScope : KvMathScope {
 
     @inlinable public static func max(_ lhs: Vector4, _ rhs: Vector4) -> Vector4 { simd_max(lhs, rhs) }
 
+    @inlinable public static func max(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Matrix2x2 { Matrix2x2(max(lhs[0], rhs[0]), max(lhs[1], rhs[1])) }
+
+    @inlinable public static func max(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Matrix3x3 { Matrix3x3(max(lhs[0], rhs[0]), max(lhs[1], rhs[1]), max(lhs[2], rhs[2])) }
+
+    @inlinable public static func max(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Matrix4x4 { Matrix4x4(max(lhs[0], rhs[0]), max(lhs[1], rhs[1]), max(lhs[2], rhs[2]), max(lhs[3], rhs[3])) }
+
 
     /// - Returns: Minimum element in the receiver.
     @inlinable public static func min(_ m: Matrix2x2) -> Scalar { Swift.min(m[0].min(), m[1].min()) }
@@ -1913,6 +1953,12 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func min(_ lhs: Vector3, _ rhs: Vector3) -> Vector3 { simd_min(lhs, rhs) }
 
     @inlinable public static func min(_ lhs: Vector4, _ rhs: Vector4) -> Vector4 { simd_min(lhs, rhs) }
+
+    @inlinable public static func min(_ lhs: Matrix2x2, _ rhs: Matrix2x2) -> Matrix2x2 { Matrix2x2(min(lhs[0], rhs[0]), min(lhs[1], rhs[1])) }
+
+    @inlinable public static func min(_ lhs: Matrix3x3, _ rhs: Matrix3x3) -> Matrix3x3 { Matrix3x3(min(lhs[0], rhs[0]), min(lhs[1], rhs[1]), min(lhs[2], rhs[2])) }
+
+    @inlinable public static func min(_ lhs: Matrix4x4, _ rhs: Matrix4x4) -> Matrix4x4 { Matrix4x4(min(lhs[0], rhs[0]), min(lhs[1], rhs[1]), min(lhs[2], rhs[2]), min(lhs[3], rhs[3])) }
 
 
     @inlinable public static func mix(_ lhs: Scalar, _ rhs: Scalar, t: Scalar) -> Scalar { simd_mix(lhs, rhs, t) }
@@ -2075,85 +2121,94 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
     public typealias Vector = Math.Vector2
 
 
-    public let x: Math.EpsArg
-    public let y: Math.EpsArg
+    public let value: Vector
 
+
+    /// Memerwise initializer.
+    @usableFromInline
+    internal init(value: Vector) {
+        Swift.assert(value.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+
+        self.value = value
+    }
 
     @usableFromInline
-    internal init(x: Math.EpsArg, y: Math.EpsArg) {
-        self.x = x
-        self.y = y
+    internal init(values v1: Vector, _ v2: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+
+        self.value = Math.max(v1, v2)
+    }
+
+    @usableFromInline
+    internal init(values v1: Vector, _ v2: Vector, _ v3: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), v3)
+    }
+
+    @usableFromInline
+    internal init(values v1: Vector, _ v2: Vector, _ v3: Vector, _ v4: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v4.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
     /// Initializes single argument tolerance.
-    @inlinable
-    public init(_ arg: Vector) {
-        self.init(x: Math.EpsArg(arg.x),
-                  y: Math.EpsArg(arg.y))
-    }
+    @inlinable public init(_ arg: Vector) { self.init(value: Math.abs(arg)) }
 
     /// Initializes tolerance by simple combination of two arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x),
-                  y: Math.EpsArg(a1.y, a2.y))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector) { self.init(values: Math.abs(a1), Math.abs(a2)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x),
-                  y: Math.EpsArg(a1.y, a2.y, a3.y))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x, a4.x),
-                  y: Math.EpsArg(a1.y, a2.y, a3.y, a4.y))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
 
 
     // MARK: Operations
 
-    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(values: x.value, y.value) }
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(value: value.max()) }
 
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
     /// - Returns: A tolerance of a sum.
-    @inlinable
-    public static func +(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x + rhs.x,
-             y: lhs.y + rhs.y)
-    }
+    @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a subtraction.
-    @inlinable
-    public static func -(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x - rhs.x,
-             y: lhs.y - rhs.y)
-    }
+    @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
     @inlinable
     public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x * rhs.x,
-             y: lhs.y * rhs.y)
+        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
     }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable
     public static func /(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x / rhs.x,
-             y: lhs.y / rhs.y)
+        let inv_rhs = 1 / rhs.value
+        return Self(values: lhs.value, inv_rhs, lhs.value * inv_rhs)
     }
 
-    /// - Returns: A tolerance of a dot product
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { x * rhs.x + y * rhs.y }
+    /// - Returns: A tolerance of a dot product.
+    @inlinable
+    public func dot(_ rhs: Self) -> Math.EpsArg {
+        Math.EpsArg(values: value.max(), rhs.value.max(), Math.dot(value, rhs.value))
+    }
 
-    /// - Returns: A tolerance of a dot product
-    @inlinable public func cross(_ rhs: Self) -> Math.EpsArg { x * rhs.y - y * rhs.x }
+    /// - Returns: A tolerance of a cross product Z coordinate.
+    @inlinable
+    public func cross(_ rhs: Self) -> Math.EpsArg {
+        Math.EpsArg(values: value.max(), rhs.value.max(), value.x * rhs.value.y + value.y + rhs.value.x)
+    }
 
 }
 
@@ -2169,99 +2224,96 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
     public typealias Vector = Math.Vector3
 
 
-    public let x: Math.EpsArg
-    public let y: Math.EpsArg
-    public let z: Math.EpsArg
+    public let value: Vector
 
+
+    /// Memerwise initializer.
+    @usableFromInline
+    internal init(value: Vector) {
+        Swift.assert(value.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+
+        self.value = value
+    }
 
     @usableFromInline
-    internal init(x: Math.EpsArg, y: Math.EpsArg, z: Math.EpsArg) {
-        self.x = x
-        self.y = y
-        self.z = z
+    internal init(values v1: Vector, _ v2: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+
+        self.value = Math.max(v1, v2)
+    }
+
+    @usableFromInline
+    internal init(values v1: Vector, _ v2: Vector, _ v3: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), v3)
+    }
+
+    @usableFromInline
+    internal init(values v1: Vector, _ v2: Vector, _ v3: Vector, _ v4: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v4.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
     /// Initializes single argument tolerance.
-    @inlinable
-    public init(_ arg: Vector) {
-        self.init(x: Math.EpsArg(arg.x),
-                  y: Math.EpsArg(arg.y),
-                  z: Math.EpsArg(arg.z))
-    }
+    @inlinable public init(_ arg: Vector) { self.init(value: Math.abs(arg)) }
 
     /// Initializes tolerance by simple combination of two arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x),
-                  y: Math.EpsArg(a1.y, a2.y),
-                  z: Math.EpsArg(a1.z, a2.z))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector) { self.init(values: Math.abs(a1), Math.abs(a2)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x),
-                  y: Math.EpsArg(a1.y, a2.y, a3.y),
-                  z: Math.EpsArg(a1.z, a2.z, a3.z))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x, a4.x),
-                  y: Math.EpsArg(a1.y, a2.y, a3.y, a4.y),
-                  z: Math.EpsArg(a1.z, a2.z, a3.z, a4.z))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
 
 
     // MARK: Operations
 
-    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(values: x.value, y.value, z.value) }
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(value: value.max()) }
 
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
     /// - Returns: A tolerance of a sum.
-    @inlinable
-    public static func +(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x + rhs.x,
-             y: lhs.y + rhs.y,
-             z: lhs.z + rhs.z)
-    }
+    @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a subtraction.
-    @inlinable
-    public static func -(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x - rhs.x,
-             y: lhs.y - rhs.y,
-             z: lhs.z - rhs.z)
-    }
+    @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
     @inlinable
     public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x * rhs.x,
-             y: lhs.y * rhs.y,
-             z: lhs.z * rhs.z)
+        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
     }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable
     public static func /(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x / rhs.x,
-             y: lhs.y / rhs.y,
-             z: lhs.z / rhs.z)
+        let inv_rhs = 1 / rhs.value
+        return Self(values: lhs.value, inv_rhs, lhs.value * inv_rhs)
     }
 
-    /// - Returns: A tolerance of a dot product
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { x * rhs.x + y * rhs.y + z * rhs.z }
+    /// - Returns: A tolerance of a dot product.
+    @inlinable
+    public func dot(_ rhs: Self) -> Math.EpsArg {
+        Math.EpsArg(values: value.max(), rhs.value.max(), Math.dot(value, rhs.value))
+    }
 
-    /// - Returns: A tolerance of a dot product
+    /// - Returns: A tolerance of a cross product.
     @inlinable
     public func cross(_ rhs: Self) -> Self {
-        Self(x: y * rhs.z - z * rhs.y,
-             y: z * rhs.x - x * rhs.z,
-             z: x * rhs.y - y * rhs.x)
+        Self(values: value, rhs.value,
+             Vector(x: value.y * rhs.value.z + value.z * rhs.value.y,
+                    y: value.z * rhs.value.x + value.x * rhs.value.z,
+                    z: value.x * rhs.value.y + value.y * rhs.value.x))
     }
 
 }
@@ -2278,101 +2330,339 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> {
     public typealias Vector = Math.Vector4
 
 
-    public let x: Math.EpsArg
-    public let y: Math.EpsArg
-    public let z: Math.EpsArg
-    public let w: Math.EpsArg
+    public let value: Vector
 
+
+    /// Memerwise initializer.
+    @usableFromInline
+    internal init(value: Vector) {
+        Swift.assert(value.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+
+        self.value = value
+    }
 
     @usableFromInline
-    internal init(x: Math.EpsArg, y: Math.EpsArg, z: Math.EpsArg, w: Math.EpsArg) {
-        self.x = x
-        self.y = y
-        self.z = z
-        self.w = w
+    internal init(values v1: Vector, _ v2: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+
+        self.value = Math.max(v1, v2)
+    }
+
+    @usableFromInline
+    internal init(values v1: Vector, _ v2: Vector, _ v3: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), v3)
+    }
+
+    @usableFromInline
+    internal init(values v1: Vector, _ v2: Vector, _ v3: Vector, _ v4: Vector) {
+        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v4.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
     /// Initializes single argument tolerance.
-    @inlinable
-    public init(_ arg: Vector) {
-        self.init(x: Math.EpsArg(arg.x),
-                  y: Math.EpsArg(arg.y),
-                  z: Math.EpsArg(arg.z),
-                  w: Math.EpsArg(arg.w))
-    }
+    @inlinable public init(_ arg: Vector) { self.init(value: Math.abs(arg)) }
 
     /// Initializes tolerance by simple combination of two arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x),
-                  y: Math.EpsArg(a1.y, a2.y),
-                  z: Math.EpsArg(a1.z, a2.z),
-                  w: Math.EpsArg(a1.w, a2.w))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector) { self.init(values: Math.abs(a1), Math.abs(a2)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x),
-                  y: Math.EpsArg(a1.y, a2.y, a3.y),
-                  z: Math.EpsArg(a1.z, a2.z, a3.z),
-                  w: Math.EpsArg(a1.w, a2.w, a3.w))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable
-    public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) {
-        self.init(x: Math.EpsArg(a1.x, a2.x, a3.x, a4.x),
-                  y: Math.EpsArg(a1.y, a2.y, a3.y, a4.y),
-                  z: Math.EpsArg(a1.z, a2.z, a3.z, a4.z),
-                  w: Math.EpsArg(a1.w, a2.w, a3.w, a4.w))
-    }
+    @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
 
 
     // MARK: Operations
 
-    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(values: x.value, y.value, z.value, w.value) }
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(value: value.max()) }
 
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
     /// - Returns: A tolerance of a sum.
-    @inlinable
-    public static func +(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x + rhs.x,
-             y: lhs.y + rhs.y,
-             z: lhs.z + rhs.z,
-             w: lhs.w + rhs.w)
-    }
+    @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a subtraction.
-    @inlinable
-    public static func -(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x - rhs.x,
-             y: lhs.y - rhs.y,
-             z: lhs.z - rhs.z,
-             w: lhs.w - rhs.w)
-    }
+    @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
     @inlinable
     public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x * rhs.x,
-             y: lhs.y * rhs.y,
-             z: lhs.z * rhs.z,
-             w: lhs.w * rhs.w)
+        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
     }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable
     public static func /(lhs: Self, rhs: Self) -> Self {
-        Self(x: lhs.x / rhs.x,
-             y: lhs.y / rhs.y,
-             z: lhs.z / rhs.z,
-             w: lhs.w / rhs.w)
+        let inv_rhs = 1 / rhs.value
+        return Self(values: lhs.value, inv_rhs, lhs.value * inv_rhs)
     }
 
-    /// - Returns: A tolerance of a dot product
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w }
+    /// - Returns: A tolerance of a dot product.
+    @inlinable
+    public func dot(_ rhs: Self) -> Math.EpsArg {
+        Math.EpsArg(values: value.max(), rhs.value.max(), Math.dot(value, rhs.value))
+    }
+
+}
+
+
+
+// MARK: - .KvNumericalToleranceVectorArgument2x2
+
+/// Vector tolerance argument.
+public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
+
+    public typealias Tolerance = Math.Eps
+
+    public typealias Matrix = Math.Matrix2x2
+
+
+    public let value: Matrix
+
+
+    /// Memerwise initializer.
+    @usableFromInline
+    internal init(value: Matrix) {
+        Swift.assert(Math.min(value) >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+
+        self.value = value
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+
+        self.value = Math.max(v1, v2)
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), v3)
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix, _ v4: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v4) >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
+    }
+
+    /// Initializes single argument tolerance.
+    @inlinable public init(_ arg: Matrix) { self.init(value: Math.abs(arg)) }
+
+    /// Initializes tolerance by simple combination of two arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2)) }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3)) }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix, _ a4: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Operations
+
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(value: Math.max(value)) }
+
+    @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
+
+
+    /// - Returns: A tolerance of a sum.
+    @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
+
+    /// - Returns: A tolerance of a subtraction.
+    @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
+
+    /// - Returns: A tolerance of a product.
+    @inlinable
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
+    }
+
+}
+
+
+
+// MARK: - .KvNumericalToleranceVectorArgument3x3
+
+/// Vector tolerance argument.
+public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
+
+    public typealias Tolerance = Math.Eps
+
+    public typealias Matrix = Math.Matrix3x3
+
+
+    public let value: Matrix
+
+
+    /// Memerwise initializer.
+    @usableFromInline
+    internal init(value: Matrix) {
+        Swift.assert(Math.min(value) >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+
+        self.value = value
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+
+        self.value = Math.max(v1, v2)
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), v3)
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix, _ v4: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v4) >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
+    }
+
+    /// Initializes single argument tolerance.
+    @inlinable public init(_ arg: Matrix) { self.init(value: Math.abs(arg)) }
+
+    /// Initializes tolerance by simple combination of two arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2)) }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3)) }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix, _ a4: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Operations
+
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(value: Math.max(value)) }
+
+    @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
+
+
+    /// - Returns: A tolerance of a sum.
+    @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
+
+    /// - Returns: A tolerance of a subtraction.
+    @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
+
+    /// - Returns: A tolerance of a product.
+    @inlinable
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
+    }
+
+}
+
+
+
+// MARK: - .KvNumericalToleranceVectorArgument4x4
+
+/// Vector tolerance argument.
+public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
+
+    public typealias Tolerance = Math.Eps
+
+    public typealias Matrix = Math.Matrix4x4
+
+
+    public let value: Matrix
+
+
+    /// Memerwise initializer.
+    @usableFromInline
+    internal init(value: Matrix) {
+        Swift.assert(Math.min(value) >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+
+        self.value = value
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+
+        self.value = Math.max(v1, v2)
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), v3)
+    }
+
+    @usableFromInline
+    internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix, _ v4: Matrix) {
+        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v4) >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+
+        self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
+    }
+
+    /// Initializes single argument tolerance.
+    @inlinable public init(_ arg: Matrix) { self.init(value: Math.abs(arg)) }
+
+    /// Initializes tolerance by simple combination of two arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2)) }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3)) }
+
+    /// Initializes tolerance by simple combination of three arguments.
+    @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix, _ a4: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Operations
+
+    @inlinable public var scalar: Math.EpsArg { Math.EpsArg(value: Math.max(value)) }
+
+    @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
+
+
+    /// - Returns: A tolerance of a sum.
+    @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
+
+    /// - Returns: A tolerance of a subtraction.
+    @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
+
+    /// - Returns: A tolerance of a product.
+    @inlinable
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
+    }
 
 }

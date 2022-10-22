@@ -54,8 +54,6 @@ class KvLine3Tests : XCTestCase {
             /// Quaternion when line contains the origin.
             let q1 = Math.Quaternion(from: L<Math>.front, to: Math.normalize(.one))
 
-
-
             assertEqual(L<Math>(in: .one, at: .zero), .init(quaternion: q1, d: 0))
             assertEqual(L<Math>(in: .one, at: .one), .init(quaternion: q1, d: 0))
 

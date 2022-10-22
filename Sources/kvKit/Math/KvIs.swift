@@ -69,6 +69,7 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> {
     public let value: T
 
 
+    /// Memerwise initializer.
     @usableFromInline
     internal init(value: T) {
         Swift.assert(value >= 0, "Invalid argument: tolerance argument value (\(value)) must be positive")
@@ -107,13 +108,13 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> {
     @inlinable public init(_ arg: T) { self.init(value: abs(arg)) }
 
     /// Initializes tolerance by simple combination of two arguments.
-    @inlinable public init(_ a1: T, _ a2: T) { self.init(value: Swift.max(abs(a1), abs(a2))) }
+    @inlinable public init(_ a1: T, _ a2: T) { self.init(values: abs(a1), abs(a2)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable public init(_ a1: T, _ a2: T, _ a3: T) { self.init(value: Swift.max(Swift.max(abs(a1), abs(a2)), abs(a3))) }
+    @inlinable public init(_ a1: T, _ a2: T, _ a3: T) { self.init(values: abs(a1), abs(a2), abs(a3)) }
 
     /// Initializes tolerance by simple combination of three arguments.
-    @inlinable public init(_ a1: T, _ a2: T, _ a3: T, _ a4: T) { self.init(value: Swift.max(Swift.max(abs(a1), abs(a2)), Swift.max(abs(a3), abs(a4)))) }
+    @inlinable public init(_ a1: T, _ a2: T, _ a3: T, _ a4: T) { self.init(values: abs(a1), abs(a2), abs(a3), abs(a4)) }
 
 
     // MARK: Operations
