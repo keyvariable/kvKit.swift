@@ -300,11 +300,11 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
     /// - Returns: Front and back parts of the receiver relative to given line.
     public func split(by line: KvLine2<Math>) -> SplitResult {
-        typealias Element = (vertex: Vertex, location: Location)
+        typealias Element = (vertex: Vertex, location: KvLine2<Math>.Location)
         typealias Accumulator = (vertices: [Vertex], isValid: Bool)
 
         var iterator = _vertices
-            .lazy.map { ($0, Location.of($0.coordinate, relativeTo: line)) }
+            .lazy.map { ($0, line.location(of: $0.coordinate)) }
             .makeIterator()
 
         guard let first = iterator.next() else { return (nil, nil) }
@@ -325,17 +325,17 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
 
             switch (prev.location, next.location) {
-            case (.back, .front), (.front, .back):
+            case (.negative, .positive), (.positive, .negative):
                 AppendIntersection()
             default:
                 break
             }
 
             switch next.location {
-            case .back:
+            case .negative:
                 back.vertices.append(next.vertex)
                 back.isValid = true
-            case .front:
+            case .positive:
                 front.vertices.append(next.vertex)
                 front.isValid = true
             case .neutral:
@@ -395,31 +395,6 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
     /// - Returns: The direction of linerwise closed path on given vertices.
     @inlinable public static func direction(of vertices: Vertex...) -> Direction { direction(of: vertices) }
-
-
-
-    // MARK: .Location
-
-    private enum Location {
-
-        case front, back, neutral
-
-
-        // MARK: Fabrics
-
-        static func of(_ c: Math.Vector2, relativeTo line: KvLine2<Math>) -> Self {
-            var isNegative = false
-
-            if KvIsPositive(line.signedOffset(to: c), alsoIsNegative: &isNegative) {
-                return .front
-            }
-            else if isNegative {
-                return .back
-            }
-            else { return .neutral }
-        }
-
-    }
 
 }
 

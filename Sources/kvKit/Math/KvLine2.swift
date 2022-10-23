@@ -149,21 +149,9 @@ public struct KvLine2<Math : KvMathScope> {
     public func offset(to x: Coordinate) -> Scalar { abs(at(x)) }
 
 
-    /// - Returns: A boolean value indicating whether given coordinate is in the positive half-space.
-    ///
-    /// - SeeAlso: ``isInNegative``
-    /// - Note: A half-space is positive or negative whether the normal vector is in it.
-    @inlinable public func isInPositive(_ x: Coordinate) -> Bool { KvIsPositive(at(x), eps: epsArg(at: x).tolerance) }
-
-
-    /// - Returns: A boolean value indicating whether given coordinate is in the negative half-space.
-    ///
-    /// - SeeAlso: ``isInPositive``
-    /// - Note: A half-space is positive or negative whether the normal vector is in it.
-    @inlinable public func isInNegative(_ x: Coordinate) -> Bool { KvIsNegative(at(x), eps: epsArg(at: x).tolerance) }
-
-
     /// - Returns: A boolean value indicating whether the receiver contains given coordinate.
+    ///
+    /// - SeeAlso: ``isInPositive``, ``isInNegative``, ``location(of:)``
     @inlinable public func contains(_ x: Coordinate) -> Bool { KvIsZero(at(x), eps: epsArg(at: x).tolerance) }
 
     /// - Returns: A boolean value indicating whether the receiver contains coordinates of given ray.
@@ -172,6 +160,37 @@ public struct KvLine2<Math : KvMathScope> {
     {
         contains(ray.origin.coordinate)
         && KvIsZero(Math.dot(normal, ray.direction), eps: Math.epsArg(normal).dot(Math.epsArg(ray.direction)).tolerance)
+    }
+
+
+    /// - Returns: A boolean value indicating whether given coordinate is in the positive half-space.
+    ///
+    /// - SeeAlso: ``isInNegative``, ``contains(_:)``, ``location(of:)``
+    /// - Note: A half-space is positive or negative whether the normal vector is in it.
+    @inlinable public func isInPositive(_ x: Coordinate) -> Bool { KvIsPositive(at(x), eps: epsArg(at: x).tolerance) }
+
+
+    /// - Returns: A boolean value indicating whether given coordinate is in the negative half-space.
+    ///
+    /// - SeeAlso: ``isInPositive``, ``contains(_:)``, ``location(of:)``
+    /// - Note: A half-space is positive or negative whether the normal vector is in it.
+    @inlinable public func isInNegative(_ x: Coordinate) -> Bool { KvIsNegative(at(x), eps: epsArg(at: x).tolerance) }
+
+
+    /// - Returns: A location of given coordinate relative to the receiver.
+    ///
+    /// - Note: It's effective when at least two cases should be hanled. It only one case is handled then consider ``isInPositive``, ``isInNegative`` or ``contains(_:)``.
+    @inlinable
+    public func location(of x: Coordinate) -> Location {
+        var isNegative = false
+
+        if KvIsPositive(at(x), eps: epsArg(at: x).tolerance, alsoIsNegative: &isNegative) {
+            return .positive
+        }
+        else if isNegative {
+            return .negative
+        }
+        else { return .neutral }
     }
 
 
@@ -317,6 +336,21 @@ public struct KvLine2<Math : KvMathScope> {
     @inlinable
     public static func *(lhs: AffineTransform, rhs: Self) -> Self {
         Self(normal: lhs.act(normal: rhs.normal), at: lhs.act(coordinate: rhs.anyCoordinate))
+    }
+
+
+
+    // MARK: .Location
+
+    public enum Location {
+
+        /// Denotes part of the coordinate space where value of the line canonical equation is numerically positive.
+        case positive
+        /// Denotes part of the coordinate space where value of the line canonical equation is numerically negative.
+        case negative
+        /// Denotes part of the coordinate space where value of the line canonical equation is numerically zero. In other words coordinates of the line.
+        case neutral
+
     }
 
 }

@@ -322,8 +322,8 @@ class KvConvex2Tests : XCTestCase {
                 ccwFlags.indices.forEach { ccwFlags[$0].toggle() }
             }
 
-            input = Self.cyclicShiftedLeft(input, for: shift)
-            ccwFlags = Self.cyclicShiftedLeft(ccwFlags, for: shift)
+            input = Self.cyclicShiftedLeft(input, by: shift)
+            ccwFlags = Self.cyclicShiftedLeft(ccwFlags, by: shift)
 
             let output = Self.verticesAndSteps(from: input)
             ccwFlags = Self.cyclicShiftedLeft(ccwFlags)
@@ -571,7 +571,7 @@ class KvConvex2Tests : XCTestCase {
 
             [ 0 as Int, 1, 2, 3 ].forEach { shift in
                 [ false, true ].forEach { isReversed in
-                    let input2 = Self.cyclicShiftedLeft(input, for: shift)
+                    let input2 = Self.cyclicShiftedLeft(input, by: shift)
                     guard let rhs = (!isReversed
                                      ? TestCase<Math>.Convex(input2)
                                      : TestCase<Math>.Convex(input2.reversed(), reverse: true))
@@ -622,51 +622,71 @@ class KvConvex2Tests : XCTestCase {
 
 
         func RunNoSplit<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool) {
-            let input = Self.quadVertices(Math.self, isCCW: isCCW)
+            do {
+                let input = Self.quadVertices(Math.self, isCCW: isCCW)
 
-            guard let quad = TestCase<Math>.Convex(input)
-            else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad") }
+                guard let quad = TestCase<Math>.Convex(input)
+                else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") quad") }
 
-            typealias Line = KvLine2<Math>
+                typealias Line = KvLine2<Math>
 
-            let testCases: [(line: Line, isFront: Bool)] = [
-                ([  0,  1,  1 ] as Line,  true), ([  0,  1, -2 ] as Line, false),
-                ([  0, -1, -1 ] as Line, false), ([  0, -1,  2 ] as Line,  true),
-                ([  1,  0,  1 ] as Line,  true), ([  1,  0, -2 ] as Line, false),
-                ([ -1,  0, -1 ] as Line, false), ([ -1,  0,  2 ] as Line,  true),
+                let testCases: [(line: Line, isFront: Bool)] = [
+                    ([  0,  1,  1 ] as Line,  true), ([  0,  1, -2 ] as Line, false),
+                    ([  0, -1, -1 ] as Line, false), ([  0, -1,  2 ] as Line,  true),
+                    ([  1,  0,  1 ] as Line,  true), ([  1,  0, -2 ] as Line, false),
+                    ([ -1,  0, -1 ] as Line, false), ([ -1,  0,  2 ] as Line,  true),
 
-                ([  0,  1, 0 ] as Line,  true), ([  0,  1, -1 ] as Line, false),
-                ([  0, -1, 0 ] as Line, false), ([  0, -1,  1 ] as Line,  true),
-                ([  1,  0, 0 ] as Line,  true), ([  1,  0, -1 ] as Line, false),
-                ([ -1,  0, 0 ] as Line, false), ([ -1,  0,  1 ] as Line,  true),
+                    ([  0,  1, 0 ] as Line,  true), ([  0,  1, -1 ] as Line, false),
+                    ([  0, -1, 0 ] as Line, false), ([  0, -1,  1 ] as Line,  true),
+                    ([  1,  0, 0 ] as Line,  true), ([  1,  0, -1 ] as Line, false),
+                    ([ -1,  0, 0 ] as Line, false), ([ -1,  0,  1 ] as Line,  true),
 
-                (Line(in: Math.normalize([  1, -1 ]), at: [ 0, 0 ]),  true),
-                (Line(in: Math.normalize([ -1,  1 ]), at: [ 0, 0 ]), false),
-                (Line(in: Math.normalize([  1, -1 ]), at: [ 1, 1 ]), false),
-                (Line(in: Math.normalize([ -1,  1 ]), at: [ 1, 1 ]),  true),
+                    (Line(in: Math.normalize([  1, -1 ]), at: [ 0, 0 ]),  true),
+                    (Line(in: Math.normalize([ -1,  1 ]), at: [ 0, 0 ]), false),
+                    (Line(in: Math.normalize([  1, -1 ]), at: [ 1, 1 ]), false),
+                    (Line(in: Math.normalize([ -1,  1 ]), at: [ 1, 1 ]),  true),
 
-                (Line(in: Math.normalize([  1,  1 ]), at: [ 1, 0 ]),  true),
-                (Line(in: Math.normalize([ -1, -1 ]), at: [ 1, 0 ]), false),
-                (Line(in: Math.normalize([  1,  1 ]), at: [ 0, 1 ]), false),
-                (Line(in: Math.normalize([ -1, -1 ]), at: [ 0, 1 ]),  true),
-            ]
+                    (Line(in: Math.normalize([  1,  1 ]), at: [ 1, 0 ]),  true),
+                    (Line(in: Math.normalize([ -1, -1 ]), at: [ 1, 0 ]), false),
+                    (Line(in: Math.normalize([  1,  1 ]), at: [ 0, 1 ]), false),
+                    (Line(in: Math.normalize([ -1, -1 ]), at: [ 0, 1 ]),  true),
+                ]
 
-            testCases.forEach { (line, isFront) in
-                let result = quad.split(by: line)
+                testCases.forEach { (line, isFront) in
+                    let result = quad.split(by: line)
 
-                switch isFront {
-                case true:
-                    XCTAssert(result.front != nil)
-                    XCTAssert(result.back == nil)
+                    switch isFront {
+                    case true:
+                        XCTAssert(result.front != nil)
+                        XCTAssert(result.back == nil)
 
-                    XCTAssert(result.front?.isCCW == isCCW)
+                        XCTAssert(result.front?.isCCW == isCCW)
 
-                case false:
-                    XCTAssert(result.front == nil)
-                    XCTAssert(result.back != nil)
+                    case false:
+                        XCTAssert(result.front == nil)
+                        XCTAssert(result.back != nil)
 
-                    XCTAssert(result.back?.isCCW == isCCW)
+                        XCTAssert(result.back?.isCCW == isCCW)
+                    }
                 }
+            }
+            // A real case where line contains one of vertices and all oter vertices are in positive half space.
+            do {
+                let input: [KvPosition2<Math, Void>] = [
+                    [ 1.7260361466778038, 0.0019036039196929089 ],
+                    [ 1.7832921656971408, 1.6724486737107114 ],
+                    [ 0.0, 0.0 ],
+                    [ 0.6859084618411143, -1.655929511123291 ],
+                ]
+                let line: KvLine2<Math> = [ 0.6054502632390406, 0.7958831438997667, 0.902642926609616 ]
+
+                guard let convex = KvConvex2(input, reverse: !isCCW)
+                else { return XCTFail("Failed to build a \(isCCW ? "CCW" : "CW") convex polygon") }
+
+                let result = convex.split(by: line)
+
+                KvAssertEqual(result.front, convex)
+                XCTAssertNil(result.back)
             }
         }
 
@@ -730,7 +750,7 @@ class KvConvex2Tests : XCTestCase {
 
 
     private static func verticesAndSteps<Vertices, Math>(from input: Vertices) -> [VertexAndStep<Math>]
-    where Math : KvMathScope, Vertices : Sequence, Vertices.Element == Vertex<Math>
+    where Math : KvMathScope, Vertices : Collection, Vertices.Element == Vertex<Math>
     {
         let cooedinates = cyclicShiftedLeft(input)
 
@@ -740,40 +760,7 @@ class KvConvex2Tests : XCTestCase {
 
 
     /// - Returns: Copy of given sequence where first element is moved to the end. E.g. [ 1, 2 , 3, ...] -> [ 2, 3, ..., 1 ].
-    private static func cyclicShiftedLeft<S : Sequence>(_ sequence: S) -> [S.Element] {
-        var iterator = sequence.makeIterator()
-
-        guard let first = iterator.next() else { return .init() }
-
-        var result = Array(IteratorSequence(iterator))
-
-        result.append(first)
-
-        return result
-    }
-
-
-    /// - Returns: Copy of given sequence where last element is moved to the start. E.g. [ 1, 2 , 3, ..., n] -> [ n, 1, 2, 3, ... ].
-    private static func cyclicShiftedRight<S : Sequence>(_ sequence: S) -> [S.Element] {
-        var iterator = sequence.makeIterator()
-
-        guard var prev = iterator.next() else { return .init() }
-
-        var result: [S.Element] = .init()
-
-        while let next = iterator.next() {
-            result.append(prev)
-            prev = next
-        }
-
-        result.insert(prev, at: 0)
-
-        return result
-    }
-
-
-    /// - Returns: Copy of given sequence where first element is moved to the end. E.g. [ 1, 2 , 3, ...] -> [ 2, 3, ..., 1 ].
-    private static func cyclicShiftedLeft<C : Collection>(_ collection: C, for shift: Int = 1) -> [C.Element] {
+    private static func cyclicShiftedLeft<C : Collection>(_ collection: C, by shift: Int = 1) -> [C.Element] {
         return Array(
             [ collection.suffix(collection.count - shift),
               collection.prefix(shift), ]
@@ -783,7 +770,7 @@ class KvConvex2Tests : XCTestCase {
 
 
     /// - Returns: Copy of given sequence where last element is moved to the start. E.g. [ 1, 2 , 3, ..., n] -> [ n, 1, 2, 3, ... ].
-    private static func cyclicShiftedRight<C : Collection>(_ collection: C, for shift: Int = 1) -> [C.Element] {
+    private static func cyclicShiftedRight<C : Collection>(_ collection: C, by shift: Int = 1) -> [C.Element] {
         return Array(
             [ collection.suffix(shift),
               collection.prefix(collection.count - shift), ]
