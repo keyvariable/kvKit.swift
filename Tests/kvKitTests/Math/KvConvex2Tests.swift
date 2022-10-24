@@ -721,20 +721,20 @@ class KvConvex2Tests : XCTestCase {
         // MARK: Operations
 
         func polygonElement(_ direction: Convex.LocalDirection) -> PolygonElement {
-            .init(vertex: vertex, step: step, direction: direction)
+            .init(vertex: vertex, step: .init(step), direction: direction)
         }
 
         func polygonElement(isCCW: Bool) -> PolygonElement {
-            .init(vertex: vertex, step: step, direction: isCCW ? .ccw : .cw)
+            .init(vertex: vertex, step: .init(step), direction: isCCW ? .ccw : .cw)
         }
 
 
         func convexElement(_ direction: Convex.Direction) -> ConvexElement {
-            .init(vertex: vertex, step: step, direction: direction)
+            .init(vertex: vertex, step: .init(step), direction: direction)
         }
 
         func convexElement(isCCW: Bool) -> ConvexElement {
-            .init(vertex: vertex, step: step, direction: isCCW ? .ccw : .cw)
+            .init(vertex: vertex, step: .init(step), direction: isCCW ? .ccw : .cw)
         }
 
     }

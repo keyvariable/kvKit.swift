@@ -38,6 +38,7 @@ public struct KvNumericTolerance<T : FloatingPoint> {
     public let value: T
 
 
+    /// Memberwise initializer.
     @usableFromInline
     internal init(value: T) {
         Swift.assert(value >= 0, "Invalid argument: tolerance value (\(value)) must be positive")
@@ -61,7 +62,7 @@ public struct KvNumericTolerance<T : FloatingPoint> {
 // MARK: .KvNumericToleranceMagnitude
 
 /// A lightweight container for magnitude of numerical comparison tolerance.
-public struct KvNumericToleranceArgument<T : FloatingPoint> {
+public struct KvNumericToleranceArgument<T : FloatingPoint> : Hashable {
 
     public typealias Tolerance = KvNumericTolerance<T>
 
@@ -104,6 +105,9 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> {
         self.value = Swift.max(Swift.max(v1, v2), Swift.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = 0 }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: T) { self.init(value: abs(arg)) }
 
@@ -115,6 +119,11 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: T, _ a2: T, _ a3: T, _ a4: T) { self.init(values: abs(a1), abs(a2), abs(a3), abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -129,7 +138,7 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> {
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(values: lhs.value, rhs.value, lhs.value * rhs.value) }
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable

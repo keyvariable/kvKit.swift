@@ -123,7 +123,7 @@ public struct KvBConvex2<Math : KvMathScope> {
 
 
             func AppendLine(from element: Convex.VertexIteratorElement) {
-                lines.append(Line(in: directionFactor * element.step, at: element.vertex.coordinate))
+                lines.append(Line(in: directionFactor * element.step.vector, at: element.vertex.coordinate))
             }
 
 

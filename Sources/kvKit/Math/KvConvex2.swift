@@ -155,8 +155,12 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
         let c0 = _vertices[0].coordinate
         let c1 = _vertices[1].coordinate
+        let c2 = _vertices[2].coordinate
 
-        return KvIsPositive(Math.cross(c1 - c0, _vertices[2].coordinate - c1).z)
+        let epsArg1 = Math.epsArg(c1)
+        let epsArg = (epsArg1 - Math.epsArg(c0)).cross(Math.epsArg(c2) - epsArg1)
+
+        return KvIsPositive(Math.cross(c1 - c0, c2 - c1).z, eps: epsArg.tolerance)
     }
 
 
@@ -494,17 +498,58 @@ extension KvConvex2 {
         /// Coordinate of vertex.
         public var vertex: Vertex
         /// Offset from the receiver's *coordinate* to the next coordinate.
-        public var step: Vector
+        public var step: Step
         /// Direction of subpath until the coordinate.
         public var direction: Direction
 
 
-        // MARK: Operations
+        // MARK: Fabrics
 
         static func from(_ source: PolygonVertexIteratorElement, direction: Direction) -> Self {
             Self(vertex: source.vertex,
                  step: source.step,
                  direction: direction)
+        }
+
+
+        // MARK: .Step
+
+        public struct Step : KvNumericallyEquatable, Hashable {
+
+            public let vector: Vector
+            public let epsArg: Math.EpsArg2
+
+
+            /// Memberwise initializer
+            @inlinable
+            public init(_ vector: Vector, epsArg: Math.EpsArg2) {
+                self.vector = vector
+                self.epsArg = epsArg
+            }
+
+            /// Initializes the step with default tolerance argument.
+            @inlinable public init(_ vector: Vector) { self.init(vector, epsArg: Math.epsArg(vector)) }
+
+
+            // MARK: Auxiliaries
+
+            @inlinable public static var zero: Self { Self(.zero, epsArg: .zero) }
+
+
+            // MARK: Operators
+
+            @inlinable public static prefix func -(rhs: Self) -> Self { Self(-rhs.vector, epsArg: rhs.epsArg) }
+
+            @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(lhs.vector + rhs.vector, epsArg: lhs.epsArg + rhs.epsArg) }
+
+
+            // MARK: : KvNumericallyEquatable
+
+            @inlinable
+            public func isEqual(to rhs: Self) -> Bool {
+                Math.isEqual(vector, rhs.vector, eps: (epsArg - rhs.epsArg).tolerance)
+            }
+
         }
 
     }
@@ -514,10 +559,13 @@ extension KvConvex2 {
 
     struct PolygonVertexIteratorElement {
 
+        typealias Step = VertexIteratorElement.Step
+
+
         /// Coordinate of vertex.
         var vertex: Vertex
         /// Offset from the receiver's *coordinate* to the next coordinate.
-        var step: Vector
+        var step: Step
         /// Direction at the coordinate and it's neighbours.
         var direction: KvConvex2.LocalDirection
 
@@ -640,8 +688,36 @@ extension KvConvex2 {
             }
 
 
+            private typealias Step = PolygonVertexIteratorElement.Step
+
+
             /// A FSM state as a block.
             private var nextBlock: FSM.Block
+
+
+            // MARK: .VertexContainer
+
+            private struct VertexContainer {
+
+                let vertex: Vertices.Element
+                let epsArg: Math.EpsArg2
+
+
+                /// Memberwise initializer
+                init(_ vertex: Vertices.Element, epsArg: Math.EpsArg2) {
+                    self.vertex = vertex
+                    self.epsArg = epsArg
+                }
+
+
+                init(_ vertex: Vertices.Element) { self.init(vertex, epsArg: Math.epsArg(vertex.coordinate)) }
+
+
+                // MARK: Operators
+
+                static func -(lhs: Self, rhs: Self) -> Step { Step(lhs.vertex.coordinate - rhs.vertex.coordinate, epsArg: lhs.epsArg - rhs.epsArg) }
+
+            }
 
 
             // MARK: .LocalDirection
@@ -663,25 +739,24 @@ extension KvConvex2 {
                 /// - Parameter s2: Vector from second to third vertex.
                 ///
                 /// An instance is initialized with the direction of three vertices.
-                public init(steps s1: Vector, _ s2: Vector) {
+                public init(steps s1: Step, _ s2: Step) {
                     var isNegative = false
 
-                    if KvIsPositive(Math.cross(s1, s2).z, alsoIsNegative: &isNegative) {
+                    if KvIsPositive(Math.cross(s1.vector, s2.vector).z, eps: s1.epsArg.cross(s2.epsArg).tolerance, alsoIsNegative: &isNegative) {
                         self = .ccw
                     }
                     else if isNegative {
                         self = .cw
                     }
-                    else {
-                        self = KvIsNotNegative(Math.dot(s1, s2)) ? .frontOrUndefined : .backward
-                    }
+                    else { self = (KvIsNotNegative(Math.dot(s1.vector, s2.vector), eps: s1.epsArg.dot(s2.epsArg).tolerance)
+                                   ? .frontOrUndefined : .backward) }
                 }
 
 
                 /// An instance is initialized with the direction of three vertices.
                 @inlinable
-                public init(vertices v1: Vertex, _ v2: Vertex, _ v3: Vertex) {
-                    self.init(steps: v2.coordinate - v1.coordinate, v3.coordinate - v2.coordinate)
+                public init(vertices v1: VertexContainer, _ v2: VertexContainer, _ v3: VertexContainer) {
+                    self.init(steps: v2 - v1, v3 - v2)
                 }
 
             }
@@ -717,99 +792,99 @@ extension KvConvex2 {
                     let fsm = FSM(vertices)
 
                     return { _self in
-                        guard let start = fsm.iterator.next() else {
+                        guard let start = fsm.nextVertex() else {
                             _self.nextBlock = endStateBlock()
                             return nil
                         }
 
-                        guard var p1 = fsm.iterator.next() else {
+                        guard var p1 = fsm.nextVertex() else {
                             _self.nextBlock = endStateBlock()
-                            return .init(vertex: start, step: .zero, direction: .degenerate)
+                            return .init(vertex: start.vertex, step: .zero, direction: .degenerate)
                         }
 
-                        var s1 = p1.coordinate - start.coordinate
+                        var s1 = p1 - start
 
                         // Enumerating vertices until first non-degenerate case.
-                        while let p2 = fsm.iterator.next() {
-                            let s2 = p2.coordinate - p1.coordinate
+                        while let p2 = fsm.nextVertex() {
+                            let s2 = p2 - p1
 
                             switch LocalDirection(steps: s1, s2) {
                             case .ccw:
                                 _self.nextBlock = regularStateBlock(
                                     fsm, start, s1,
-                                    Element(vertex: p1, step: s2, direction: .ccw),
+                                    Element(vertex: p1.vertex, step: s2, direction: .ccw),
                                     p2)
                                 return _self.nextBlock(&_self)
 
                             case .cw:
                                 _self.nextBlock = regularStateBlock(
                                     fsm, start, s1,
-                                    Element(vertex: p1, step: s2, direction: .cw),
+                                    Element(vertex: p1.vertex, step: s2, direction: .cw),
                                     p2)
                                 return _self.nextBlock(&_self)
 
                             case .frontOrUndefined:
-                                s1 += s2
+                                s1 = s1 + s2
                                 p1 = p2
 
                             case .backward:
                                 _self.nextBlock = endStateBlock()
-                                return Element(vertex: p1, step: s2, direction: .degenerate)
+                                return Element(vertex: p1.vertex, step: s2, direction: .degenerate)
                             }
                         }
 
                         // Two point case of all-front case.
                         _self.nextBlock = endStateBlock()
-                        return Element(vertex: p1, step: -s1, direction: .degenerate)
+                        return Element(vertex: p1.vertex, step: -s1, direction: .degenerate)
                     }
                 }
 
 
                 /// - Parameter element: Pending element to retrun.
-                private static func regularStateBlock(_ fsm: FSM, _ first: Vertices.Element, _ firstStep: Vector, _ element: Element, _ p2: Vertices.Element) -> Block {
+                private static func regularStateBlock(_ fsm: FSM, _ first: VertexContainer, _ firstStep: Step, _ element: Element, _ p2: VertexContainer) -> Block {
                     var element = element
                     var p2 = p2
 
                     return { _self in
-                        while let p3 = fsm.iterator.next() {
-                            let s3 = p3.coordinate - p2.coordinate
+                        while let p3 = fsm.nextVertex() {
+                            let s3 = p3 - p2
 
                             defer { p2 = p3 }
 
                             switch LocalDirection(steps: element.step, s3) {
                             case .ccw:
-                                defer { element = Element(vertex: p2, step: s3, direction: .ccw) }
+                                defer { element = Element(vertex: p2.vertex, step: s3, direction: .ccw) }
                                 return element
                             case .cw:
-                                defer { element = Element(vertex: p2, step: s3, direction: .cw) }
+                                defer { element = Element(vertex: p2.vertex, step: s3, direction: .cw) }
                                 return element
                             case .frontOrUndefined:
-                                element.step += s3
+                                element.step = element.step + s3
                             case .backward:
-                                _self.nextBlock = pendingVertexStateBlock(Element(vertex: p2, step: s3, direction: .degenerate))
+                                _self.nextBlock = pendingVertexStateBlock(Element(vertex: p2.vertex, step: s3, direction: .degenerate))
                                 return element
                             }
                         }
 
                         // Closing the path
                         do {
-                            let s0 = first.coordinate - p2.coordinate
+                            let s0 = first - p2
 
                             switch LocalDirection(steps: element.step, s0) {
                             case .ccw:
-                                _self.nextBlock = lastElementStateBlock(Element(vertex: p2, step: s0, direction: .ccw), first, s0, firstStep)
+                                _self.nextBlock = lastElementStateBlock(Element(vertex: p2.vertex, step: s0, direction: .ccw), first, s0, firstStep)
 
                             case .cw:
-                                _self.nextBlock = lastElementStateBlock(Element(vertex: p2, step: s0, direction: .cw), first, s0, firstStep)
+                                _self.nextBlock = lastElementStateBlock(Element(vertex: p2.vertex, step: s0, direction: .cw), first, s0, firstStep)
 
                             case .frontOrUndefined:
                                 // *P2* point is ignored in this case.
-                                element.step += s0
+                                element.step = element.step + s0
                                 _self.nextBlock = lastElementStateBlock(element, first, element.step, firstStep)
                                 return _self.nextBlock(&_self)
 
                             case .backward:
-                                _self.nextBlock = pendingVertexStateBlock(Element(vertex: p2, step: s0, direction: .degenerate))
+                                _self.nextBlock = pendingVertexStateBlock(Element(vertex: p2.vertex, step: s0, direction: .degenerate))
                             }
 
                             return element
@@ -819,24 +894,24 @@ extension KvConvex2 {
 
 
                 /// Given element will be posted once, then the end state is entered.
-                private static func lastElementStateBlock(_ element: Element, _ p1: Vertices.Element, _ s1: Vector, _ s2: Vector) -> Block {
+                private static func lastElementStateBlock(_ element: Element, _ p1: VertexContainer, _ s1: Step, _ s2: Step) -> Block {
                     var element = element
 
                     return { _self in
                         switch LocalDirection(steps: s1, s2) {
                         case .ccw:
-                            _self.nextBlock = pendingVertexStateBlock(Element(vertex: p1, step: s2, direction: .ccw))
+                            _self.nextBlock = pendingVertexStateBlock(Element(vertex: p1.vertex, step: s2, direction: .ccw))
 
                         case .cw:
-                            _self.nextBlock = pendingVertexStateBlock(Element(vertex: p1, step: s2, direction: .cw))
+                            _self.nextBlock = pendingVertexStateBlock(Element(vertex: p1.vertex, step: s2, direction: .cw))
 
                         case .frontOrUndefined:
                             // *Start* point is ignored in this case.
-                            element.step += s2
+                            element.step = element.step + s2
                             _self.nextBlock = endStateBlock()
 
                         case .backward:
-                            _self.nextBlock = pendingVertexStateBlock(Element(vertex: p1, step: s2, direction: .degenerate))
+                            _self.nextBlock = pendingVertexStateBlock(Element(vertex: p1.vertex, step: s2, direction: .degenerate))
                         }
 
                         return element
@@ -858,6 +933,11 @@ extension KvConvex2 {
                         nil
                     }
                 }
+
+
+                // MARK: Operations
+
+                private func nextVertex() -> VertexContainer? { iterator.next().map(VertexContainer.init(_:)) }
 
             }
 
@@ -947,7 +1027,7 @@ extension KvConvex2.VertexIteratorElement : KvNumericallyEquatable {
     public func isEqual(to rhs: Self) -> Bool {
         direction == rhs.direction
         && KvConvex2.Math.isEqual(vertex.coordinate, rhs.vertex.coordinate)
-        && KvConvex2.Math.isEqual(step, rhs.step)
+        && step.isEqual(to: rhs.step)
     }
 
 }
@@ -967,7 +1047,7 @@ extension KvConvex2.PolygonVertexIteratorElement : KvNumericallyEquatable {
     public func isEqual(to rhs: Self) -> Bool {
         direction == rhs.direction
         && KvConvex2.Math.isEqual(vertex.coordinate, rhs.vertex.coordinate)
-        && KvConvex2.Math.isEqual(step, rhs.step)
+        && step.isEqual(to: rhs.step)
     }
 
 }

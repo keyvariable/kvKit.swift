@@ -2114,7 +2114,7 @@ public struct KvMathDoubleScope : KvMathScope {
 // MARK: - .KvNumericalToleranceVectorArgument2
 
 /// Vector tolerance argument.
-public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
+public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable {
 
     public typealias Tolerance = Math.Eps
 
@@ -2159,6 +2159,9 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = .zero }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: Vector) { self.init(value: Math.abs(arg)) }
 
@@ -2170,6 +2173,11 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -2185,11 +2193,8 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
     /// - Returns: A tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
-    @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
-    }
+    /// - Returns: A tolerance of a memberwise product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable
@@ -2217,7 +2222,7 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> {
 // MARK: - .KvNumericalToleranceVectorArgument3
 
 /// Vector tolerance argument.
-public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
+public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable {
 
     public typealias Tolerance = Math.Eps
 
@@ -2262,6 +2267,9 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = .zero }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: Vector) { self.init(value: Math.abs(arg)) }
 
@@ -2273,6 +2281,11 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -2288,11 +2301,8 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
     /// - Returns: A tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
-    @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
-    }
+    /// - Returns: A tolerance of a memberwise product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable
@@ -2323,7 +2333,7 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> {
 // MARK: - .KvNumericalToleranceVectorArgument4
 
 /// Vector tolerance argument.
-public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> {
+public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> : Hashable {
 
     public typealias Tolerance = Math.Eps
 
@@ -2368,6 +2378,9 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> {
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = .zero }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: Vector) { self.init(value: Math.abs(arg)) }
 
@@ -2379,6 +2392,11 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: Vector, _ a2: Vector, _ a3: Vector, _ a4: Vector) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -2394,11 +2412,8 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> {
     /// - Returns: A tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
-    @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
-    }
+    /// - Returns: A tolerance of a memberwise product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
     /// - Returns: A tolerance of a devesion.
     @inlinable
@@ -2465,6 +2480,9 @@ public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = .zero }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: Matrix) { self.init(value: Math.abs(arg)) }
 
@@ -2476,6 +2494,11 @@ public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix, _ a4: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -2492,10 +2515,7 @@ public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
-    @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
-    }
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
 }
 
@@ -2549,6 +2569,9 @@ public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = .zero }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: Matrix) { self.init(value: Math.abs(arg)) }
 
@@ -2560,6 +2583,11 @@ public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix, _ a4: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -2576,10 +2604,7 @@ public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
-    @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
-    }
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
 }
 
@@ -2633,6 +2658,9 @@ public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
 
+    /// Zero argument initializer.
+    @inlinable public init() { value = .zero }
+
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: Matrix) { self.init(value: Math.abs(arg)) }
 
@@ -2644,6 +2672,11 @@ public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
 
     /// Initializes tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: Matrix, _ a2: Matrix, _ a3: Matrix, _ a4: Matrix) { self.init(values: Math.abs(a1), Math.abs(a2), Math.abs(a3), Math.abs(a4)) }
+
+
+    // MARK: Auxiliaries
+
+    @inlinable public static var zero: Self { Self() }
 
 
     // MARK: Operations
@@ -2660,9 +2693,6 @@ public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a product.
-    @inlinable
-    public static func *(lhs: Self, rhs: Self) -> Self {
-        Self(values: lhs.value, rhs.value, lhs.value * rhs.value)
-    }
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
 }
