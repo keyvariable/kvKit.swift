@@ -305,7 +305,8 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
     /// - Returns: Front and back parts of the receiver relative to given line.
     public func split(by line: KvLine2<Math>) -> SplitResult {
         typealias Element = (vertex: Vertex, location: KvLine2<Math>.Location)
-        typealias Accumulator = (vertices: [Vertex], isValid: Bool)
+        /// `matchesSource` indicates whether all the receivers vertices are collected.
+        typealias Accumulator = (vertices: [Vertex], matchesSource: Bool)
 
         var iterator = _vertices
             .lazy.map { ($0, line.location(of: $0.coordinate)) }
@@ -313,8 +314,8 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
         guard let first = iterator.next() else { return (nil, nil) }
 
-        var front: Accumulator = (.init(), false)
-        var back: Accumulator = (.init(), false)
+        var front: Accumulator = (.init(), true)
+        var back: Accumulator = (.init(), true)
 
 
         func Process(prev: Element, next: Element) {
@@ -324,7 +325,10 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
                 let v = ray.intersection(with: line)!
 
                 front.vertices.append(v)
+                front.matchesSource = false
+
                 back.vertices.append(v)
+                back.matchesSource = false
             }
 
 
@@ -338,13 +342,26 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
             switch next.location {
             case .negative:
                 back.vertices.append(next.vertex)
-                back.isValid = true
+                front.matchesSource = false
             case .positive:
                 front.vertices.append(next.vertex)
-                front.isValid = true
+                back.matchesSource = false
             case .neutral:
                 front.vertices.append(next.vertex)
                 back.vertices.append(next.vertex)
+            }
+        }
+
+
+        func MakeConvex(with accumulator: Accumulator) -> Self? {
+            switch accumulator.matchesSource {
+            case true:
+                return self
+
+            case false:
+                guard accumulator.vertices.count >= 3 else { return nil }
+
+                return Self(accumulator.vertices, reverse: isReversed)
             }
         }
 
@@ -359,8 +376,7 @@ public struct KvConvex2<Vertex : KvVertex2Protocol> {
 
         Process(prev: prev, next: first)
 
-        return (front: front.isValid ? Self(front.vertices, reverse: isReversed) : nil,
-                back: back.isValid ? Self(back.vertices, reverse: isReversed) : nil)
+        return (front: MakeConvex(with: front), back: MakeConvex(with: back))
     }
 
 
