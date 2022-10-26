@@ -2200,7 +2200,7 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable
     @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
 
     /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(value: 2 * Math.dot(value, rhs.value)) }
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2 * Math.dot(value, rhs.value)) }
 
     /// - Returns: A tolerance of a cross product Z coordinate.
     @inlinable
@@ -2301,7 +2301,7 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
     @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
 
     /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(value: 2 * Math.dot(value, rhs.value)) }
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2 * Math.dot(value, rhs.value)) }
 
     /// - Returns: A tolerance of a cross product.
     @inlinable
@@ -2405,7 +2405,7 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> : Hashable
     @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
 
     /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(value: 2 * Math.dot(value, rhs.value)) }
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2 * Math.dot(value, rhs.value)) }
 
 }
 
