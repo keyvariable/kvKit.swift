@@ -2205,7 +2205,7 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable
     /// - Returns: A tolerance of a cross product Z coordinate.
     @inlinable
     public func cross(_ rhs: Self) -> Math.EpsArg {
-        Math.EpsArg(values: 2 * value.sum() * rhs.value.sum(), 2 * (value.x * rhs.value.y + value.y * rhs.value.x))
+        Math.EpsArg(values: value.max(), rhs.value.max(), 2 * (value.x * rhs.value.y + value.y * rhs.value.x))
     }
 
 }
@@ -2306,7 +2306,7 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
     /// - Returns: A tolerance of a cross product.
     @inlinable
     public func cross(_ rhs: Self) -> Self {
-        Self(values: 2 * value * rhs.value,
+        Self(values: value, rhs.value,
              2 * Vector(x: value.y * rhs.value.z + value.z * rhs.value.y,
                         y: value.z * rhs.value.x + value.x * rhs.value.z,
                         z: value.x * rhs.value.y + value.y * rhs.value.x))
