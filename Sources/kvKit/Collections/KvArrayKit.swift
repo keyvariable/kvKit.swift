@@ -21,15 +21,14 @@
 //  Created by Svyatoslav Popov on 09.10.2022.
 //
 
-public struct KvArrayKit {
-
-    private init() { }
-
-}
-
+/// Collection of auxiliaries for arrays.
+///
+/// See: ``KvCollectionKit``, ``KvSequenceKit``
+public struct KvArrayKit { private init() { } }
 
 
-// MARK: Mutation
+
+// MARK: - Mutation
 
 extension KvArrayKit {
 

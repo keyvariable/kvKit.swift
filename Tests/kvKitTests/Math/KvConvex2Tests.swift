@@ -318,15 +318,15 @@ class KvConvex2Tests : XCTestCase {
             var ccwFlags = [ true, true, false, true ]
 
             if !isCCW {
-                input = Self.cyclicShiftedRight(input.reversed())
+                input = Array(KvCollectionKit.cyclicShiftedRight(input.reversed()))
                 ccwFlags.indices.forEach { ccwFlags[$0].toggle() }
             }
 
-            input = Self.cyclicShiftedLeft(input, by: shift)
-            ccwFlags = Self.cyclicShiftedLeft(ccwFlags, by: shift)
+            input = Array(KvCollectionKit.cyclicShiftedLeft(input, by: shift))
+            ccwFlags = Array(KvCollectionKit.cyclicShiftedLeft(ccwFlags, by: shift))
 
             let output = Self.verticesAndSteps(from: input)
-            ccwFlags = Self.cyclicShiftedLeft(ccwFlags)
+            ccwFlags = Array(KvCollectionKit.cyclicShiftedLeft(ccwFlags))
 
             var expectedConvex = zip(output, ccwFlags)
                 .prefix(1 + ccwFlags.firstIndex(where: { $0 != ccwFlags[0] })!)
@@ -420,11 +420,11 @@ class KvConvex2Tests : XCTestCase {
 
         func MakeTestCase<Math : KvMathScope>(_ math: Math.Type, isCCW: Bool, count: Int) -> TestCase<Math> {
             let quad = Self.quadVertices(Math.self, isCCW: isCCW)
-            let input = Self.cyclicShiftedLeft(
+            let input = Array(KvCollectionKit.cyclicShiftedLeft(
                 quad
                     .map { repeatElement($0, count: count) }
                     .joined()
-            )
+            ))
 
             let output = Self.verticesAndSteps(from: quad)
 
@@ -455,7 +455,7 @@ class KvConvex2Tests : XCTestCase {
             let offsets = stride(from: 0.0, to: 1.0 - 1e-4, by: step)
                 .lazy.map { Math.Scalar($0) }
 
-            let input = zip(quad, Self.cyclicShiftedLeft(quad))
+            let input = zip(quad, KvCollectionKit.cyclicShiftedLeft(quad))
                 .map { (start, end) in offsets.map { start.mixed(end, t: $0) } }
                 .joined()
 
@@ -509,7 +509,7 @@ class KvConvex2Tests : XCTestCase {
 
             var output = Self.verticesAndSteps(from: quad)
             if startCount > 0 {
-                output = Self.cyclicShiftedRight(output)
+                output = Array(KvCollectionKit.cyclicShiftedRight(output))
             }
 
             return TestCase(input: Array(input),
@@ -571,7 +571,7 @@ class KvConvex2Tests : XCTestCase {
 
             [ 0 as Int, 1, 2, 3 ].forEach { shift in
                 [ false, true ].forEach { isReversed in
-                    let input2 = Self.cyclicShiftedLeft(input, by: shift)
+                    let input2 = KvCollectionKit.cyclicShiftedLeft(input, by: shift)
                     guard let rhs = (!isReversed
                                      ? TestCase<Math>.Convex(input2)
                                      : TestCase<Math>.Convex(input2.reversed(), reverse: true))
@@ -752,30 +752,8 @@ class KvConvex2Tests : XCTestCase {
     private static func verticesAndSteps<Vertices, Math>(from input: Vertices) -> [VertexAndStep<Math>]
     where Math : KvMathScope, Vertices : Collection, Vertices.Element == Vertex<Math>
     {
-        let cooedinates = cyclicShiftedLeft(input)
-
-        return zip(cooedinates, cyclicShiftedLeft(cooedinates))
+        zip(KvCollectionKit.cyclicShiftedLeft(input, by: 1), KvCollectionKit.cyclicShiftedLeft(input, by: 2))
             .map { .init(vertex: $0.0, step: $0.1.coordinate - $0.0.coordinate) }
-    }
-
-
-    /// - Returns: Copy of given sequence where first element is moved to the end. E.g. [ 1, 2 , 3, ...] -> [ 2, 3, ..., 1 ].
-    private static func cyclicShiftedLeft<C : Collection>(_ collection: C, by shift: Int = 1) -> [C.Element] {
-        return Array(
-            [ collection.suffix(collection.count - shift),
-              collection.prefix(shift), ]
-                .joined()
-        )
-    }
-
-
-    /// - Returns: Copy of given sequence where last element is moved to the start. E.g. [ 1, 2 , 3, ..., n] -> [ n, 1, 2, 3, ... ].
-    private static func cyclicShiftedRight<C : Collection>(_ collection: C, by shift: Int = 1) -> [C.Element] {
-        return Array(
-            [ collection.suffix(shift),
-              collection.prefix(collection.count - shift), ]
-                .joined()
-        )
     }
 
 }
