@@ -66,8 +66,6 @@ public struct KvTransform2<Math : KvMathScope> {
         self.matrix = matrix
         self.inverseMatrix = inverseMatrix
         self.normalMatrix = normalMatrix
-
-        assert()
     }
 
 
@@ -362,14 +360,6 @@ public struct KvTransform2<Math : KvMathScope> {
     @inlinable public func act(vector v: Vector) -> Vector { KvTransform2.act(matrix, vector: v) }
 
 
-    /// Performs various validations and calls *assertionFailure()* if the receiver is not valid.
-    @inlinable
-    public func assert() {
-        Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity, eps: (Math.epsArg(matrix) * Math.epsArg(inverseMatrix)).tolerance), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(KvAffineTransform2<Math>.normalizedScaleComponent(for: Math.make2(inverseMatrix).transpose), normalMatrix), "The matrix and the normal matrix don't match")
-    }
-
-
     /// Fast implementation for product of the tranlation and the receiver.
     @inlinable
     public func translated(by translation: Vector) -> Self {
@@ -464,8 +454,6 @@ public struct KvAffineTransform2<Math : KvMathScope> {
         self.matrix = matrix
         self.inverseMatrix = inverseMatrix
         self.normalMatrix = normalMatrix
-
-        assert()
     }
 
 
@@ -604,14 +592,6 @@ public struct KvAffineTransform2<Math : KvMathScope> {
     @inlinable public func act(vector v: Vector) -> Vector { matrix * v }
 
 
-    /// Performs various validations and calls *assertionFailure()* if the receiver is not valid.
-    @inlinable
-    public func assert() {
-        Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity, eps: (Math.epsArg(matrix) * Math.epsArg(inverseMatrix)).tolerance), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(KvAffineTransform2.normalizedScaleComponent(for: inverseMatrix.transpose), normalMatrix), "The matrix and the normal matrix don't match")
-    }
-
-
 
     // MARK: Operators
 
@@ -691,8 +671,6 @@ public struct KvTransform3<Math : KvMathScope> {
         self.matrix = matrix
         self.inverseMatrix = inverseMatrix
         self.normalMatrix = normalMatrix
-
-        assert()
     }
 
 
@@ -1038,14 +1016,6 @@ public struct KvTransform3<Math : KvMathScope> {
     @inlinable public func act(vector v: Vector) -> Vector { KvTransform3.act(matrix, vector: v) }
 
 
-    /// Performs various validations and calls *assertionFailure()* if the receiver is not valid.
-    @inlinable
-    public func assert() {
-        Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity, eps: (Math.epsArg(matrix) * Math.epsArg(inverseMatrix)).tolerance), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(KvAffineTransform3<Math>.normalizedScaleComponent(for: Math.make3(inverseMatrix).transpose), normalMatrix), "The matrix and the normal matrix don't match")
-    }
-
-
     /// Fast implementation for product of the tranlation and the receiver.
     @inlinable
     public func translated(by translation: Vector) -> Self {
@@ -1140,8 +1110,6 @@ public struct KvAffineTransform3<Math : KvMathScope> {
         self.matrix = matrix
         self.inverseMatrix = inverseMatrix
         self.normalMatrix = normalMatrix
-
-        assert()
     }
 
 
@@ -1285,14 +1253,6 @@ public struct KvAffineTransform3<Math : KvMathScope> {
 
     /// - Returns: Transformed vector.
     @inlinable public func act(vector v: Vector) -> Vector { matrix * v }
-
-
-    /// Performs various validations and calls *assertionFailure()* if the receiver is not valid.
-    @inlinable
-    public func assert() {
-        Swift.assert(Math.isEqual(matrix * inverseMatrix, .identity, eps: (Math.epsArg(matrix) * Math.epsArg(inverseMatrix)).tolerance), "The matrix and it's inverse don't match")
-        Swift.assert(Math.isEqual(KvAffineTransform3.normalizedScaleComponent(for: inverseMatrix.transpose), normalMatrix), "The matrix and the normal matrix don't match")
-    }
 
 
 
