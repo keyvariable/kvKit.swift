@@ -543,8 +543,11 @@ extension KvConvex2 {
                 self.epsArg = epsArg
             }
 
-            /// Initializes the step with default tolerance argument.
+            /// Initializes step with default tolerance argument.
             @inlinable public init(_ vector: Vector) { self.init(vector, epsArg: Math.epsArg(vector)) }
+
+            /// Initializes step with a vector between two given coordinates and default tolerance argument.
+            @inlinable public init(from: Vector, to: Vector) { self.init(to - from, epsArg: Math.epsArg(to) - Math.epsArg(from)) }
 
 
             // MARK: Auxiliaries

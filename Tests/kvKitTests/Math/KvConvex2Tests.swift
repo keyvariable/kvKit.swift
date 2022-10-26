@@ -291,7 +291,7 @@ class KvConvex2Tests : XCTestCase {
             )
         }
 
-        try [ 3, 4, 256 ].forEach { count in
+        try [ 3, 4, 16 ].forEach { count in
             try [ true, false ].forEach { isCCW in
                 let prefix = "Valid polygon (\(count), \(isCCW ? "CCW" : "CW"))"
 
@@ -715,26 +715,26 @@ class KvConvex2Tests : XCTestCase {
 
 
         var vertex: Convex.Vertex
-        var step: Convex.Vector
+        var step: Convex.PolygonVertexIteratorElement.Step
 
 
         // MARK: Operations
 
         func polygonElement(_ direction: Convex.LocalDirection) -> PolygonElement {
-            .init(vertex: vertex, step: .init(step), direction: direction)
+            .init(vertex: vertex, step: step, direction: direction)
         }
 
         func polygonElement(isCCW: Bool) -> PolygonElement {
-            .init(vertex: vertex, step: .init(step), direction: isCCW ? .ccw : .cw)
+            .init(vertex: vertex, step: step, direction: isCCW ? .ccw : .cw)
         }
 
 
         func convexElement(_ direction: Convex.Direction) -> ConvexElement {
-            .init(vertex: vertex, step: .init(step), direction: direction)
+            .init(vertex: vertex, step: step, direction: direction)
         }
 
         func convexElement(isCCW: Bool) -> ConvexElement {
-            .init(vertex: vertex, step: .init(step), direction: isCCW ? .ccw : .cw)
+            .init(vertex: vertex, step: step, direction: isCCW ? .ccw : .cw)
         }
 
     }
@@ -753,7 +753,7 @@ class KvConvex2Tests : XCTestCase {
     where Math : KvMathScope, Vertices : Collection, Vertices.Element == Vertex<Math>
     {
         zip(KvCollectionKit.cyclicShiftedLeft(input, by: 1), KvCollectionKit.cyclicShiftedLeft(input, by: 2))
-            .map { .init(vertex: $0.0, step: $0.1.coordinate - $0.0.coordinate) }
+            .map { .init(vertex: $0.0, step: .init(from: $0.0.coordinate, to: $0.1.coordinate)) }
     }
 
 }

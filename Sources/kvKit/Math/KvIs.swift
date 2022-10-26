@@ -140,12 +140,8 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> : Hashable {
     /// - Returns: A tolerance of a product.
     @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
-    /// - Returns: A tolerance of a devesion.
-    @inlinable
-    public static func /(lhs: Self, rhs: Self) -> Self {
-        let inv_rhs = 1 / rhs.value
-        return Self(values: lhs.value, inv_rhs, lhs.value * inv_rhs)
-    }
+    /// - Returns: A tolerance of a division.
+    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
 
 }
 
