@@ -28,7 +28,7 @@ import SceneKit
 
 
 /// Collection of auxiliaries for SceneKit.
-struct KvSceneKit { private init() { } }
+public struct KvSceneKit { private init() { } }
 
 
 
