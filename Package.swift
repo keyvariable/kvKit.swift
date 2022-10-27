@@ -21,12 +21,17 @@ import PackageDescription
 
 let package = Package(
     name: "kvKit-Swift",
+
     platforms: [ .iOS(.v11), ],
+
     products: [
         .library(name: "kvKit", targets: [ "kvKit" ]),
+        .library(name: "kvTestKit", targets: [ "kvTestKit" ]),
     ],
+
     targets: [
         .target(name: "kvKit", dependencies: [ ]),
-        .testTarget(name: "kvKitTests", dependencies: [ "kvKit" ]),
+        .target(name: "kvTestKit", dependencies: [ "kvKit" ]),
+        .testTarget(name: "kvKitTests", dependencies: [ "kvKit", "kvTestKit" ]),
     ]
 )

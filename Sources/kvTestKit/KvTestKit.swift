@@ -16,7 +16,7 @@
 //===----------------------------------------------------------------------===//
 //
 //  KvTestKit.swift
-//  kvKit
+//  kvTestKit
 //
 //  Created by Svyatoslav Popov on 28.09.2022.
 //

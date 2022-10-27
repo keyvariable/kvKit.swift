@@ -24,6 +24,7 @@
 import XCTest
 
 @testable import kvKit
+@testable import kvTestKit
 
 import simd
 
