@@ -25,12 +25,13 @@ import simd
 
 
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 public typealias KvMathScalar4 = BinaryFloatingPoint & SIMDScalar
 
 
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+// TODO: Delete when KvMath4 will become degenerate.
+@available(*, deprecated, message: "Migrate to KvMathScope")
 public enum KvMath4<Scalar> where Scalar : KvMathScalar4 {
 
     public typealias Scalar = Scalar
@@ -44,10 +45,10 @@ public enum KvMath4<Scalar> where Scalar : KvMathScalar4 {
 
 // MARK: Matrix Fabrics <Float>
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath4 where Scalar == Float {
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float2x2) -> simd_float4x4 {
         .init({ Vector($0.x, $0.y, 0, 0) }(base[0]),
               { Vector($0.x, $0.y, 0, 0) }(base[1]),
@@ -55,17 +56,17 @@ extension KvMath4 where Scalar == Float {
               [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float2x3) -> simd_float4x4 {
         .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float2x4) -> simd_float4x4 {
         .init(base[0], base[1], [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float3x2) -> simd_float4x4 {
         .init({ Vector($0.x, $0.y, 0, 0) }(base[0]),
               { Vector($0.x, $0.y, 0, 0) }(base[1]),
@@ -73,17 +74,17 @@ extension KvMath4 where Scalar == Float {
               [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float3x3) -> simd_float4x4 {
         .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 0), [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float3x4) -> simd_float4x4 {
         .init(base[0], base[1], base[2], [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float4x2) -> simd_float4x4 {
         .init({ Vector($0.x, $0.y, 0, 0) }(base[0]),
               { Vector($0.x, $0.y, 0, 0) }(base[1]),
@@ -91,7 +92,7 @@ extension KvMath4 where Scalar == Float {
               { Vector($0.x, $0.y, 0, 1) }(base[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float4x3) -> simd_float4x4 {
         .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 0), Vector(base[3], 1))
     }
@@ -102,10 +103,10 @@ extension KvMath4 where Scalar == Float {
 
 // MARK: Matrix Fabrics <Float>
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath4 where Scalar == Double {
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double2x2) -> simd_double4x4 {
         .init({ Vector($0.x, $0.y, 0, 0) }(base[0]),
               { Vector($0.x, $0.y, 0, 0) }(base[1]),
@@ -113,17 +114,17 @@ extension KvMath4 where Scalar == Double {
               [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double2x3) -> simd_double4x4 {
         .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double2x4) -> simd_double4x4 {
         .init(base[0], base[1], [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double3x2) -> simd_double4x4 {
         .init({ Vector($0.x, $0.y, 0, 0) }(base[0]),
               { Vector($0.x, $0.y, 0, 0) }(base[1]),
@@ -131,17 +132,17 @@ extension KvMath4 where Scalar == Double {
               [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double3x3) -> simd_double4x4 {
         .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 0), [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double3x4) -> simd_double4x4 {
         .init(base[0], base[1], base[2], [ 0, 0, 0, 1 ])
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double4x2) -> simd_double4x4 {
         .init({ Vector($0.x, $0.y, 0, 0) }(base[0]),
               { Vector($0.x, $0.y, 0, 0) }(base[1]),
@@ -149,7 +150,7 @@ extension KvMath4 where Scalar == Double {
               { Vector($0.x, $0.y, 0, 1) }(base[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double4x3) -> simd_double4x4 {
         .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 0), Vector(base[3], 1))
     }
@@ -160,20 +161,20 @@ extension KvMath4 where Scalar == Double {
 
 // MARK: Martix Operations <Float>
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath4 where Scalar == Float {
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func abs(_ matrix: simd_float4x4) -> simd_float4x4 {
         .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]), simd.abs(matrix[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func min(_ matrix: simd_float4x4) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min(), matrix[3].min())
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func max(_ matrix: simd_float4x4) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max(), matrix[3].max())
     }
@@ -184,20 +185,20 @@ extension KvMath4 where Scalar == Float {
 
 // MARK: Martix Operations <Double>
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath4 where Scalar == Double {
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func abs(_ matrix: simd_double4x4) -> simd_double4x4 {
         .init(simd.abs(matrix[0]), simd.abs(matrix[1]), simd.abs(matrix[2]), simd.abs(matrix[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func min(_ matrix: simd_double4x4) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min(), matrix[2].min(), matrix[3].min())
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func max(_ matrix: simd_double4x4) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max(), matrix[2].max(), matrix[3].max())
     }
@@ -208,10 +209,10 @@ extension KvMath4 where Scalar == Double {
 
 // MARK: Transformations <Float>
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath4 where Scalar == Float {
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated)
     @inlinable public static func scale(from matrix: simd_float4x4) -> Vector {
         .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]),
@@ -219,7 +220,7 @@ extension KvMath4 where Scalar == Float {
               w: simd.length(matrix[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated)
     @inlinable public static func scale²(from matrix: simd_float4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]),
@@ -227,7 +228,7 @@ extension KvMath4 where Scalar == Float {
               w: simd.length_squared(matrix[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated)
     @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_float4x4) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
@@ -243,10 +244,10 @@ extension KvMath4 where Scalar == Float {
 
 // MARK: Transformations <Double>
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath4 where Scalar == Double {
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated)
     @inlinable public static func scale(from matrix: simd_double4x4) -> Vector {
         .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]),
@@ -254,7 +255,7 @@ extension KvMath4 where Scalar == Double {
               w: simd.length(matrix[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated)
     @inlinable public static func scale²(from matrix: simd_double4x4) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]),
@@ -262,7 +263,7 @@ extension KvMath4 where Scalar == Double {
               w: simd.length_squared(matrix[3]))
     }
 
-    @available(*, deprecated, message: "Refactor related code to KvMathScope")
+    @available(*, deprecated)
     @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_double4x4) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
@@ -278,22 +279,22 @@ extension KvMath4 where Scalar == Double {
 
 // MARK: - Matrix Comparisons
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 @inlinable public func KvIs(_ lhs: simd_float4x4, equalTo rhs: simd_float4x4) -> Bool {
     KvIsZero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 @inlinable public func KvIs(_ lhs: simd_double4x4, equalTo rhs: simd_double4x4) -> Bool {
     KvIsZero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 @inlinable public func KvIs(_ lhs: simd_float4x4, inequalTo rhs: simd_float4x4) -> Bool {
     KvIsNonzero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }
 
-@available(*, deprecated, message: "Refactor related code to KvMathScope")
+@available(*, deprecated, message: "Migrate to KvMathScope")
 @inlinable public func KvIs(_ lhs: simd_double4x4, inequalTo rhs: simd_double4x4) -> Bool {
     KvIsNonzero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }

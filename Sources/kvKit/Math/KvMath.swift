@@ -220,9 +220,11 @@ public func sqr<T>(_ x: T) -> T where T : Numeric {
 // MARK: - Legacy
 
 // TODO: Delete when KvMath will become degenerate.
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 public enum KvMath<Scalar> { }
 
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Numeric {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -231,6 +233,7 @@ extension KvMath where Scalar : Numeric {
 }
 
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -242,6 +245,7 @@ extension KvMath where Scalar : Comparable {
 }
 
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : SignedNumeric & Comparable {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -250,6 +254,7 @@ extension KvMath where Scalar : SignedNumeric & Comparable {
 }
 
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : BinaryInteger {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -258,6 +263,7 @@ extension KvMath where Scalar : BinaryInteger {
 }
 
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : BinaryFloatingPoint {
 
     @available(*, deprecated, message: "Use KvMathScalar.mix(_:_:t:)")
@@ -273,6 +279,7 @@ extension KvMath where Scalar : BinaryFloatingPoint {
 }
 
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : FixedWidthInteger {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -284,6 +291,7 @@ extension KvMath where Scalar : FixedWidthInteger {
 
 // MARK: Minimum for Optionals
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -320,6 +328,7 @@ extension KvMath where Scalar : Comparable {
 
 // MARK: Maximum for Optionals
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
     @available(*, deprecated, message: "Use global analog instead")
@@ -358,6 +367,7 @@ extension KvMath where Scalar : Comparable {
 
 // MARK: - Legacy: Comparable
 
+@available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
     @available(*, deprecated, message: "Use global analog instead")
