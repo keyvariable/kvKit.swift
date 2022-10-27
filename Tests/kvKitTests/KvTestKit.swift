@@ -26,7 +26,8 @@ import XCTest
 
 
 /// Invokes ``XCTFail``() when *result* and *expectation* are not both `nil` or *isEqual*(*result*, *expectation*) doesn't return *true*.
-func KvAssertEqual<R, E>(_ result: R?, _ expectation: E?, by isEqual: (R, E) -> Bool, _ message: @autoclosure () -> String = "") {
+@inlinable
+public func KvAssertEqual<R, E>(_ result: R?, _ expectation: E?, by isEqual: (R, E) -> Bool, _ message: @autoclosure () -> String = "") {
     switch (result, expectation) {
     case (.none, .none):
         break   // OK
