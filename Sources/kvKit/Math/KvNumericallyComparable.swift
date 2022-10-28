@@ -31,7 +31,7 @@ public protocol KvNumericallyComparable : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver is equal to *rhs* taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIs(_:equalTo:alsoIsGreaterThan:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:equalTo:alsoIsGreaterThan:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isEqual(to rhs: Self, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool
 
@@ -40,13 +40,13 @@ public protocol KvNumericallyComparable : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver is inequal to *rhs* taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIs(_:inequalTo:alsoIsGreaterThan:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:inequalTo:alsoIsGreaterThan:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isInequal(to rhs: Self, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is greater than *rhs* taking into account the computational error.
     ///
-    /// - Note: See `KvIs(_:greaterThan:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:greaterThan:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isGreater(than rhs: Self) -> Bool
 
@@ -55,13 +55,13 @@ public protocol KvNumericallyComparable : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver is greater than *rhs* taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIs(_:greaterThan:alsoIsLessThan:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:greaterThan:alsoIsLessThan:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isGreater(than rhs: Self, alsoIsLessThan lessFlag: inout Bool) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is less than *rhs* taking into account the computational error.
     ///
-    /// - Note: See `KvIs(_:lessThan:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:lessThan:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isLess(than rhs: Self) -> Bool
 
@@ -70,19 +70,19 @@ public protocol KvNumericallyComparable : KvNumericallyEquatable {
     /// - Returns: A boolean value indicating whether the receiver is less than *rhs* taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIs(_:lessThan:alsoIsGreaterThan:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:lessThan:alsoIsGreaterThan:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isLess(than rhs: Self, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is greater than or equal to *rhs* taking into account the computational error.
     ///
-    /// - Note: See `KvIs(_:greaterThanOrEqualTo:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:greaterThanOrEqualTo:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isGreaterOrEqual(to rhs: Self) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is less than or equal to *rhs* taking into account the computational error.
     ///
-    /// - Note: See `KvIs(_:lessThanOrEqualTo:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIs(_:lessThanOrEqualTo:)` methods for standard floating point types.
     /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isLessOrEqual(than rhs: Self) -> Bool
 
@@ -112,7 +112,7 @@ public protocol KvNumericallyZeroComparable : KvNumericallyZeroEquatable {
     /// - Returns: A boolean value indicating whether the receiver is equal to zero taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIsZero(_:alsoIsPositive:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsZero(_:alsoIsPositive:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isZero(alsoIsPositive positiveFlag: inout Bool) -> Bool
 
@@ -121,13 +121,13 @@ public protocol KvNumericallyZeroComparable : KvNumericallyZeroEquatable {
     /// - Returns: A boolean value indicating whether the receiver is not equal to zero taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIsNonzero(_:alsoIsPositive:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsNonzero(_:alsoIsPositive:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isNonzero(alsoIsPositive positiveFlag: inout Bool) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is positive taking into account the computational error.
     ///
-    /// - Note: See `KvIsPositive(_:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsPositive(_:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isPositive() -> Bool
 
@@ -136,13 +136,13 @@ public protocol KvNumericallyZeroComparable : KvNumericallyZeroEquatable {
     /// - Returns: A boolean value indicating whether the receiver is positive taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIsPositive(_:alsoIsNegative:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsPositive(_:alsoIsNegative:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isPositive(alsoIsNegative negativeFlag: inout Bool) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is negative taking into account the computational error.
     ///
-    /// - Note: See `KvIsNegative(_:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsNegative(_:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isNegative() -> Bool
 
@@ -151,19 +151,19 @@ public protocol KvNumericallyZeroComparable : KvNumericallyZeroEquatable {
     /// - Returns: A boolean value indicating whether the receiver is negative taking into account the computational error.
     ///
     /// - Note: It's expected to be faster to check the flag than to compare the same values twice.
-    /// - Note: See `KvIsNegative(_:alsoIsPositive:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsNegative(_:alsoIsPositive:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isNegative(alsoIsPositive positiveFlag: inout Bool) -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is not positive taking into account the computational error.
     ///
-    /// - Note: See `KvIsNotPositive(_:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsNotPositive(_:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isNotPositive() -> Bool
 
     /// - Returns: A boolean value indicating whether the receiver is not negative taking into account the computational error.
     ///
-    /// - Note: See `KvIsNotNegative(_:)` methods for standerd floating point types and some SIMD types.
+    /// - Note: See `KvIsNotNegative(_:)` methods for standard floating point types.
     /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
     func isNotNegative() -> Bool
 
