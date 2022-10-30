@@ -435,6 +435,10 @@ public protocol KvSCNGeometrySourceVertex { }
 /// Prodides a position in 3D coordinate space.
 public protocol KvSCNGeometrySourcePosition3 : KvSCNGeometrySourceVertex {
 
+    var simdPosition: simd_float3 { get }
+
+
+    @available(*, deprecated, message: "Migrate to .simdPosition")
     var position: SCNVector3 { get }
 
 }
@@ -443,13 +447,32 @@ public protocol KvSCNGeometrySourcePosition3 : KvSCNGeometrySourceVertex {
 extension KvSCNGeometrySourcePosition3 {
 
     fileprivate static func builder<Vertex : KvSCNGeometrySourceVertex>(for vertex: Vertex.Type) -> (put: (Vertex) -> Void, build: () -> SCNGeometrySource) {
-        var positions: [SCNVector3] = .init()
+        var data: Data = .init()
+        var count = 0
 
         return (
-            put: { positions.append(($0 as! KvSCNGeometrySourcePosition3).position) },
-            build: { .init(vertices: positions) }
+            put: { vertex in
+                withUnsafeBytes(of: (vertex as! KvSCNGeometrySourcePosition3).simdPosition) {
+                    data.append($0.baseAddress!.assumingMemoryBound(to: UInt8.self), count: $0.count)
+                }
+                count += 1
+            },
+            build: {
+                .init(data: data,
+                      semantic: .vertex,
+                      vectorCount: count,
+                      usesFloatComponents: true,
+                      componentsPerVector: simd_float3.scalarCount,
+                      bytesPerComponent: MemoryLayout<simd_float3.Scalar>.size,
+                      dataOffset: 0,
+                      dataStride: data.count / count)
+            }
         )
     }
+
+
+    @available(*, deprecated, message: "Migrate to .simdPosition")
+    @inlinable public var position: SCNVector3 { .init(simdPosition) }
 
 }
 
@@ -460,6 +483,10 @@ extension KvSCNGeometrySourcePosition3 {
 /// Prodides a normal in 3D coordinate space.
 public protocol KvSCNGeometrySourceNormal3 : KvSCNGeometrySourceVertex {
 
+    var simdNormal: simd_float3 { get }
+
+
+    @available(*, deprecated, message: "Migrate to .simdNormal")
     var normal: SCNVector3 { get }
 
 }
@@ -468,13 +495,32 @@ public protocol KvSCNGeometrySourceNormal3 : KvSCNGeometrySourceVertex {
 extension KvSCNGeometrySourceNormal3 {
 
     fileprivate static func builder<Vertex : KvSCNGeometrySourceVertex>(for vertex: Vertex.Type) -> (put: (Vertex) -> Void, build: () -> SCNGeometrySource) {
-        var normals: [SCNVector3] = .init()
+        var data: Data = .init()
+        var count = 0
 
         return (
-            put: { normals.append(($0 as! KvSCNGeometrySourceNormal3).normal) },
-            build: { .init(normals: normals) }
+            put: { vertex in
+                withUnsafeBytes(of: (vertex as! KvSCNGeometrySourceNormal3).simdNormal) {
+                    data.append($0.baseAddress!.assumingMemoryBound(to: UInt8.self), count: $0.count)
+                }
+                count += 1
+            },
+            build: {
+                .init(data: data,
+                      semantic: .normal,
+                      vectorCount: count,
+                      usesFloatComponents: true,
+                      componentsPerVector: simd_float3.scalarCount,
+                      bytesPerComponent: MemoryLayout<simd_float3.Scalar>.size,
+                      dataOffset: 0,
+                      dataStride: data.count / count)
+            }
         )
     }
+
+
+    @available(*, deprecated, message: "Migrate to .simdNormal")
+    @inlinable public var normal: SCNVector3 { .init(simdNormal) }
 
 }
 
@@ -485,6 +531,10 @@ extension KvSCNGeometrySourceNormal3 {
 /// Provides a 2D texture coordinate in 0 slot.
 public protocol KvSCNGeometrySourceTx0uv : KvSCNGeometrySourceVertex {
 
+    var simdTx0: simd_float2 { get }
+
+
+    @available(*, deprecated, message: "Migrate to .simdTx0")
     var tx0: CGPoint { get }
 
 }
@@ -493,13 +543,32 @@ public protocol KvSCNGeometrySourceTx0uv : KvSCNGeometrySourceVertex {
 extension KvSCNGeometrySourceTx0uv {
 
     fileprivate static func builder<Vertex : KvSCNGeometrySourceVertex>(for vertex: Vertex.Type) -> (put: (Vertex) -> Void, build: () -> SCNGeometrySource) {
-        var tx0: [CGPoint] = .init()
+        var data: Data = .init()
+        var count = 0
 
         return (
-            put: { tx0.append(($0 as! KvSCNGeometrySourceTx0uv).tx0) },
-            build: { .init(textureCoordinates: tx0) }
+            put: { vertex in
+                withUnsafeBytes(of: (vertex as! KvSCNGeometrySourceTx0uv).simdTx0) {
+                    data.append($0.baseAddress!.assumingMemoryBound(to: UInt8.self), count: $0.count)
+                }
+                count += 1
+            },
+            build: {
+                .init(data: data,
+                      semantic: .texcoord,
+                      vectorCount: count,
+                      usesFloatComponents: true,
+                      componentsPerVector: simd_float2.scalarCount,
+                      bytesPerComponent: MemoryLayout<simd_float2.Scalar>.size,
+                      dataOffset: 0,
+                      dataStride: data.count / count)
+            }
         )
     }
+
+
+    @available(*, deprecated, message: "Migrate to .simdTx0")
+    @inlinable public var tx0: CGPoint { .init(x: CGFloat(simdTx0.x), y: CGFloat(simdTx0.y)) }
 
 }
 
