@@ -345,6 +345,14 @@ public protocol KvSimd2 : KvSimdVector {
 }
 
 
+extension KvSimd2 {
+
+    /// Initializes vector from a tuple of scalars.
+    @inlinable public init(_ tuple: (Scalar, Scalar)) { self.init(tuple.0, tuple.1) }
+
+}
+
+
 
 // MARK: - KvSimd2I
 
@@ -424,6 +432,10 @@ extension KvSimd3 {
     {
         self.init(xy.x, xy.y, z)
     }
+
+
+    /// Initializes vector from a tuple of scalars.
+    @inlinable public init(_ tuple: (Scalar, Scalar, Scalar)) { self.init(tuple.0, tuple.1, tuple.2) }
 
 }
 
@@ -531,6 +543,10 @@ extension KvSimd4 {
     {
         self.init(xyz.x, xyz.y, xyz.z, w)
     }
+
+
+    /// Initializes vector from a tuple of scalars.
+    @inlinable public init(_ tuple: (Scalar, Scalar, Scalar, Scalar)) { self.init(tuple.0, tuple.1, tuple.2, tuple.3) }
 
 }
 
