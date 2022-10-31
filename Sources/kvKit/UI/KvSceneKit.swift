@@ -257,6 +257,52 @@ extension KvSceneKit {
 
 extension KvSceneKit {
 
+    /// Invokes *body* with content of given *source* represented as a collection of vectors of given type.
+    @inlinable
+    public static func withVectors<Vector, R>(
+        of vectorType: Vector.Type,
+        in source: SCNGeometrySource,
+        body: (KvCollectionKit.Sparce<Vector>) throws -> R
+    ) rethrows -> R {
+        try source.data.withUnsafeBytes { buffer in
+            try body(KvCollectionKit.Sparce(origin: buffer.baseAddress!.advanced(by: source.dataOffset),
+                                            stride: source.dataStride,
+                                            count: source.vectorCount))
+        }
+    }
+
+
+    /// Invokes *body* with content of given *source* represented as a collection of vectors of 2 Float components.
+    @inlinable
+    public static func withVectors2F<R>(
+        in source: SCNGeometrySource,
+        body: (KvCollectionKit.Sparce<(Float, Float)>) throws -> R
+    ) rethrows -> R {
+        try withVectors(of: (Float, Float).self, in: source, body: body)
+    }
+
+
+    /// Invokes *body* with content of given *source* represented as a collection of vectors of 3 Float components.
+    @inlinable
+    public static func withVectors3F<R>(
+        in source: SCNGeometrySource,
+        body: (KvCollectionKit.Sparce<(Float, Float, Float)>) throws -> R
+    ) rethrows -> R {
+        try withVectors(of: (Float, Float, Float).self, in: source, body: body)
+    }
+
+
+    /// Invokes *body* with content of given *source* represented as a collection of vectors of 4 Float components.
+    @inlinable
+    public static func withVectors4F<R>(
+        in source: SCNGeometrySource,
+        body: (KvCollectionKit.Sparce<(Float, Float, Float, Float)>) throws -> R
+    ) rethrows -> R {
+        try withVectors(of: (Float, Float, Float, Float).self, in: source, body: body)
+    }
+
+
+
     public static func withIterator<R>(for element: SCNGeometryElement, body: (AnyIterator<Int>) -> R) -> R {
 
         func MakeIterator<T : BinaryInteger>(_ buffer: UnsafeRawBufferPointer, elementType: T.Type) -> AnyIterator<Int> {
@@ -305,6 +351,8 @@ extension KvSceneKit {
 
 
 
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated)
     public static func withPositions<R>(in sources: [SCNGeometrySource], body: (UnsafeBufferPointer<Float3>) -> R) -> R {
         assert(MemoryLayout<Float3>.stride == 3 * MemoryLayout<Float>.size)
 
@@ -316,7 +364,8 @@ extension KvSceneKit {
 
         guard positionSource.usesFloatComponents,
               positionSource.componentsPerVector == 3,
-              positionSource.bytesPerComponent == MemoryLayout<Float>.stride
+              positionSource.bytesPerComponent == MemoryLayout<Float>.stride,
+              positionSource.dataStride == 3 * positionSource.bytesPerComponent
         else {
             KvDebug.pause("Unable to enumerate triangles in geometry where type of positions isn't float triplet")
             return ([ ] as [Float3]).withUnsafeBufferPointer(body)
@@ -329,6 +378,8 @@ extension KvSceneKit {
 
 
 
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated)
     @inlinable
     public static func withPositions<R>(in geometry: SCNGeometry, body: (UnsafeBufferPointer<Float3>) -> R) -> R {
         withPositions(in: geometry.sources, body: body)
@@ -336,6 +387,8 @@ extension KvSceneKit {
 
 
 
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated)
     public static func forEachTriangle(sources: [SCNGeometrySource],
                                        elements: [SCNGeometryElement]?,
                                        body: (simd_float3, simd_float3, simd_float3) -> Void)
@@ -387,6 +440,8 @@ extension KvSceneKit {
 
 
 
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated)
     @inlinable
     public static func forEachTriangle(in geometry: SCNGeometry, body: (simd_float3, simd_float3, simd_float3) -> Void) {
         forEachTriangle(sources: geometry.sources, elements: geometry.elements, body: body)
@@ -396,12 +451,15 @@ extension KvSceneKit {
 
     // MARK: .Float3
 
-    /// Container for Float triplet having the stride equal to size.
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated)
+    /// Container for *Float* triplet having the stride equal to size and the same allignment as *Float* type.
     public struct Float3 : Hashable {
 
         public var x, y, z: Float
 
 
+        @inlinable
         public init(x: Float, y: Float, z: Float) {
             self.x = x
             self.y = y
