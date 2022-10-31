@@ -410,37 +410,65 @@ extension KvSceneKit {
     }
 
 
-    /// Invokes body with triangle indices from given combination of geometry sources and elements. Method does nothing when given sources and elements produce no triangles.
+    /// Invokes body with triangle indices from given elements.
+    ///
+    /// - Note: Method does nothing when given elements produce no triangles.
+    ///
+    /// See ``forEachTriangle(sources:body:)``, ``forEachTriangle(in:sources:body:)``, ``forEachTriangle(geometry:body:)``.
     @inlinable
-    public static func forEachTriangle(in sources: [SCNGeometrySource], _ elements: [SCNGeometryElement]?, body: (Int, Int, Int) -> Void) {
-        switch elements {
-        case .some(let elements):
-            elements.forEach { element in
-                forEachTriangle(in: element, body: body)
-            }
+    public static func forEachTriangle<Elements>(in elements: Elements, body: (Int, Int, Int) -> Void)
+    where Elements : Sequence, Elements.Element == SCNGeometryElement {
+        elements.forEach { element in
+            forEachTriangle(in: element, body: body)
+        }
+    }
 
-        case .none:
-            let vertexCount = sources
-                .lazy.map { $0.vectorCount }
-                .min()!
 
-            var iterator = (0 ..< vertexCount).makeIterator()
+    /// Invokes body with triangle indices as given collection of sources is rendered as unindexed.
+    ///
+    /// - Note: Method does nothing when given sources produce no triangles.
+    ///
+    /// See ``forEachTriangle(in:body:)-4ga00``, ``forEachTriangle(in:sources:body:)``, ``forEachTriangle(geometry:body:)``.
+    @inlinable
+    public static func forEachTriangle<Sources>(sources: Sources, body: (Int, Int, Int) -> Void)
+    where Sources : Sequence, Sources.Element == SCNGeometrySource {
+        let vertexCount = sources
+            .lazy.map { $0.vectorCount }
+            .min()!
 
-            while let i₁ = iterator.next(), let i₂ = iterator.next(), let i₃ = iterator.next() {
-                body(i₁, i₂, i₃)
-            }
+        var iterator = (0 ..< vertexCount).makeIterator()
+
+        while let i₁ = iterator.next(), let i₂ = iterator.next(), let i₃ = iterator.next() {
+            body(i₁, i₂, i₃)
+        }
+    }
+
+
+    /// Invokes body with triangle indices from given combination of geometry sources and elements.
+    ///
+    /// - Note: Method does nothing when given sources and elements produce no triangles.
+    /// - Note: If *elements* is *nil* then *sources* are interpretted as unindexed vertices.
+    ///
+    /// See ``forEachTriangle(in:body:)-4ga00``, ``forEachTriangle(sources:body:)``, ``forEachTriangle(geometry:body:)``.
+    @inlinable
+    public static func forEachTriangle<Sources>(in elements: [SCNGeometryElement]?, sources: Sources, body: (Int, Int, Int) -> Void)
+    where Sources : Sequence, Sources.Element == SCNGeometrySource {
+        if let elements = elements, !elements.isEmpty {
+            forEachTriangle(in: elements, body: body)
+        } else {
+            forEachTriangle(sources: sources, body: body)
         }
     }
 
 
     // TODO: Rename to forEachTriangle(in:body:) in 5.0.0
     /// Invokes body with triangle indices from given geometry. Method does nothing when given geometry has no triangles.
+    ///
+    /// See ``forEachTriangle(in:body:)-4ga00``, ``forEachTriangle(sources:body:)``, ``forEachTriangle(in:sources:body:)``.
     @inlinable
     public static func forEachTriangle(geometry: SCNGeometry, body: (Int, Int, Int) -> Void) {
-        forEachTriangle(in: geometry.sources, geometry.elements, body: body)
+        forEachTriangle(in: geometry.elements, sources: geometry.sources, body: body)
     }
-
-
 
 
 
