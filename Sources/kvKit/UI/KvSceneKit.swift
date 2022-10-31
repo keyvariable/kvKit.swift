@@ -350,8 +350,74 @@ extension KvSceneKit {
     }
 
 
+    /// Invokes body with triangle indices defined by given element. Method does nothing when given element doen't produce triangles.
+    @inlinable
+    public static func forEachTriangle(in element: SCNGeometryElement, body: (Int, Int, Int) -> Void) {
+        switch element.primitiveType {
+        case .triangles:
+            withIterator(for: element) { iterator in
+                while let i₁ = iterator.next(), let i₂ = iterator.next(), let i₃ = iterator.next() {
+                    body(i₁, i₂, i₃)
+                }
+            }
 
-    // TODO: Delete in 5.0.0
+        case .triangleStrip:
+            withIterator(for: element) { iterator in
+                guard var i₁ = iterator.next(),
+                      var i₂ = iterator.next()
+                else { return }
+
+                while let i₃ = iterator.next() {
+                    body(i₁, i₂, i₃)
+
+                    i₁ = i₂
+                    i₂ = i₃
+                }
+            }
+
+        case .line, .point, .polygon:
+            break
+        @unknown default:
+            break
+        }
+    }
+
+
+    /// Invokes body with triangle indices from given combination of geometry sources and elements. Method does nothing when given sources and elements produce no triangles.
+    @inlinable
+    public static func forEachTriangle(in sources: [SCNGeometrySource], _ elements: [SCNGeometryElement]?, body: (Int, Int, Int) -> Void) {
+        switch elements {
+        case .some(let elements):
+            elements.forEach { element in
+                forEachTriangle(in: element, body: body)
+            }
+
+        case .none:
+            let vertexCount = sources
+                .lazy.map { $0.vectorCount }
+                .min()!
+
+            var iterator = (0 ..< vertexCount).makeIterator()
+
+            while let i₁ = iterator.next(), let i₂ = iterator.next(), let i₃ = iterator.next() {
+                body(i₁, i₂, i₃)
+            }
+        }
+    }
+
+
+    // TODO: Rename to forEachTriangle(in:body:) in 5.0.0
+    /// Invokes body with triangle indices from given geometry. Method does nothing when given geometry has no triangles.
+    @inlinable
+    public static func forEachTriangle(geometry: SCNGeometry, body: (Int, Int, Int) -> Void) {
+        forEachTriangle(in: geometry.sources, geometry.elements, body: body)
+    }
+
+
+
+
+
+    // TODO: Delete in 4.0.0
     @available(*, deprecated)
     public static func withPositions<R>(in sources: [SCNGeometrySource], body: (UnsafeBufferPointer<Float3>) -> R) -> R {
         assert(MemoryLayout<Float3>.stride == 3 * MemoryLayout<Float>.size)
@@ -378,7 +444,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 5.0.0
+    // TODO: Delete in 4.0.0
     @available(*, deprecated)
     @inlinable
     public static func withPositions<R>(in geometry: SCNGeometry, body: (UnsafeBufferPointer<Float3>) -> R) -> R {
@@ -387,7 +453,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 5.0.0
+    // TODO: Delete in 4.0.0
     @available(*, deprecated)
     public static func forEachTriangle(sources: [SCNGeometrySource],
                                        elements: [SCNGeometryElement]?,
@@ -440,7 +506,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 5.0.0
+    // TODO: Delete in 4.0.0
     @available(*, deprecated)
     @inlinable
     public static func forEachTriangle(in geometry: SCNGeometry, body: (simd_float3, simd_float3, simd_float3) -> Void) {
@@ -451,7 +517,7 @@ extension KvSceneKit {
 
     // MARK: .Float3
 
-    // TODO: Delete in 5.0.0
+    // TODO: Delete in 4.0.0
     @available(*, deprecated)
     /// Container for *Float* triplet having the stride equal to size and the same allignment as *Float* type.
     public struct Float3 : Hashable {
