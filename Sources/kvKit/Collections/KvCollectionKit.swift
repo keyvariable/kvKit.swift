@@ -148,3 +148,150 @@ extension KvCollectionKit {
     }
 
 }
+
+
+
+// MARK: - Sparse Collections
+
+extension KvCollectionKit {
+
+    // MARK: .Sparse
+
+    /// Collection of elements in a buffer having non-zero distance between neighbour elements.
+    public struct Sparce<T> : Collection {
+
+        /// Number of elements in collection.
+        public let count: Int
+
+
+
+        /// Memberwise initializer.
+        ///
+        /// - Parameter stride: Byte distance between pointers to an element and the next one.
+        @inlinable
+        public init(origin: UnsafeRawPointer, stride: Int, count: Int) {
+            assert(stride >= MemoryLayout<T>.stride, "Given stride (\(stride)) is less than element stride (\(MemoryLayout<T>.stride))")
+
+            self.origin = origin
+            self.stride = stride
+            self.count = count
+        }
+
+
+        /// Initializes the receiver on given buffer.
+        ///
+        /// - Parameter stride: Byte distance between pointers to an element and the next one.
+        @inlinable
+        public init(buffer: UnsafeRawBufferPointer, stride: Int) {
+            self.init(origin: buffer.baseAddress!, stride: stride, count: (buffer.count + (stride - MemoryLayout<T>.stride)) / stride)
+        }
+
+
+        /// Initializes the receiver on given buffer applying given offset to base address of the buffer.
+        ///
+        /// - Parameter stride: Byte distance between pointers to an element and the next one.
+        @inlinable
+        public init(buffer: UnsafeRawBufferPointer, stride: Int, offset: Int) {
+            self.init(origin: buffer.baseAddress!.advanced(by: offset),
+                      stride: stride,
+                      count: (buffer.count - offset + (stride - MemoryLayout<T>.stride)) / stride)
+        }
+
+
+
+        /// Pointer to first element.
+        @usableFromInline internal let origin: UnsafeRawPointer
+        /// Byte distance between pointers to an element and the next one.
+        @usableFromInline internal let stride: Int
+
+
+
+        // MARK: : Collection
+
+        public typealias Index = Int
+
+
+        @inlinable public var startIndex: Index { 0 }
+        @inlinable public var endIndex: Index { count }
+
+
+        @inlinable
+        public subscript(position: Int) -> T {
+            origin.load(fromByteOffset: stride * position, as: T.self)
+        }
+
+
+        @inlinable
+        public func makeIterator() -> Iterator {
+            Iterator(pointer: origin, stride: stride, limit: count)
+        }
+
+
+        @inlinable public func index(after i: Index) -> Index { i + 1 }
+
+
+
+
+        // MARK: .Iterator
+
+        /// Iterator of a sparce collection.
+        public struct Iterator : IteratorProtocol {
+
+            /// Memberwise initializer.
+            ///
+            /// - Parameter stride: Byte distance between pointers to an element and the next one.
+            @inlinable
+            public init(pointer: UnsafeRawPointer, stride: Int, limit: Int) {
+                assert(stride >= MemoryLayout<T>.stride, "Given stride (\(stride)) is less than element stride (\(MemoryLayout<T>.stride))")
+
+                self.pointer = pointer
+                self.stride = stride
+                self.limit = limit
+            }
+
+
+            /// Initializes the receiver on given buffer.
+            ///
+            /// - Parameter stride: Byte distance between pointers to an element and the next one.
+            @inlinable
+            public init(buffer: UnsafeRawBufferPointer, stride: Int) {
+                self.init(pointer: buffer.baseAddress!, stride: stride, limit: (buffer.count + (stride - MemoryLayout<T>.stride)) / stride)
+            }
+
+
+            /// Initializes the receiver on given buffer applying given offset to base address of the buffer.
+            ///
+            /// - Parameter stride: Byte distance between pointers to an element and the next one.
+            @inlinable
+            public init(buffer: UnsafeRawBufferPointer, stride: Int, offset: Int) {
+                self.init(pointer: buffer.baseAddress!.advanced(by: offset),
+                          stride: stride,
+                          limit: (buffer.count - offset + (stride - MemoryLayout<T>.stride)) / stride)
+            }
+
+
+            @usableFromInline internal var pointer: UnsafeRawPointer
+
+            @usableFromInline internal var stride: Int
+            @usableFromInline internal var limit: Int
+
+
+            // MARK: : IteratorProtocol
+
+            @inlinable
+            public mutating func next() -> T? {
+                guard limit > 0 else { return nil }
+
+                defer {
+                    pointer = pointer.advanced(by: stride)
+                    limit += 1
+                }
+
+                return pointer.load(as: T.self)
+            }
+
+        }
+
+    }
+
+}
