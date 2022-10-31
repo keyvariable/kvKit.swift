@@ -257,6 +257,27 @@ extension KvSceneKit {
 
 extension KvSceneKit {
 
+    /// - Returns: A boolean value indicating whether given goemtry source contains vectors of *Float* components.
+    ///
+    /// See ``isFloatVectorSource(_:numberOfScalars:)``.
+    @inlinable
+    public static func isFloatVectorSource(_ source: SCNGeometrySource) -> Bool {
+        source.usesFloatComponents
+        && source.bytesPerComponent == MemoryLayout<Float>.stride
+    }
+
+
+    /// - Returns: A boolean value indicating whether given goemtry source contains vectors of *numberOfScalars* *Float* components.
+    ///
+    /// See ``isFloatVectorSource(_:)``.
+    @inlinable
+    public static func isFloatVectorSource(_ source: SCNGeometrySource, numberOfScalars: Int) -> Bool {
+        isFloatVectorSource(source)
+        && source.componentsPerVector == numberOfScalars
+    }
+
+
+
     /// Invokes *body* with content of given *source* represented as a collection of vectors of given type.
     @inlinable
     public static func withVectors<Vector, R>(
@@ -273,6 +294,8 @@ extension KvSceneKit {
 
 
     /// Invokes *body* with content of given *source* represented as a collection of vectors of 2 Float components.
+    ///
+    /// See ``isFloatVectorSource(_:numberOfScalars:)``, ``withVectors3F(in:body:)``, ``withVectors4F(in:body:)``, ``withVectors(of:in:body:)``.
     @inlinable
     public static func withVectors2F<R>(
         in source: SCNGeometrySource,
@@ -283,6 +306,8 @@ extension KvSceneKit {
 
 
     /// Invokes *body* with content of given *source* represented as a collection of vectors of 3 Float components.
+    ///
+    /// See ``isFloatVectorSource(_:numberOfScalars:)``, ``withVectors2F(in:body:)``, ``withVectors4F(in:body:)``, ``withVectors(of:in:body:)``.
     @inlinable
     public static func withVectors3F<R>(
         in source: SCNGeometrySource,
@@ -293,6 +318,8 @@ extension KvSceneKit {
 
 
     /// Invokes *body* with content of given *source* represented as a collection of vectors of 4 Float components.
+    ///
+    /// See ``isFloatVectorSource(_:numberOfScalars:)``, ``withVectors2F(in:body:)``, ``withVectors3F(in:body:)``, ``withVectors(of:in:body:)``.
     @inlinable
     public static func withVectors4F<R>(
         in source: SCNGeometrySource,
