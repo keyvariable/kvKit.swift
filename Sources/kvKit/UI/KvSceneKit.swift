@@ -175,26 +175,28 @@ extension KvSceneKit {
 
 extension KvSceneKit {
 
-    public static func colorComponent<C>(from value: Float) -> C
-    where C : BinaryInteger
-    {
-        C(round(255 * simd_clamp(value, 0, 1)))
+    /// - Returns: Given color component as an unsigned byte integer.
+    @inlinable
+    public static func colorComponent<T : BinaryFloatingPoint>(from value: T) -> UInt8 {
+        UInt8(round(255 * clamp(value, 0, 1)))
     }
 
 
-
-    public static func unicolorTexture(white: Float, alpha: Float = 1, size: Int = 32, isCube: Bool = false) -> MDLTexture {
+    /// - Parameter white: A gray scale value.
+    @inlinable
+    public static func unicolorTexture<T>(white: T, alpha: T = 1, size: Int = 32, isCube: Bool = false) -> MDLTexture
+    where T : BinaryFloatingPoint {
         unicolorTexture(texel: { [ $0, $0, $0, $1 ] }(colorComponent(from: white), colorComponent(from: alpha)),
                         channelCount: 4, channelEncoding: .uint8, size: size, isCube: isCube)
     }
 
 
-
-    public static func unicolorTexture(r: Float, g: Float, b: Float, alpha: Float = 1, size: Int = 32, isCube: Bool = false) -> MDLTexture {
+    @inlinable
+    public static func unicolorTexture<T>(r: T, g: T, b: T, alpha: T = 1, size: Int = 32, isCube: Bool = false) -> MDLTexture
+    where T : BinaryFloatingPoint {
         unicolorTexture(texel: [ colorComponent(from: r), colorComponent(from: g), colorComponent(from: b), colorComponent(from: alpha) ],
                         channelCount: 4, channelEncoding: .uint8, size: size, isCube: isCube)
     }
-
 
 
     public static func unicolorTexture<T>(texel: T, channelCount: Int, channelEncoding: MDLTextureChannelEncoding, size: Int = 32, isCube: Bool = false) -> MDLTexture

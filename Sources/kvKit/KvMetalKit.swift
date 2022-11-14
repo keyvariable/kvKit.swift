@@ -35,6 +35,13 @@ public struct KvMetalKit { private init() { } }
 
 extension KvMetalKit {
 
+    /// - Returns: Given color component as an unsigned byte integer.
+    @inlinable
+    public static func colorComponent<T : BinaryFloatingPoint>(from value: T) -> UInt8 {
+        UInt8(round(255 * clamp(value, 0, 1)))
+    }
+
+
     /// - Returns: A cube texture filled with given *pattern* texel.
     public static func unicolorCubeTexture<Texel>(repeating pattern: Texel, with descriptor: MTLTextureDescriptor, on device: MTLDevice? = nil) throws -> MTLTexture {
         let device = try device ?? {
@@ -47,6 +54,8 @@ extension KvMetalKit {
         }()
 
         guard let texture = device.makeTexture(descriptor: descriptor) else { throw KvError("Failed to create unicolor cube texture with descriptor: \(descriptor)") }
+
+        texture.label = "Unicolor"
 
         let sliceBytes = UnsafeMutableBufferPointer<Texel>.allocate(capacity: descriptor.width * descriptor.height)
         defer { sliceBytes.deallocate() }
@@ -67,12 +76,12 @@ extension KvMetalKit {
     }
 
 
-    /// - Parameter rgba: An RGBA vector to fill resulting texture. Default is black opaque color (`[ 0, 0, 0, 255 ]`).
+    /// - Parameter rgba: An RGBA vector to fill resulting texture.
     ///
     /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given RGBA pattern vector.
     @inlinable
     public static func unicolorCubeTexture(
-        rgba: simd_uchar4 = [ 0, 0, 0, 255 ],
+        rgba: simd_uchar4,
         size: Int = 16,
         usage: MTLTextureUsage = .shaderRead,
         on device: MTLDevice? = nil
@@ -83,6 +92,60 @@ extension KvMetalKit {
         return try unicolorCubeTexture(repeating: rgba, with: descriptor, on: device)
     }
 
+    /// - Parameter rgba: A 32-bit RGBA value (`0xRRGGBBAA`).
+    ///
+    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given pattern value.
+    @inlinable
+    public static func unicolorCubeTexture(
+        rgba: UInt32,
+        size: Int = 16,
+        usage: MTLTextureUsage = .shaderRead,
+        on device: MTLDevice? = nil
+    ) throws -> MTLTexture {
+        try unicolorCubeTexture(rgba: simd_uchar4(numericCast((rgba >> 24) & 0xFF),
+                                                  numericCast((rgba >> 16) & 0xFF),
+                                                  numericCast((rgba >>  8) & 0xFF),
+                                                  numericCast((rgba      ) & 0xFF)),
+                                size: size,
+                                usage: usage,
+                                on: device)
+    }
+
+
+    /// - Parameter white: A gray scale value.
+    ///
+    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given gray scale color and given opacity.
+    @inlinable
+    public static func unicolorCubeTexture<T : BinaryFloatingPoint>(
+        white: T,
+        alpha: T = 1,
+        size: Int = 16,
+        usage: MTLTextureUsage = .shaderRead,
+        on device: MTLDevice? = nil
+    ) throws -> MTLTexture {
+        try unicolorCubeTexture(rgba: simd_uchar4(.init(repeating: colorComponent(from: white)), colorComponent(from: alpha)),
+                                size: size,
+                                usage: usage,
+                                on: device)
+    }
+
+
+    /// - Parameter white: A gray scale value.
+    ///
+    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given gray scale color and given opacity.
+    @inlinable
+    public static func unicolorCubeTexture<T : BinaryFloatingPoint>(
+        r: T, g: T, b: T,
+        alpha: T = 1,
+        size: Int = 16,
+        usage: MTLTextureUsage = .shaderRead,
+        on device: MTLDevice? = nil
+    ) throws -> MTLTexture {
+        try unicolorCubeTexture(rgba: simd_uchar4(colorComponent(from: r), colorComponent(from: g), colorComponent(from: b), colorComponent(from: alpha)),
+                                size: size,
+                                usage: usage,
+                                on: device)
+    }
 
 
     @inlinable
