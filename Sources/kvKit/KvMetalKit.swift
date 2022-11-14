@@ -67,16 +67,18 @@ extension KvMetalKit {
     }
 
 
-    /// - Returns: A cube texture filled with given RGBA pattern vector.
+    /// - Parameter rgba: An RGBA vector to fill resulting texture. Default is black opaque color (`[ 0, 0, 0, 255 ]`).
+    ///
+    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given RGBA pattern vector.
     @inlinable
     public static func unicolorCubeTexture(
         rgba: simd_uchar4 = [ 0, 0, 0, 255 ],
         size: Int = 16,
-        pixelFormat: MTLPixelFormat = .rgba8Unorm,
+        usage: MTLTextureUsage = .shaderRead,
         on device: MTLDevice? = nil
     ) throws -> MTLTexture {
-        let descriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: pixelFormat, size: size, mipmapped: false)
-        descriptor.usage = .shaderRead
+        let descriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .rgba8Unorm, size: size, mipmapped: false)
+        descriptor.usage = usage
 
         return try unicolorCubeTexture(repeating: rgba, with: descriptor, on: device)
     }
