@@ -76,75 +76,19 @@ extension KvMetalKit {
     }
 
 
-    /// - Parameter rgba: An RGBA vector to fill resulting texture.
-    ///
-    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given RGBA pattern vector.
+    /// - Returns: A cube texture filled with given RGBA pattern.
     @inlinable
     public static func unicolorCubeTexture(
-        rgba: simd_uchar4,
+        repeating pattern: RGBA8,
         size: Int = 16,
         usage: MTLTextureUsage = .shaderRead,
         on device: MTLDevice? = nil
     ) throws -> MTLTexture {
         let descriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .rgba8Unorm, size: size, mipmapped: false)
+        descriptor.pixelFormat = pattern.pixelFormat
         descriptor.usage = usage
 
-        return try unicolorCubeTexture(repeating: rgba, with: descriptor, on: device)
-    }
-
-    /// - Parameter rgba: A 32-bit RGBA value (`0xRRGGBBAA`).
-    ///
-    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given pattern value.
-    @inlinable
-    public static func unicolorCubeTexture(
-        rgba: UInt32,
-        size: Int = 16,
-        usage: MTLTextureUsage = .shaderRead,
-        on device: MTLDevice? = nil
-    ) throws -> MTLTexture {
-        try unicolorCubeTexture(rgba: simd_uchar4(numericCast((rgba >> 24) & 0xFF),
-                                                  numericCast((rgba >> 16) & 0xFF),
-                                                  numericCast((rgba >>  8) & 0xFF),
-                                                  numericCast((rgba      ) & 0xFF)),
-                                size: size,
-                                usage: usage,
-                                on: device)
-    }
-
-
-    /// - Parameter white: A gray scale value.
-    ///
-    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given gray scale color and given opacity.
-    @inlinable
-    public static func unicolorCubeTexture<T : BinaryFloatingPoint>(
-        white: T,
-        alpha: T = 1,
-        size: Int = 16,
-        usage: MTLTextureUsage = .shaderRead,
-        on device: MTLDevice? = nil
-    ) throws -> MTLTexture {
-        try unicolorCubeTexture(rgba: simd_uchar4(.init(repeating: colorComponent(from: white)), colorComponent(from: alpha)),
-                                size: size,
-                                usage: usage,
-                                on: device)
-    }
-
-
-    /// - Parameter white: A gray scale value.
-    ///
-    /// - Returns: A cube texture having `.rgba8Unorm` pixel format filled with given gray scale color and given opacity.
-    @inlinable
-    public static func unicolorCubeTexture<T : BinaryFloatingPoint>(
-        r: T, g: T, b: T,
-        alpha: T = 1,
-        size: Int = 16,
-        usage: MTLTextureUsage = .shaderRead,
-        on device: MTLDevice? = nil
-    ) throws -> MTLTexture {
-        try unicolorCubeTexture(rgba: simd_uchar4(colorComponent(from: r), colorComponent(from: g), colorComponent(from: b), colorComponent(from: alpha)),
-                                size: size,
-                                usage: usage,
-                                on: device)
+        return try unicolorCubeTexture(repeating: pattern.texel, with: descriptor, on: device)
     }
 
 
@@ -166,6 +110,63 @@ extension KvMetalKit {
         textures.forEach(blitEncoder.generateMipmaps(for:))
 
         blitEncoder.endEncoding()
+    }
+
+
+
+    // MARK: .RGBA8
+
+    /// Input providing pixel format, color and opacity compnents.
+    public enum RGBA8 {
+
+        /// A gray scale color.
+        case grayScale(Float, alpha: Float = 1, srgb: Bool = false)
+
+        /// A value in standard hex format `0xAARRGGBB`.
+        case hex(UInt32, srgb: Bool = false)
+
+        /// Four normalized color components of *Float* type.
+        case rgba(r: Float, g: Float, b: Float, a: Float = 1, srgb: Bool = false)
+
+        /// A vector where RGBA components are XYZW components of associated vector.
+        case uchar4(simd_uchar4, srgb: Bool = false)
+
+
+        // MARK: Operations
+
+        @inlinable
+        public var texel: simd_uchar4 {
+            switch self {
+            case let .grayScale(white, alpha, srgb: _):
+                return simd_uchar4(.init(repeating: colorComponent(from: white)), colorComponent(from: alpha))
+            case let .hex(hex, srgb: _):
+                return simd_uchar4(numericCast((hex >> 16) & 0xFF),
+                                   numericCast((hex >>  8) & 0xFF),
+                                   numericCast((hex      ) & 0xFF),
+                                   numericCast((hex >> 24) & 0xFF))
+            case let .rgba(r, g, b, a, srgb: _):
+                return simd_uchar4(colorComponent(from: r), colorComponent(from: g), colorComponent(from: b), colorComponent(from: a))
+            case let .uchar4(pattern, srgb: _):
+                return pattern
+            }
+        }
+
+        @inlinable
+        public var isSRGB: Bool {
+            switch self {
+            case let .grayScale(_, _, srgb: isSRGB):
+                return isSRGB
+            case let .hex(_, srgb: isSRGB):
+                return isSRGB
+            case let .rgba(r: _, g: _, b: _, a: _, srgb: isSRGB):
+                return isSRGB
+            case let .uchar4(_, srgb: isSRGB):
+                return isSRGB
+            }
+        }
+
+        @inlinable public var pixelFormat: MTLPixelFormat { isSRGB ? .rgba8Unorm_srgb : .rgba8Unorm }
+
     }
 
 }
