@@ -35,6 +35,7 @@ public struct KvMetalKit { private init() { } }
 
 extension KvMetalKit {
 
+    /// - Returns: A cube texture filled with given *pattern* texel.
     public static func unicolorCubeTexture<Texel>(repeating pattern: Texel, with descriptor: MTLTextureDescriptor, on device: MTLDevice? = nil) throws -> MTLTexture {
         let device = try device ?? {
             switch MTLCreateSystemDefaultDevice() {
@@ -66,9 +67,10 @@ extension KvMetalKit {
     }
 
 
+    /// - Returns: A cube texture filled with given RGBA pattern vector.
     @inlinable
     public static func unicolorCubeTexture(
-        repeating pattern: simd_uchar4 = [ 0, 0, 0, 255 ],
+        rgba: simd_uchar4 = [ 0, 0, 0, 255 ],
         size: Int = 16,
         pixelFormat: MTLPixelFormat = .rgba8Unorm,
         on device: MTLDevice? = nil
@@ -76,7 +78,7 @@ extension KvMetalKit {
         let descriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: pixelFormat, size: size, mipmapped: false)
         descriptor.usage = .shaderRead
 
-        return try unicolorCubeTexture(repeating: pattern, with: descriptor, on: device)
+        return try unicolorCubeTexture(repeating: rgba, with: descriptor, on: device)
     }
 
 
