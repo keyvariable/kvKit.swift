@@ -120,16 +120,16 @@ extension KvMetalKit {
     public enum RGBA8 {
 
         /// A gray scale color.
-        case grayScale(Float, alpha: Float = 1, srgb: Bool = false)
+        case grayScale(white: Float, alpha: Float = 1, srgb: Bool = false)
 
         /// A value in standard hex format `0xAARRGGBB`.
-        case hex(UInt32, srgb: Bool = false)
+        case hex(value: UInt32, srgb: Bool = false)
 
         /// Four normalized color components of *Float* type.
         case rgba(r: Float, g: Float, b: Float, a: Float = 1, srgb: Bool = false)
 
         /// A vector where RGBA components are XYZW components of associated vector.
-        case uchar4(simd_uchar4, srgb: Bool = false)
+        case uchar4(value: simd_uchar4, srgb: Bool = false)
 
 
         // MARK: Operations
@@ -154,13 +154,13 @@ extension KvMetalKit {
         @inlinable
         public var isSRGB: Bool {
             switch self {
-            case let .grayScale(_, _, srgb: isSRGB):
+            case let .grayScale(white: _, alpha: _, srgb: isSRGB):
                 return isSRGB
-            case let .hex(_, srgb: isSRGB):
+            case let .hex(value: _, srgb: isSRGB):
                 return isSRGB
             case let .rgba(r: _, g: _, b: _, a: _, srgb: isSRGB):
                 return isSRGB
-            case let .uchar4(_, srgb: isSRGB):
+            case let .uchar4(value: _, srgb: isSRGB):
                 return isSRGB
             }
         }
