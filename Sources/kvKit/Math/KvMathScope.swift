@@ -213,6 +213,19 @@ public protocol KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrices are equal.
     static func isEqual(_ lhs: Matrix4x4, _ rhs: Matrix4x4, eps: Eps) -> Bool
 
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    static func isNonOrthogonal(_ lhs: Vector2, _ rhs: Vector2) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    static func isNonOrthogonal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    static func isNonOrthogonal(_ lhs: Vector3, _ rhs: Vector3) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    static func isNonOrthogonal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool
+
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
     static func isNonzero(_ v: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
@@ -800,7 +813,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)    // Both vectors are nonzero
         && KvIsZero(cross(lhs, rhs).z, eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
@@ -809,7 +822,7 @@ public struct KvMathFloatScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)    // Both vectors are nonzero
         && isZero(cross(lhs, rhs), eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
@@ -993,6 +1006,43 @@ public struct KvMathFloatScope : KvMathScope {
         && isEqual(lhs[1], rhs[1], eps: eps)
         && isEqual(lhs[2], rhs[2], eps: eps)
         && isEqual(lhs[3], rhs[3], eps: eps)
+    }
+
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
     }
 
 
@@ -1576,7 +1626,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)    // Both vectors are nonzero
         && KvIsZero(cross(lhs, rhs).z, eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
@@ -1585,7 +1635,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Note: *False* is returned if any of given vectors is zero.
     @inlinable
     public static func isCollinear(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
-        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)    // Both vectors are nonzero
         && isZero(cross(lhs, rhs), eps: epsArg(lhs).cross(epsArg(rhs)).tolerance)
     }
 
@@ -1772,6 +1822,43 @@ public struct KvMathDoubleScope : KvMathScope {
     }
 
 
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
+    @inlinable
+    public static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
+    }
+
+
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector2) -> Bool { KvIsNonzero(abs(v).max()) }
 
@@ -1814,7 +1901,7 @@ public struct KvMathDoubleScope : KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
 
-    
+
     /// - Returns: A boolean value indicating whether given vector is of unit length.
     @inlinable public static func isUnit(_ v: Vector2) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
 
