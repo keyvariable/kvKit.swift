@@ -52,8 +52,19 @@ public struct KvNumericTolerance<T : FloatingPoint> {
     }
 
 
+    // MARK: Auxiliaries
+
     /// Default tolerance for comparisons with zero.
     @inlinable public static var zero: Self { Self(value: 16 * T.ulpOfOne) }
+
+    /// Default tolerance for comparisons of squared values with zero.
+    @inlinable public static var zero²: Self { Self(value: 256 * sqr(T.ulpOfOne)) }
+
+
+    // MARK: Operations
+
+    /// Tolerance for comparisons of squared values.
+    @inlinable public var squared: Self { Self(value: Swift.max(sqr(T.ulpOfOne), sqr(value))) }
 
 }
 

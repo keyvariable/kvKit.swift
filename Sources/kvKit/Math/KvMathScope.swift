@@ -242,6 +242,19 @@ public protocol KvMathScope {
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool
 
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    static func isUnit(_ v: Vector2) -> Bool
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    static func isUnit(_ v: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    static func isUnit(_ v: Vector3) -> Bool
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    static func isUnit(_ v: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    static func isUnit(_ v: Vector4) -> Bool
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    static func isUnit(_ v: Vector4, eps: Eps) -> Bool
+
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
     static func isZero(_ v: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero vector.
@@ -1026,6 +1039,25 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
 
 
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector2) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector2, eps: Eps) -> Bool { KvIs(length²(v), equalTo: 1, eps: eps.squared) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector3) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector3, eps: Eps) -> Bool { KvIs(length²(v), equalTo: 1, eps: eps.squared) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector4) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector4, eps: Eps) -> Bool { KvIs(length²(v), equalTo: 1, eps: eps.squared) }
+
+
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
     @inlinable public static func isZero(_ v: Vector2) -> Bool { KvIsZero(abs(v).max()) }
 
@@ -1781,6 +1813,25 @@ public struct KvMathDoubleScope : KvMathScope {
 
     /// - Returns: A boolean value indicating wheather given matrix is numerically inequal to zero matrix.
     @inlinable public static func isNonzero(_ m: Matrix4x4, eps: Eps) -> Bool { KvIsNonzero(max(abs(m)), eps: eps) }
+
+    
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector2) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector2, eps: Eps) -> Bool { KvIs(length²(v), equalTo: 1, eps: eps.squared) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector3) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector3, eps: Eps) -> Bool { KvIs(length²(v), equalTo: 1, eps: eps.squared) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector4) -> Bool { KvIs(length²(v), equalTo: 1, eps: .zero²) }
+
+    /// - Returns: A boolean value indicating whether given vector is of unit length.
+    @inlinable public static func isUnit(_ v: Vector4, eps: Eps) -> Bool { KvIs(length²(v), equalTo: 1, eps: eps.squared) }
 
 
     /// - Returns: A boolean value indicating wheather given vector is numerically equal to zero.
