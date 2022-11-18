@@ -230,7 +230,7 @@ extension KvMetalKit {
         ///
         /// - Note: It's faster than implementations for arbitrary perspective projection matrices.
         @inlinable
-        public func perspectiveProjectionMatrix<Math>(_ math: Math.Type, zNear: Math.Scalar, zFar: Math.Scalar) -> Math.Matrix4x4
+        static public func perspectiveProjectionMatrix<Math>(_ math: Math.Type, zNear: Math.Scalar, zFar: Math.Scalar) -> Math.Matrix4x4
         where Math : KvMathScope {
             typealias Column = Math.Matrix4x4.Column
 
