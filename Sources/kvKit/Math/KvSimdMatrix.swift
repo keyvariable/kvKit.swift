@@ -32,8 +32,12 @@ import simd
 
 // MARK: - KvSimdMatrix
 
-/// Common protocol for standard SIMD matrix types.
-public protocol KvSimdMatrix : Equatable, CustomDebugStringConvertible {
+/// Common protocol for standard SIMD matrix types with additional conformance to *Hashable* and *Codable* protocols.
+///
+/// Conformance to *Hashable* is implemented as standard combination of column hashes.
+///
+/// Conformance to *Codable*. Matrices are encoded as plain arrays of it's scalars.
+public protocol KvSimdMatrix : Equatable, Hashable, Codable, CustomDebugStringConvertible {
 
     associatedtype Scalar : SIMDScalar & BinaryFloatingPoint
 
@@ -193,6 +197,51 @@ public protocol KvSimd2x2 : KvSimd2xN, KvSimdSquareMatrix {
 }
 
 
+extension KvSimd2x2 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+    }
+
+}
+
+
 
 // MARK: - KvSimd2x3
 
@@ -200,6 +249,52 @@ public protocol KvSimd2x2 : KvSimd2xN, KvSimdSquareMatrix {
 public protocol KvSimd2x3 : KvSimd2xN
 where Column == SIMD3<Scalar>, Diagonal == SIMD2<Scalar>, Transpose : KvSimd3x2
 { }
+
+
+extension KvSimd2x3 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+            try container.encode(column.z)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+    }
+
+}
 
 
 
@@ -211,6 +306,53 @@ where Column == SIMD4<Scalar>, Diagonal == SIMD2<Scalar>, Transpose : KvSimd4x2
 { }
 
 
+extension KvSimd2x4 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar(), DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+            try container.encode(column.z)
+            try container.encode(column.w)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+    }
+
+}
+
+
 
 // MARK: - KvSimd3x2
 
@@ -218,6 +360,53 @@ where Column == SIMD4<Scalar>, Diagonal == SIMD2<Scalar>, Transpose : KvSimd4x2
 public protocol KvSimd3x2 : KvSimd3xN
 where Column == SIMD2<Scalar>, Diagonal == SIMD2<Scalar>, Transpose : KvSimd2x3
 { }
+
+
+extension KvSimd3x2 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+        hasher.combine(self[2])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+        try EncodeColumn(self[2])
+    }
+
+}
 
 
 
@@ -236,6 +425,54 @@ public protocol KvSimd3x3 : KvSimd3xN, KvSimdSquareMatrix {
 }
 
 
+extension KvSimd3x3 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+        hasher.combine(self[2])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+            try container.encode(column.z)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+        try EncodeColumn(self[2])
+    }
+
+}
+
+
 
 // MARK: - KvSimd3x4
 
@@ -243,6 +480,55 @@ public protocol KvSimd3x3 : KvSimd3xN, KvSimdSquareMatrix {
 public protocol KvSimd3x4 : KvSimd3xN
 where Column == SIMD4<Scalar>, Diagonal == SIMD3<Scalar>, Transpose : KvSimd4x3
 { }
+
+
+extension KvSimd3x4 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+        hasher.combine(self[2])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar(), DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+            try container.encode(column.z)
+            try container.encode(column.w)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+        try EncodeColumn(self[2])
+    }
+
+}
 
 
 
@@ -254,6 +540,55 @@ where Column == SIMD2<Scalar>, Diagonal == SIMD2<Scalar>, Transpose : KvSimd2x4
 { }
 
 
+extension KvSimd4x2 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+        hasher.combine(self[2])
+        hasher.combine(self[3])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn(), DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+        try EncodeColumn(self[2])
+        try EncodeColumn(self[3])
+    }
+
+}
+
+
 
 // MARK: - KvSimd4x3
 
@@ -261,6 +596,56 @@ where Column == SIMD2<Scalar>, Diagonal == SIMD2<Scalar>, Transpose : KvSimd2x4
 public protocol KvSimd4x3 : KvSimd4xN
 where Column == SIMD3<Scalar>, Diagonal == SIMD3<Scalar>, Transpose : KvSimd3x4
 { }
+
+
+extension KvSimd4x3 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+        hasher.combine(self[2])
+        hasher.combine(self[3])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn(), DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+            try container.encode(column.z)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+        try EncodeColumn(self[2])
+        try EncodeColumn(self[3])
+    }
+
+}
 
 
 
@@ -275,6 +660,57 @@ public protocol KvSimd4x4 : KvSimd4xN, KvSimdSquareMatrix {
     // MARK: Initialization
 
     init(_ quaternion: Quaternion)
+
+}
+
+
+extension KvSimd4x4 {
+
+    // MARK: : Hashable
+
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self[0])
+        hasher.combine(self[1])
+        hasher.combine(self[2])
+        hasher.combine(self[3])
+    }
+
+
+    // MARK: : Codable
+
+    @inlinable
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+
+
+        func DecodeScalar() throws -> Scalar { try container.decode(Scalar.self) }
+
+        func DecodeColumn() throws -> Column { try Column(DecodeScalar(), DecodeScalar(), DecodeScalar(), DecodeScalar()) }
+
+
+        try self.init(DecodeColumn(), DecodeColumn(), DecodeColumn(), DecodeColumn())
+    }
+
+
+    @inlinable
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+
+
+        func EncodeColumn(_ column: Column) throws {
+            try container.encode(column.x)
+            try container.encode(column.y)
+            try container.encode(column.z)
+            try container.encode(column.w)
+        }
+
+
+        try EncodeColumn(self[0])
+        try EncodeColumn(self[1])
+        try EncodeColumn(self[2])
+        try EncodeColumn(self[3])
+    }
 
 }
 
