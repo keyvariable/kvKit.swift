@@ -169,4 +169,79 @@ extension KvMetalKit {
 
     }
 
+
+
+    // MARK: .CubeSlice
+
+    /// Collection of auxiliaries to work with cube texture slices.
+    ///
+    /// - Note: Sequence of cases matches hardware layout of slices.
+    public enum CubeSlice : Int, CaseIterable, Hashable, CustomStringConvertible {
+
+        case xPlus = 0, xMinus = 1, yPlus = 2, yMinus = 3, zPlus = 4, zMinus = 5
+
+
+        // MARK: : CustomStringConvertible
+
+        @inlinable
+        public var description: String {
+            switch self {
+            case .xPlus:
+                return "X+"
+            case .xMinus:
+                return "X–"
+            case .yPlus:
+                return "Y+"
+            case .yMinus:
+                return "Y–"
+            case .zPlus:
+                return "Z+"
+            case .zMinus:
+                return "Z–"
+            }
+        }
+
+
+        // MARK: Matrices
+
+        /// - Returns: Transformation matrix to convert world coordinates and then render with camera having identity transformation. So single camera can be used to render any slice.
+        @inlinable
+        public func worldMatrix<Math : KvMathScope>(_ math: Math.Type) -> Math.Matrix4x4 {
+            typealias Column = Math.Matrix4x4.Column
+
+            switch self {
+            case .xPlus:
+                return Math.Matrix4x4(Column.unitNZ, Column.unitNY,  Column.unitX, Column.unitW)
+            case .xMinus:
+                return Math.Matrix4x4( Column.unitZ, Column.unitNY, Column.unitNX, Column.unitW)
+            case .yPlus:
+                return Math.Matrix4x4( Column.unitX,  Column.unitZ,  Column.unitY, Column.unitW)
+            case .yMinus:
+                return Math.Matrix4x4( Column.unitX, Column.unitNZ, Column.unitNY, Column.unitW)
+            case .zPlus:
+                return Math.Matrix4x4( Column.unitX, Column.unitNY,  Column.unitZ, Column.unitW)
+            case .zMinus:
+                return Math.Matrix4x4(Column.unitNX, Column.unitNY, Column.unitNZ, Column.unitW)
+            }
+        }
+
+
+        /// - Returns: Perspective projection matrix to render into a cube texture slice.
+        ///
+        /// - Note: It's faster than implementations for arbitrary perspective projection matrices.
+        @inlinable
+        public func perspectiveProjectionMatrix<Math>(_ math: Math.Type, zNear: Math.Scalar, zFar: Math.Scalar) -> Math.Matrix4x4
+        where Math : KvMathScope {
+            typealias Column = Math.Matrix4x4.Column
+
+            let zLengthNegative⁻¹ = -1 / (zFar - zNear)
+
+            return Math.Matrix4x4(Column.unitX,
+                                  Column.unitY,
+                                  Column.init(0, 0,   (zFar + zNear) * zLengthNegative⁻¹, -1),
+                                  Column.init(0, 0, 2 * zFar * zNear * zLengthNegative⁻¹,  0))
+        }
+
+    }
+
 }
