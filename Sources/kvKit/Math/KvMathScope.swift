@@ -226,6 +226,19 @@ public protocol KvMathScope {
     /// - Returns: A boolean value indicating whether given vectors are both nonzero and are not orthogonal.
     static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool
 
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    static func isOrthogonal(_ lhs: Vector2, _ rhs: Vector2) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    static func isOrthogonal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    static func isOrthogonal(_ lhs: Vector3, _ rhs: Vector3) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    static func isOrthogonal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    static func isOrthogonal(_ lhs: Vector4, _ rhs: Vector4) -> Bool
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    static func isOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool
+
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
     static func isNonzero(_ v: Vector2) -> Bool
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero vector.
@@ -1046,6 +1059,43 @@ public struct KvMathFloatScope : KvMathScope {
     }
 
 
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: eps) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: eps) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: eps) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+
     /// - Returns: A boolean value indicating wheather given vector is numerically inequal to zero.
     @inlinable public static func isNonzero(_ v: Vector2) -> Bool { KvIsNonzero(abs(v).max()) }
 
@@ -1856,6 +1906,43 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable
     public static func isNonOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
         KvIsNonzero(simd_dot(lhs, rhs), eps: eps)
+    }
+
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector2, _ rhs: Vector2) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector2, _ rhs: Vector2, eps: Eps) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: eps) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector3, _ rhs: Vector3) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector3, _ rhs: Vector3, eps: Eps) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: eps) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector4, _ rhs: Vector4) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: epsArg(lhs).dot(epsArg(rhs)).tolerance) && isNonzero(lhs) && isNonzero(rhs)
+    }
+
+    /// - Returns: A boolean value indicating whether given vectors are both nonzero and orthogonal.
+    @inlinable
+    public static func isOrthogonal(_ lhs: Vector4, _ rhs: Vector4, eps: Eps) -> Bool {
+        KvIsZero(simd_dot(lhs, rhs), eps: eps) && isNonzero(lhs) && isNonzero(rhs)
     }
 
 
