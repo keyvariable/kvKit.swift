@@ -54,17 +54,8 @@ public struct KvNumericTolerance<T : FloatingPoint> {
 
     // MARK: Auxiliaries
 
-    /// Default tolerance for comparisons with zero.
-    @inlinable public static var zero: Self { Self(value: 16 * T.ulpOfOne) }
-
-    /// Default tolerance for comparisons of squared values with zero.
-    @inlinable public static var zero²: Self { Self(value: 256 * sqr(T.ulpOfOne)) }
-
-
-    // MARK: Operations
-
-    /// Tolerance for comparisons of squared values.
-    @inlinable public var squared: Self { Self(value: Swift.max(sqr(T.ulpOfOne), sqr(value))) }
+    /// Default tolerance for comparisons.
+    @inlinable public static var `default`: Self { Self(value: 16 * T.ulpOfOne) }
 
 }
 
@@ -390,7 +381,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T) -> Bool 
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bool {
+public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     abs(value) <= eps.value
 }
 
@@ -404,7 +395,7 @@ public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bo
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
     positiveFlag = value > eps.value
 
     return !positiveFlag && value >= -eps.value
@@ -416,7 +407,7 @@ public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, alsoI
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bool {
+public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     abs(value) > eps.value
 }
 
@@ -430,7 +421,7 @@ public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) ->
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
     positiveFlag = value > eps.value
 
     return positiveFlag || value < -eps.value
@@ -442,7 +433,7 @@ public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, al
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bool {
+public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value > eps.value
 }
 
@@ -456,7 +447,7 @@ public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, alsoIsNegative negativeFlag: inout Bool) -> Bool {
+public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsNegative negativeFlag: inout Bool) -> Bool {
     negativeFlag = value < -eps.value
 
     return value > eps.value
@@ -468,7 +459,7 @@ public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, a
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bool {
+public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value < -eps.value
 }
 
@@ -482,7 +473,7 @@ public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
     positiveFlag = value > eps.value
 
     return value < -eps.value
@@ -494,7 +485,7 @@ public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero, a
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNotPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bool {
+public func KvIsNotPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value <= eps.value
 }
 
@@ -504,7 +495,7 @@ public func KvIsNotPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNotNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .zero) -> Bool {
+public func KvIsNotNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value >= -eps.value
 }
 
@@ -886,7 +877,16 @@ public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : BinaryFloatingPoint {
 
 
 
+// TODO: Delete in 4.0.0
 // MARK: Legacy
+
+extension KvNumericTolerance {
+
+    @available(*, deprecated, renamed: "default")
+    @inlinable public static var zero: Self { .default }
+
+}
+
 
 @available(*, deprecated, renamed: "KvEps(for:)")
 @inlinable
