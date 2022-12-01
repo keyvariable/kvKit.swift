@@ -39,10 +39,15 @@ extension KvDispatchQueueKit {
         public static let background = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.background", qos: .background, autoreleaseFrequency: .inherit)
 
         /// Serial dispatch queue executing tasks with *.userInitiated* quality of service.
-        public static let userInitialted = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.background", qos: .userInitiated, autoreleaseFrequency: .inherit)
+        public static let userInitiated = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.userInitiated", qos: .userInitiated, autoreleaseFrequency: .inherit)
 
         /// Serial dispatch queue executing tasks with *.utility* quality of service.
-        public static let utility = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.background", qos: .utility, autoreleaseFrequency: .inherit)
+        public static let utility = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.utility", qos: .utility, autoreleaseFrequency: .inherit)
+
+
+        // TODO: Delete in 4.0.0
+        @available(*, unavailable, renamed: "userInitiated")
+        public static var userInitialted: DispatchQueue { self.userInitiated }
 
     }
 
