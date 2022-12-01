@@ -207,7 +207,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = Math.Eps.zero.value
+            let bound = Math.Eps.default.value
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -240,7 +240,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = Math.Eps.zero.value
+            let bound = Math.Eps.default.value
             let range = -bound...bound
 
             (0 ..< 10_000)
@@ -273,7 +273,7 @@ class KvMathScopeTests : XCTestCase {
                 XCTAssertEqual(Math.isZero(input), expected, "input = \(input); expected = \(expected)")
             }
 
-            let bound = Math.Eps.zero.value
+            let bound = Math.Eps.default.value
             let range = -bound...bound
 
             (0 ..< 10_000)
