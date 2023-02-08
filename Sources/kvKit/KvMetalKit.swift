@@ -84,8 +84,7 @@ extension KvMetalKit {
         usage: MTLTextureUsage = .shaderRead,
         on device: MTLDevice? = nil
     ) throws -> MTLTexture {
-        let descriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .rgba8Unorm, size: size, mipmapped: false)
-        descriptor.pixelFormat = pattern.pixelFormat
+        let descriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: pattern.pixelFormat, size: size, mipmapped: false)
         descriptor.usage = usage
 
         return try unicolorCubeTexture(repeating: pattern.texel, with: descriptor, on: device)
