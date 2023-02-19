@@ -244,3 +244,31 @@ extension KvMetalKit {
     }
 
 }
+
+
+
+// MARK: - Computations
+
+extension KvMetalKit {
+
+    /// Sets up given *pipelineState* and invokes *dispatchThreads*() with 1D grid of *width* threads with automatic maximum number of threads per group.
+    @inlinable
+    public static func dispatchComputeThreads(_ computeEncoder: MTLComputeCommandEncoder, _ pipelineState: MTLComputePipelineState, width: Int) {
+        computeEncoder.setComputePipelineState(pipelineState)
+
+        computeEncoder.dispatchThreads(MTLSizeMake(width, 1, 1), threadsPerThreadgroup: MTLSizeMake(pipelineState.maxTotalThreadsPerThreadgroup, 1, 1))
+    }
+
+
+    /// Sets up given *pipelineState* and invokes *dispatchThreads*() with 2D grid of *nx*×*ny* threads with automatic maximum number of threads per group.
+    @inlinable
+    public static func dispatchComputeThreads(_ computeEncoder: MTLComputeCommandEncoder, _ pipelineState: MTLComputePipelineState, width: Int, height: Int) {
+        computeEncoder.setComputePipelineState(pipelineState)
+
+        let threadgroupHeight = 1 << Int(floor(log2(sqrt(Double(pipelineState.maxTotalThreadsPerThreadgroup)))))
+        let threadgroupWidth = pipelineState.maxTotalThreadsPerThreadgroup / threadgroupHeight
+
+        computeEncoder.dispatchThreads(MTLSizeMake(width, height, 1), threadsPerThreadgroup: MTLSizeMake(threadgroupWidth, threadgroupHeight, 1))
+    }
+
+}
