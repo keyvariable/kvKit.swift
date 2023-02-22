@@ -251,24 +251,201 @@ extension KvMetalKit {
 
 extension KvMetalKit {
 
-    /// Sets up given *pipelineState* and invokes *dispatchThreads*() with 1D grid of *width* threads with automatic maximum number of threads per group.
-    @inlinable
-    public static func dispatchComputeThreads(_ computeEncoder: MTLComputeCommandEncoder, _ pipelineState: MTLComputePipelineState, width: Int) {
-        computeEncoder.setComputePipelineState(pipelineState)
+    // MARK: .ThreadGrid
 
-        computeEncoder.dispatchThreads(MTLSizeMake(width, 1, 1), threadsPerThreadgroup: MTLSizeMake(pipelineState.maxTotalThreadsPerThreadgroup, 1, 1))
-    }
+    /// Configuration of a thread grid. It calculates parameters of the grid to dispatch threads and provides convenient shorthand methods to execute calculations.
+    ///
+    /// Typical usage:
+    /// ```
+    /// KvMetalKit.ThreadGrid(pipelineState, width: 1920, height: 1080)
+    ///     .setAndDispatch(computeEncoder)
+    /// ```
+    public struct ThreadGrid {
+
+        /// Pipeline state the grid is computed for.
+        public let pipelineState: MTLComputePipelineState
+
+        /// Size of the grid.
+        ///
+        /// See ``threadgroupSize``, ``threadgroupCount``.
+        public let size: MTLSize
+        /// The threadgroup size.
+        ///
+        /// See ``size``, ``threadgroupCount``.
+        public let threadgroupSize: MTLSize
 
 
-    /// Sets up given *pipelineState* and invokes *dispatchThreads*() with 2D grid of *nx*×*ny* threads with automatic maximum number of threads per group.
-    @inlinable
-    public static func dispatchComputeThreads(_ computeEncoder: MTLComputeCommandEncoder, _ pipelineState: MTLComputePipelineState, width: Int, height: Int) {
-        computeEncoder.setComputePipelineState(pipelineState)
+        /// Size of the griid in threadgroups.
+        /// It's used to execute calculations using uniform threadgroups.
+        /// See [Metal feature set tables](https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf).
+        ///
+        /// See ``size``, ``threadgroupSize``.
+        @inlinable
+        public var threadgroupCount: MTLSize {
+            MTLSizeMake(Self.threadgroupCountComponent(gridSize: size.width , threadgroupSize: threadgroupSize.width ),
+                        Self.threadgroupCountComponent(gridSize: size.height, threadgroupSize: threadgroupSize.height),
+                        Self.threadgroupCountComponent(gridSize: size.depth , threadgroupSize: threadgroupSize.depth ))
+        }
 
-        let threadgroupHeight = 1 << Int(floor(log2(sqrt(Double(pipelineState.maxTotalThreadsPerThreadgroup)))))
-        let threadgroupWidth = pipelineState.maxTotalThreadsPerThreadgroup / threadgroupHeight
 
-        computeEncoder.dispatchThreads(MTLSizeMake(width, height, 1), threadsPerThreadgroup: MTLSizeMake(threadgroupWidth, threadgroupHeight, 1))
+        /// Memberwise initializer.
+        @inlinable
+        public init(_ pipelineState: MTLComputePipelineState, size: MTLSize, threadgroupSize: MTLSize) {
+            self.pipelineState = pipelineState
+            self.size = size
+            self.threadgroupSize = threadgroupSize
+        }
+
+
+        /// Calculates 1D-grid for given *pipelineState*.
+        ///
+        /// See ``init(_:texture1D:)``, ``threadgroupSize(_:width)``.
+        @inlinable
+        public init(_ pipelineState: MTLComputePipelineState, width: Int) {
+            self.init(pipelineState,
+                      size: MTLSizeMake(width, 1, 1),
+                      threadgroupSize: Self.threadgroupSize(pipelineState, width: width))
+        }
+
+
+        /// Calculates 1D-grid for given *pipelineState* of the same size as given *texture1D*.
+        ///
+        /// See ``init(_:width:)``, ``threadgroupSize(_:width)``.
+        @inlinable
+        public init(_ pipelineState: MTLComputePipelineState, texture1D: MTLTexture) {
+            self.init(pipelineState, width: texture1D.width)
+        }
+
+
+        /// Calculates 2D-grid for given *pipelineState*.
+        ///
+        /// See ``init(_:texture2D:)``, ``threadgroupSize(_:width:height:)``.
+        @inlinable
+        public init(_ pipelineState: MTLComputePipelineState, width: Int, height: Int) {
+            self.init(pipelineState,
+                      size: MTLSizeMake(width, height, 1),
+                      threadgroupSize: Self.threadgroupSize(pipelineState, width: width, height: height))
+        }
+
+
+        /// Calculates 2D-grid for given *pipelineState* of the same size as given *texture2D*.
+        ///
+        /// See ``init(_:width:height:)``, ``threadgroupSize(_:width:height:)``.
+        @inlinable
+        public init(_ pipelineState: MTLComputePipelineState, texture2D: MTLTexture) {
+            self.init(pipelineState, width: texture2D.width, height: texture2D.height)
+        }
+
+
+        // MARK: Opeprations
+
+        /// Dispatches the threads using non-uniform theadgroups.
+        ///
+        /// - Warning: The device must support non-uniform threadgroups. See [Metal feature set tables](https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf).
+        ///
+        /// See: ``setAndDispatch(_:)``, ``dispatchUniform(_:)``.
+        @inlinable
+        public func dispatch(_ computeEncoder: MTLComputeCommandEncoder) {
+            computeEncoder.dispatchThreads(size, threadsPerThreadgroup: threadgroupSize)
+        }
+
+
+        /// Dispatches the threads using uniform theadgroups.
+        ///
+        /// - Note: This method is supported by all devices but requires bound check for the thread position in the kernel.
+        ///         If all target devices support non-uniform threadgroups then consider ``dispatch(_:)`` method.
+        ///         See [Metal feature set tables](https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf).
+        ///
+        /// See: ``setAndDispatchUniform(_:)``, ``dispatch(_:)``.
+        @inlinable
+        public func dispatchUniform(_ computeEncoder: MTLComputeCommandEncoder) {
+            computeEncoder.dispatchThreadgroups(threadgroupCount, threadsPerThreadgroup: threadgroupSize)
+        }
+
+
+        /// Sets the receiver's *pipelineState* to given *computeEncoder* and dispatches the threads using non-uniform theadgroups.
+        ///
+        /// - Warning: The device must support non-uniform threadgroups. See [Metal feature set tables](https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf).
+        ///
+        /// See: ``dispatch(_:)``, ``setAndDispatchUniform(_:)``.
+        @inlinable
+        public func setAndDispatch(_ computeEncoder: MTLComputeCommandEncoder) {
+            computeEncoder.setComputePipelineState(pipelineState)
+
+            dispatch(computeEncoder)
+        }
+
+
+        /// Sets the receiver's *pipelineState* to given *computeEncoder* and dispatches the threads using uniform theadgroups.
+        ///
+        /// - Note: This method is supported by all devices but requires bound check for the thread position in the kernel.
+        ///         If all target devices support non-uniform threadgroups then consider ``setAndDispatch(_:)`` method.
+        ///         See [Metal feature set tables](https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf).
+        ///
+        /// See: ``setAndDispatch(_:)``, ``dispatchUniform(_:)``.
+        @inlinable
+        public func setAndDispatchUniform(_ computeEncoder: MTLComputeCommandEncoder) {
+            computeEncoder.setComputePipelineState(pipelineState)
+
+            dispatchUniform(computeEncoder)
+        }
+
+
+        /// - Returns: The threadgroup size of 1D-grid for given *pipelineState*.
+        ///
+        /// See ``threadgroupSize(_:width:height:)``.
+        @inlinable
+        public static func threadgroupSize(_ pipelineState: MTLComputePipelineState, width: Int) -> MTLSize {
+            return MTLSizeMake(min(width, pipelineState.maxTotalThreadsPerThreadgroup), 1, 1)
+        }
+
+
+        /// - Returns: The threadgroup size of 1D-grid for given *pipelineState*.
+        ///
+        /// See ``threadgroupSize(_:width:)``.
+        @inlinable
+        public static func threadgroupSize(_ pipelineState: MTLComputePipelineState, width: Int, height: Int) -> MTLSize {
+            let maxThreads = pipelineState.maxTotalThreadsPerThreadgroup
+
+            guard width * height > maxThreads else { return MTLSizeMake(width, height, 1) }
+
+            let executionWidth = pipelineState.threadExecutionWidth
+
+            // Simple initial size.
+            var size = MTLSizeMake(executionWidth, maxThreads / executionWidth, 1)
+
+            // Doubling threadgroup width while possible
+            do {
+                var nextSizeWidth = size.width << 1
+
+                while size.height > height, nextSizeWidth <= width {
+                    size.height >>= 1
+                    size.width = nextSizeWidth
+
+                    nextSizeWidth <<= 1
+                }
+            }
+            // Doubling threadgroup height while possible
+            do {
+                var nextSizeHeight = size.height << 1
+
+                while size.width > width, nextSizeHeight <= height {
+                    size.width >>= 1
+                    size.height = nextSizeHeight
+
+                    nextSizeHeight <<= 1
+                }
+            }
+
+            return size
+        }
+
+
+        @usableFromInline
+        static func threadgroupCountComponent(gridSize: Int, threadgroupSize: Int) -> Int {
+            max(1, threadgroupSize > 1 ? (gridSize / threadgroupSize) : gridSize)
+        }
+
     }
 
 }
