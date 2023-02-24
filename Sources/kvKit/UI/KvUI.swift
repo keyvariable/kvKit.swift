@@ -38,17 +38,37 @@ public class KvUI { }
 
 
 
+// MARK: Views and Windows
+
+extension KvUI {
+
+#if canImport(UIKit)
+    typealias View = UIView
+    typealias ViewController = UIViewController
+    typealias Window = UIWindow
+
+#elseif canImport(Cocoa)
+    typealias View = NSView
+    typealias ViewController = NSViewController
+    typealias Window = NSWindow
+#endif // Cocoa
+
+}
+
+
+
 // MARK: .Color
 
 extension KvUI {
 
-    #if canImport(Cocoa)
-    /// Platform high level color type.
-    public typealias Color = NSColor
-    #elseif canImport(UIKit)
+#if canImport(UIKit)
     /// Platform high level color type.
     public typealias Color = UIColor
-    #endif // iOS
+
+#elseif canImport(Cocoa)
+    /// Platform high level color type.
+    public typealias Color = NSColor
+#endif // Cocoa
 
 
 
@@ -58,11 +78,11 @@ extension KvUI {
                           green: CGFloat((hexValue >> 8) & 0xFF) / 255,
                           blue: CGFloat(hexValue & 0xFF) / 255)
         
-        #if canImport(Cocoa)
-        return Color(calibratedRed: components.red, green: components.green, blue: components.blue, alpha: alpha)
-        #elseif canImport(UIKit)
+#if canImport(UIKit)
         return Color(red: components.red, green: components.green, blue: components.blue, alpha: alpha)
-        #endif // canImport(UIKit)
+#elseif canImport(Cocoa)
+        return Color(calibratedRed: components.red, green: components.green, blue: components.blue, alpha: alpha)
+#endif // Cocoa
     }
 
 }
@@ -73,13 +93,14 @@ extension KvUI {
 
 extension KvUI {
 
-    #if canImport(Cocoa)
-    /// Platform high level image type.
-    public typealias Image = NSImage
-    #elseif canImport(UIKit)
+#if canImport(UIKit)
     /// Platform high level image type.
     public typealias Image = UIImage
-    #endif // iOS
+
+#elseif canImport(Cocoa)
+    /// Platform high level image type.
+    public typealias Image = NSImage
+#endif // Cocoa
 
 }
 
@@ -91,7 +112,7 @@ extension KvUI {
 
     public struct Alert {
 
-        #if canImport(Cocoa)
+#if canImport(Cocoa)
         public static func present(message: String, details: String? = nil, _ alertStyle: NSAlert.Style = .informational,
                                    in window: NSWindow? = nil, action: String = "Close", completion: (() -> Void)? = nil)
         {
@@ -148,11 +169,11 @@ extension KvUI {
                 completion?(modalResponse)
             }
         }
-        #endif // canImport(Cocoa)
+#endif // canImport(Cocoa)
 
 
 
-        #if canImport(UIKit)
+#if canImport(UIKit)
         @available(iOS 13.0, *)
         public static func present(message: String, title: String? = nil, in viewController: UIViewController? = nil,
                                    action: String = "Close", completion: (() -> Void)? = nil)
@@ -209,7 +230,7 @@ extension KvUI {
 
             viewController.present(alertController, animated: true, completion: nil)
         }
-        #endif // canImport(UIKit)
+#endif // canImport(UIKit)
 
     }
 
