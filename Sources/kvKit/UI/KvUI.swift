@@ -43,14 +43,14 @@ public class KvUI { }
 extension KvUI {
 
 #if canImport(UIKit)
-    typealias View = UIView
-    typealias ViewController = UIViewController
-    typealias Window = UIWindow
+    public typealias View = UIView
+    public typealias ViewController = UIViewController
+    public typealias Window = UIWindow
 
 #elseif canImport(Cocoa)
-    typealias View = NSView
-    typealias ViewController = NSViewController
-    typealias Window = NSWindow
+    public typealias View = NSView
+    public typealias ViewController = NSViewController
+    public typealias Window = NSWindow
 #endif // Cocoa
 
 }
