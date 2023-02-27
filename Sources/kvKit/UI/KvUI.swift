@@ -32,6 +32,10 @@ import Cocoa
 import UIKit
 #endif // canImport(UIKit)
 
+#if canImport(SwiftUI)
+import SwiftUI
+#endif // SwiftUI
+
 
 
 public class KvUI { }
@@ -47,10 +51,26 @@ extension KvUI {
     public typealias ViewController = UIViewController
     public typealias Window = UIWindow
 
+#if canImport(SwiftUI)
+    @available(iOS 13.0, *)
+    public typealias ViewRepresentable = UIViewRepresentable
+
+    @available(iOS 13.0, *)
+    public typealias ViewControllerRepresentable = UIViewControllerRepresentable
+#endif // SwiftUI
+
 #elseif canImport(Cocoa)
     public typealias View = NSView
     public typealias ViewController = NSViewController
     public typealias Window = NSWindow
+
+#if canImport(SwiftUI)
+    @available(macOS 10.15, *)
+    public typealias ViewRepresentable = NSViewRepresentable
+    
+    @available(macOS 10.15, *)
+    public typealias ViewControllerRepresentable = NSViewControllerRepresentable
+#endif // SwiftUI
 #endif // Cocoa
 
 }
