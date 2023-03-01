@@ -51,6 +51,9 @@ extension KvUI {
     public typealias ViewController = UIViewController
     public typealias Window = UIWindow
 
+    public typealias Responder = UIResponder
+    public typealias Event = UIEvent
+
 #if canImport(SwiftUI)
     @available(iOS 13.0, *)
     public typealias ViewRepresentable = UIViewRepresentable
@@ -64,10 +67,13 @@ extension KvUI {
     public typealias ViewController = NSViewController
     public typealias Window = NSWindow
 
+    public typealias Responder = NSResponder
+    public typealias Event = NSEvent
+
 #if canImport(SwiftUI)
     @available(macOS 10.15, *)
     public typealias ViewRepresentable = NSViewRepresentable
-    
+
     @available(macOS 10.15, *)
     public typealias ViewControllerRepresentable = NSViewControllerRepresentable
 #endif // SwiftUI
