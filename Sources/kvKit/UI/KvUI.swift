@@ -22,15 +22,15 @@
 //  Copyright © 2018 Svyatoslav Popov. All rights reserved.
 //
 
-#if canImport(Cocoa) || canImport(UIKit)
+#if canImport(AppKit) || canImport(UIKit)
 
 
 
-#if canImport(Cocoa)
-import Cocoa
-#elseif canImport(UIKit)
+#if canImport(UIKit)
 import UIKit
-#endif // canImport(UIKit)
+#elseif canImport(AppKit)
+import AppKit
+#endif // AppKit
 
 #if canImport(SwiftUI)
 import SwiftUI
@@ -62,7 +62,7 @@ extension KvUI {
     public typealias ViewControllerRepresentable = UIViewControllerRepresentable
 #endif // SwiftUI
 
-#elseif canImport(Cocoa)
+#elseif canImport(AppKit)
     public typealias View = NSView
     public typealias ViewController = NSViewController
     public typealias Window = NSWindow
@@ -77,7 +77,7 @@ extension KvUI {
     @available(macOS 10.15, *)
     public typealias ViewControllerRepresentable = NSViewControllerRepresentable
 #endif // SwiftUI
-#endif // Cocoa
+#endif // AppKit
 
 }
 
@@ -91,10 +91,10 @@ extension KvUI {
     /// Platform high level color type.
     public typealias Color = UIColor
 
-#elseif canImport(Cocoa)
+#elseif canImport(AppKit)
     /// Platform high level color type.
     public typealias Color = NSColor
-#endif // Cocoa
+#endif // AppKit
 
 
 
@@ -106,9 +106,9 @@ extension KvUI {
         
 #if canImport(UIKit)
         return Color(red: components.red, green: components.green, blue: components.blue, alpha: alpha)
-#elseif canImport(Cocoa)
+#elseif canImport(AppKit)
         return Color(calibratedRed: components.red, green: components.green, blue: components.blue, alpha: alpha)
-#endif // Cocoa
+#endif // AppKit
     }
 
 }
@@ -123,10 +123,10 @@ extension KvUI {
     /// Platform high level image type.
     public typealias Image = UIImage
 
-#elseif canImport(Cocoa)
+#elseif canImport(AppKit)
     /// Platform high level image type.
     public typealias Image = NSImage
-#endif // Cocoa
+#endif // AppKit
 
 }
 
@@ -138,7 +138,7 @@ extension KvUI {
 
     public struct Alert {
 
-#if canImport(Cocoa)
+#if canImport(AppKit)
         public static func present(message: String, details: String? = nil, _ alertStyle: NSAlert.Style = .informational,
                                    in window: NSWindow? = nil, action: String = "Close", completion: (() -> Void)? = nil)
         {
@@ -195,7 +195,7 @@ extension KvUI {
                 completion?(modalResponse)
             }
         }
-#endif // canImport(Cocoa)
+#endif // canImport(AppKit)
 
 
 
@@ -313,4 +313,4 @@ extension KvUI {
 
 
 
-#endif // canImport(Cocoa) || canImport(UIKit)
+#endif // canImport(AppKit) || canImport(UIKit)

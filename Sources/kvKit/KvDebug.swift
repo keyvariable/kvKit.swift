@@ -23,11 +23,11 @@
 
 import Foundation
 
-#if os(macOS)
-import Cocoa
-#elseif os(iOS)
+#if canImport(UIKit)
 import UIKit
-#endif // iOS
+#elseif canImport(AppKit)
+import AppKit
+#endif // AppKit
 
 
 
@@ -158,7 +158,7 @@ public class KvDebug {
 
 // MARK: MacOS Alerts
 
-#if os(macOS)
+#if canImport(AppKit)
 extension KvDebug {
 
     @inlinable
@@ -175,13 +175,13 @@ extension KvDebug {
     }
 
 }
-#endif // os(macOS)
+#endif // os(AppKit)
 
 
 
 // MARK: iOS Alerts
 
-#if os(iOS)
+#if canImport(UIKit)
 @available(iOS 13.0, *)
 extension KvDebug {
 
@@ -199,7 +199,7 @@ extension KvDebug {
     }
 
 }
-#endif // os(iOS)
+#endif // UIKit
 
 
 
