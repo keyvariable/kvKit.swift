@@ -99,7 +99,7 @@ extension KvCancellableResult {
 
 extension KvCancellableResult where T == Void {
 
-    @available (*, deprecated, message: "It's designated due to equivalence to .map({ nil })")
+    @available (*, deprecated, message: "It's deprecated due to equivalence to .map({ nil })")
     public func map<Y>() -> KvCancellableResult<Y> where Y : ExpressibleByNilLiteral {
         switch self {
         case .cancelled:
