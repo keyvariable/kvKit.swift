@@ -106,7 +106,7 @@ extension KvSceneKit {
 #endif // !DEBUG
 
     @inlinable
-    public static func locking<T>(_ file: StaticString = #fileID, _ line: UInt = #line, _ body: () throws -> T) rethrows -> T {
+    public static func locking<T>(file: StaticString = #fileID, line: UInt = #line, _ body: () throws -> T) rethrows -> T {
         try KvThreadKit.locking(KvSceneKit.transactionLock) {
             try __measuringTransactionBodyDuration(file, line, body)
         }
