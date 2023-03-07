@@ -106,7 +106,7 @@ extension KvSceneKit {
 #endif // !DEBUG
 
     @inlinable
-    public static func locking<T>(_ file: StaticString = #fileID, _ line: UInt = #line, body: () throws -> T) rethrows -> T {
+    public static func locking<T>(_ file: StaticString = #fileID, _ line: UInt = #line, _ body: () throws -> T) rethrows -> T {
         try KvThreadKit.locking(KvSceneKit.transactionLock) {
             try __measuringTransactionBodyDuration(file, line, body)
         }
@@ -114,9 +114,29 @@ extension KvSceneKit {
 
 #else // !DEBUG
     @inlinable
-    public static func locking<T>(body: () throws -> T) rethrows -> T {
+    public static func locking<T>(_ body: () throws -> T) rethrows -> T {
         try KvThreadKit.locking(KvSceneKit.transactionLock, body: body)
     }
+#endif // !DEBUG
+
+
+#if DEBUG
+#if !DEBUG
+#warning("This code must never be enabled in a release build")
+#endif // !DEBUG
+
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated, renamed: "KvSceneKit.locking(_:_:_:)")
+    @inlinable
+    public static func locking<T>(_ file: StaticString = #fileID, _ line: UInt = #line, body: () throws -> T) rethrows -> T {
+        try locking(file, line, body)
+    }
+
+#else // !DEBUG
+    // TODO: Delete in 5.0.0
+    @available(*, deprecated, renamed: "KvSceneKit.locking(_:)")
+    @inlinable
+    public static func locking<T>(body: () throws -> T) rethrows -> T { try locking(body) }
 #endif // !DEBUG
 
 
