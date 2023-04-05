@@ -21,11 +21,11 @@
 //  Created by Svyatoslav Popov on 02.02.2021.
 //
 
-#if os(macOS)
-import Cocoa
-#elseif os(iOS)
+#if canImport(UIKit)
 import UIKit
-#endif // os(iOS)
+#elseif canImport(AppKit)
+import AppKit
+#endif // AppKit
 
 
 

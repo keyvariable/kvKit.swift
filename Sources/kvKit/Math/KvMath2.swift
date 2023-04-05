@@ -25,11 +25,18 @@ import simd
 
 
 
+// MARK: - Legacy
+
+@available(*, deprecated, message: "Migrate to KvMathScope")
 public typealias KvMathScalar2 = BinaryFloatingPoint & SIMDScalar
 
 
 
-public enum KvMath2<Scalar> where Scalar : KvMathScalar2 {
+// TODO: Delete when KvMath2 will become degenerate.
+@available(*, deprecated, message: "Migrate to KvMathScope")
+public enum KvMath2<Scalar> where Scalar : SIMDScalar & BinaryFloatingPoint {
+
+    public typealias Scalar = Scalar
 
     public typealias Vector = SIMD2<Scalar>
     public typealias Position = Vector
@@ -40,22 +47,21 @@ public enum KvMath2<Scalar> where Scalar : KvMathScalar2 {
 
 // MARK: Martix Operations <Float>
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 where Scalar == Float {
 
-    @inlinable
-    public static func abs(_ matrix: simd_float2x2) -> simd_float2x2 {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func abs(_ matrix: simd_float2x2) -> simd_float2x2 {
         .init(simd.abs(matrix[0]), simd.abs(matrix[1]))
     }
 
-
-    @inlinable
-    public static func min(_ matrix: simd_float2x2) -> Scalar {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func min(_ matrix: simd_float2x2) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min())
     }
 
-
-    @inlinable
-    public static func max(_ matrix: simd_float2x2) -> Scalar {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func max(_ matrix: simd_float2x2) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max())
     }
 
@@ -65,22 +71,21 @@ extension KvMath2 where Scalar == Float {
 
 // MARK: Martix Operations <Double>
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 where Scalar == Double {
 
-    @inlinable
-    public static func abs(_ matrix: simd_double2x2) -> simd_double2x2 {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func abs(_ matrix: simd_double2x2) -> simd_double2x2 {
         .init(simd.abs(matrix[0]), simd.abs(matrix[1]))
     }
 
-
-    @inlinable
-    public static func min(_ matrix: simd_double2x2) -> Scalar {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func min(_ matrix: simd_double2x2) -> Scalar {
         Swift.min(matrix[0].min(), matrix[1].min())
     }
 
-
-    @inlinable
-    public static func max(_ matrix: simd_double2x2) -> Scalar {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func max(_ matrix: simd_double2x2) -> Scalar {
         Swift.max(matrix[0].max(), matrix[1].max())
     }
 
@@ -90,85 +95,95 @@ extension KvMath2 where Scalar == Double {
 
 // MARK: Transformations <Float>
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 where Scalar == Float {
 
-    @inlinable
-    public static func apply(_ matrix: simd_float3x3, toPosition position: Position) -> Position {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func apply(_ matrix: simd_float3x3, toPosition position: Position) -> Position {
         let p3 = matrix * simd_make_float3(position, 1)
 
         return simd_make_float2(p3) / p3.z
     }
 
-    @inlinable
-    public static func apply(_ matrix: simd_float3x3, toVector vector: Vector) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func apply(_ matrix: simd_float3x3, toVector vector: Vector) -> Vector {
         simd_make_float2(matrix * simd_make_float3(vector))
     }
 
-
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> simd_float3x3 {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func translationMatrix(by translation: Vector) -> simd_float3x3 {
         simd_matrix([ 1, 0, 0 ], [ 0, 1, 0 ], simd_make_float3(translation, 1))
     }
 
-    @inlinable
-    public static func translation(from matrix: simd_float3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func translation(from matrix: simd_float3x3) -> Vector {
         let c3 = matrix[2]
 
         return simd_make_float2(c3) / c3.z
     }
 
-    @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout simd_float3x3) {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func setTranslation(_ translation: Vector, to matrix: inout simd_float3x3) {
         let z = matrix[2, 2]
 
         matrix[2] = simd_make_float3(translation * z, z)
     }
 
-
-
-    @inlinable
-    public static func scale(from matrix: simd_float3x3) -> Vector {
-        // Assuming .z == 0 for columns 0...1
-        .init(x: simd.length(matrix[0]),
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale(from matrix: simd_float2x2) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]))
     }
 
-    @inlinable
-    public static func scale²(from matrix: simd_float3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale²(from matrix: simd_float2x2) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]))
     }
 
-    @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_float2x2) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= simd_make_float3(s.x, s.x, 1)
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[1] *= s.y
+    }
+
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale(from matrix: simd_float3x3) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
+              y: simd.length(matrix[1]))
+    }
+
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale²(from matrix: simd_float3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]))
+    }
+
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_float3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        // OK due to matrix[0].z == 0
+        matrix[0] *= simd_make_float3(s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= simd_make_float3(s.y, s.y, 1)
     }
 
-
-
-    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
-    @inlinable
-    public static func transformation(_ transform: simd_float2x2, relativeTo position: Vector) -> simd_float3x3 {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func transformation(_ transform: simd_float2x2, relativeTo position: Vector) -> simd_float3x3 {
         simd_matrix(simd_make_float3(transform[0]),
                     simd_make_float3(transform[1]),
                     simd_make_float3(position - transform * position, 1))
     }
 
-
-
-    /// - Returns: Transformed X basis vector.
-    @inlinable
-    public static func basisX(from matrix: simd_float3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func basisX(from matrix: simd_float3x3) -> Vector {
         simd_make_float2(matrix[0])
     }
 
-    /// - Returns: Transformed Y basis vector.
-    @inlinable
-    public static func basisY(from matrix: simd_float3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func basisY(from matrix: simd_float3x3) -> Vector {
         simd_make_float2(matrix[1])
     }
 
@@ -178,85 +193,95 @@ extension KvMath2 where Scalar == Float {
 
 // MARK: Transformations <Double>
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 where Scalar == Double {
 
-    @inlinable
-    public static func apply(_ matrix: simd_double3x3, toPosition position: Position) -> Position {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func apply(_ matrix: simd_double3x3, toPosition position: Position) -> Position {
         let p3 = matrix * simd_make_double3(position, 1)
 
         return simd_make_double2(p3) / p3.z
     }
 
-    @inlinable
-    public static func apply(_ matrix: simd_double3x3, toVector vector: Vector) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func apply(_ matrix: simd_double3x3, toVector vector: Vector) -> Vector {
         simd_make_double2(matrix * simd_make_double3(vector))
     }
 
-
-
-    @inlinable
-    public static func translationMatrix(by translation: Vector) -> simd_double3x3 {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func translationMatrix(by translation: Vector) -> simd_double3x3 {
         simd_matrix([ 1, 0, 0 ], [ 0, 1, 0 ], simd_make_double3(translation, 1))
     }
 
-    @inlinable
-    public static func translation(from matrix: simd_double3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func translation(from matrix: simd_double3x3) -> Vector {
         let c3 = matrix[2]
 
         return simd_make_double2(c3) / c3.z
     }
 
-    @inlinable
-    public static func setTranslation(_ translation: Vector, to matrix: inout simd_double3x3) {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func setTranslation(_ translation: Vector, to matrix: inout simd_double3x3) {
         let z = matrix[2, 2]
 
         matrix[2] = simd_make_double3(translation * z, z)
     }
 
-
-
-    @inlinable
-    public static func scale(from matrix: simd_double3x3) -> Vector {
-        // Assuming .z == 0 for columns 0...1
-        .init(x: simd.length(matrix[0]),
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale(from matrix: simd_double2x2) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
               y: simd.length(matrix[1]))
     }
 
-    @inlinable
-    public static func scale²(from matrix: simd_double3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale²(from matrix: simd_double2x2) -> Vector {
         .init(x: simd.length_squared(matrix[0]),
               y: simd.length_squared(matrix[1]))
     }
 
-    @inlinable
-    public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_double2x2) {
         let s = scale * rsqrt(self.scale²(from: matrix))
 
-        matrix[0] *= simd_make_double3(s.x, s.x, 1)
+        matrix[0] *= s.x * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
+        matrix[1] *= s.y
+    }
+
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale(from matrix: simd_double3x3) -> Vector {
+        .init(x: simd.length(matrix[0]) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1),
+              y: simd.length(matrix[1]))
+    }
+
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func scale²(from matrix: simd_double3x3) -> Vector {
+        .init(x: simd.length_squared(matrix[0]),
+              y: simd.length_squared(matrix[1]))
+    }
+
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func setScale(_ scale: Vector, to matrix: inout simd_double3x3) {
+        let s = scale * rsqrt(self.scale²(from: matrix))
+
+        // OK due to matrix[0].z == 0
+        matrix[0] *= simd_make_double3(s.x, s.x, 1) * (KvIsNotNegative(simd_determinant(matrix)) ? 1 : -1)
         matrix[1] *= simd_make_double3(s.y, s.y, 1)
     }
 
-
-
-    /// - Returns: Transformation translating by -*position*, then applying *transform*, then translating by *position*.
-    @inlinable
-    public static func transformation(_ transform: simd_double2x2, relativeTo position: Vector) -> simd_double3x3 {
+    @available(*, deprecated, message: "Migrate to KvAffineTransform2 from kvGeometry.swift package")
+    @inlinable public static func transformation(_ transform: simd_double2x2, relativeTo position: Vector) -> simd_double3x3 {
         simd_matrix(simd_make_double3(transform[0]),
                     simd_make_double3(transform[1]),
                     simd_make_double3(position - transform * position, 1))
     }
 
-
-
-    /// - Returns: Transformed X basis vector.
-    @inlinable
-    public static func basisX(from matrix: simd_double3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func basisX(from matrix: simd_double3x3) -> Vector {
         simd_make_double2(matrix[0])
     }
 
-    /// - Returns: Transformed Y basis vector.
-    @inlinable
-    public static func basisY(from matrix: simd_double3x3) -> Vector {
+    @available(*, deprecated, message: "Migrate to KvTransform2 from kvGeometry.swift package")
+    @inlinable public static func basisY(from matrix: simd_double3x3) -> Vector {
         simd_make_double2(matrix[1])
     }
 
@@ -266,8 +291,10 @@ extension KvMath2 where Scalar == Double {
 
 // MARK: .Line
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 {
 
+    @available(*, deprecated, message: "Migrate to KvLine2 from kvGeometry.swift package")
     public struct Line : Hashable {
 
         /// Line origin is the closest point to origin of the coordinate space.
@@ -382,9 +409,10 @@ extension KvMath2 {
 
 // MARK: .AABR
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 {
 
-    /// Axis-aligned bonding rectangle
+    @available(*, deprecated, message: "Migrate to KvAABB2 from kvGeometry.swift package")
     public struct AABR : Hashable {
 
         public let min, max: Position
@@ -477,6 +505,7 @@ extension KvMath2 {
 
 // MARK: <Float>.AABR
 
+@available(*, deprecated, message: "Migrate to KvAABB2 from kvGeometry.swift package")
 extension KvMath2.AABR where Scalar == Float {
 
     @inlinable
@@ -492,6 +521,7 @@ extension KvMath2.AABR where Scalar == Float {
 
 // MARK: <Double>.AABR
 
+@available(*, deprecated, message: "Migrate to KvAABB2 from kvGeometry.swift package")
 extension KvMath2.AABR where Scalar == Double {
 
     @inlinable
@@ -507,9 +537,10 @@ extension KvMath2.AABR where Scalar == Double {
 
 // MARK: .Convex
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 {
 
-    /// Simple implementation of convex shape equal to intersections of left halfspaces produced by given oriented lines.
+    @available(*, deprecated, message: "Migrate to KvBConvex2 from kvGeometry.swift package")
     public struct Convex {
 
         public let lines: [Line]
@@ -623,11 +654,11 @@ extension KvMath2 {
 
 // MARK: Auxiliaries
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 {
 
-    /// - Returns: Normalized vector when source vector has nonzero length. Otherwise *nil* is returned.
-    @inlinable
-    public static func normalizedOrNil(_ vector: Vector) -> Vector? {
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func normalizedOrNil(_ vector: Vector) -> Vector? {
         let l² = length_squared(vector)
 
         guard KvIsNonzero(l²) else { return nil }
@@ -636,11 +667,8 @@ extension KvMath2 {
     }
 
 
-    /// - Returns: ((x, 0)  × (y, 0)).z
-    ///
-    /// - Note: It's helpful to find sine of angle between two unit vectors.
-    @inlinable
-    public static func cross2(_ lhs: Vector, _ rhs: Vector) -> Scalar { lhs.x * rhs.y - lhs.y * rhs.x }
+    @available(*, deprecated, message: "Migrate to KvMathScope")
+    @inlinable public static func cross2(_ lhs: Vector, _ rhs: Vector) -> Scalar { lhs.x * rhs.y - lhs.y * rhs.x }
 
 }
 
@@ -648,35 +676,46 @@ extension KvMath2 {
 
 // MARK: Generalization of SIMD
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 {
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func abs(_ v: Vector) -> Vector { .init(Swift.abs(v.x), Swift.abs(v.y)) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { Swift.max(min, Swift.min(max, x)) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector {
-        Vector(x: KvMath3.clamp(v.x, min.x, max.x),
-               y: KvMath3.clamp(v.y, min.y, max.y))
+        Vector(x: KvMath.clamp(v.x, min.x, max.x),
+               y: KvMath.clamp(v.y, min.y, max.y))
     }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length_squared(_ v: Vector) -> Scalar { dot(v, v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector {
         Vector(x: Swift.max(x.x, y.x),
                y: Swift.max(x.y, y.y))
     }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector {
         Vector(x: Swift.min(x.x, y.x),
                y: Swift.min(x.y, y.y))
     }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
         let oneMinusT = 1 - t
 
@@ -690,26 +729,37 @@ extension KvMath2 {
 
 // MARK: SIMD where Scalar == Float
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 where Scalar == Float {
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { simd.dot(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { simd.length(v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length_squared(_ v: Vector) -> Scalar { simd.length_squared(v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector { simd_max(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
 }
@@ -718,26 +768,37 @@ extension KvMath2 where Scalar == Float {
 
 // MARK: SIMD where Scalar == Double
 
+@available(*, deprecated, message: "Migrate to KvMathScope")
 extension KvMath2 where Scalar == Double {
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func abs(_ v: Vector) -> Vector { simd.abs(v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { simd_clamp(x, min, max) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func clamp(_ v: Vector, _ min: Vector, _ max: Vector) -> Vector { simd_clamp(v, min, max) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { simd.distance(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { simd.dot(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { simd.length(v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length_squared(_ v: Vector) -> Scalar { simd.length_squared(v) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func max(_ x: Vector, _ y: Vector) -> Vector { simd_max(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func min(_ x: Vector, _ y: Vector) -> Vector { simd_min(x, y) }
 
+    @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector { simd.mix(x, y, t: t) }
 
 }
@@ -746,16 +807,15 @@ extension KvMath2 where Scalar == Double {
 
 // MARK: - Vector Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, equalTo rhs: KvMath2<Scalar>.Vector) -> Bool
+@available(*, deprecated, message: "Migrate to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, equalTo rhs: KvMath2<Scalar>.Vector) -> Bool
 where Scalar : KvMathScalar2
 {
     KvIsZero(KvMath2.abs(lhs - rhs).max())
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, inequalTo rhs: KvMath2<Scalar>.Vector) -> Bool
+@available(*, deprecated, message: "Migrate to KvMathScope")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Vector, inequalTo rhs: KvMath2<Scalar>.Vector) -> Bool
 where Scalar : KvMathScalar3
 {
     KvIsNonzero(KvMath2.abs(lhs - rhs).max())
@@ -765,26 +825,23 @@ where Scalar : KvMathScalar3
 
 // MARK: - Matrix Comparisons
 
-@inlinable
-public func KvIs(_ lhs: simd_float2x2, equalTo rhs: simd_float2x2) -> Bool {
+@available(*, deprecated, message: "Migrate to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_float2x2, equalTo rhs: simd_float2x2) -> Bool {
     KvIsZero(KvMath2.max(KvMath2.abs(lhs - rhs)))
 }
 
-
-@inlinable
-public func KvIs(_ lhs: simd_double2x2, equalTo rhs: simd_double2x2) -> Bool {
+@available(*, deprecated, message: "Migrate to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_double2x2, equalTo rhs: simd_double2x2) -> Bool {
     KvIsZero(KvMath2.max(KvMath2.abs(lhs - rhs)))
 }
 
-
-@inlinable
-public func KvIs(_ lhs: simd_float2x2, inequalTo rhs: simd_float2x2) -> Bool {
+@available(*, deprecated, message: "Migrate to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_float2x2, inequalTo rhs: simd_float2x2) -> Bool {
     KvIsNonzero(KvMath2.max(KvMath2.abs(lhs - rhs)))
 }
 
-
-@inlinable
-public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
+@available(*, deprecated, message: "Migrate to KvMathScope")
+@inlinable public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
     KvIsNonzero(KvMath2.max(KvMath2.abs(lhs - rhs)))
 }
 
@@ -792,35 +849,32 @@ public func KvIs(_ lhs: simd_double2x2, inequalTo rhs: simd_double2x2) -> Bool {
 
 // MARK: - Line Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, equalTo rhs: KvMath2<Scalar>.Line) -> Bool
+@available(*, deprecated, message: "Migrate to KvLine2 from kvGeometry.swift package")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, equalTo rhs: KvMath2<Scalar>.Line) -> Bool
 where Scalar : KvMathScalar2
 {
     lhs.contains(rhs.origin) && KvIs(lhs.standardDirection, equalTo: rhs.standardDirection)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, inequalTo rhs: KvMath2<Scalar>.Line) -> Bool
+@available(*, deprecated, message: "Migrate to KvLine2 from kvGeometry.swift package")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.Line, inequalTo rhs: KvMath2<Scalar>.Line) -> Bool
 where Scalar : KvMathScalar2
 {
     !lhs.contains(rhs.origin) || KvIs(lhs.standardDirection, inequalTo: rhs.standardDirection)
 }
 
 
-
 // MARK: - AABR Comparisons
 
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, equalTo rhs: KvMath2<Scalar>.AABR) -> Bool
+@available(*, deprecated, message: "Migrate to KvAABB2 from kvGeometry.swift package")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, equalTo rhs: KvMath2<Scalar>.AABR) -> Bool
 where Scalar : KvMathScalar2
 {
     KvIs(lhs.min, equalTo: rhs.min) && KvIs(lhs.max, equalTo: rhs.max)
 }
 
-
-@inlinable
-public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, inequalTo rhs: KvMath2<Scalar>.AABR) -> Bool
+@available(*, deprecated, message: "Migrate to KvAABB2 from kvGeometry.swift package")
+@inlinable public func KvIs<Scalar>(_ lhs: KvMath2<Scalar>.AABR, inequalTo rhs: KvMath2<Scalar>.AABR) -> Bool
 where Scalar : KvMathScalar2
 {
     KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)

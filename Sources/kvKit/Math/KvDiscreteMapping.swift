@@ -69,7 +69,7 @@ extension KvDiscreteMapping {
     /// - returns: Minimum of values greater then *x*.
     public func value(greaterThen x: T) -> T {
         let scaledX = x * scale
-        return ceil(scaledX + KvUlp(of: scaledX)) * invScale
+        return ceil(scaledX + KvEpsArg(scaledX).tolerance.value) * invScale
     }
 
 
@@ -77,7 +77,7 @@ extension KvDiscreteMapping {
     /// - returns: Maximum of values lower then *x*.
     public func value(lessThen x: T) -> T {
         let scaledX = x * scale
-        return floor(scaledX - KvUlp(of: scaledX)) * invScale
+        return floor(scaledX - KvEpsArg(scaledX).tolerance.value) * invScale
     }
 
 
@@ -85,7 +85,7 @@ extension KvDiscreteMapping {
     /// - returns: Minimum of values greater then or equal to *x*.
     public func value(greaterThenOrEqualTo x: T) -> T {
         let scaledX = x * scale
-        return ceil(scaledX - KvUlp(of: scaledX)) * invScale
+        return ceil(scaledX - KvEpsArg(scaledX).tolerance.value) * invScale
     }
 
 
@@ -93,7 +93,7 @@ extension KvDiscreteMapping {
     /// - returns: Maximum of values lower then or equal to *x*.
     public func value(lessThenOrEqualTo x: T) -> T {
         let scaledX = x * scale
-        return floor(scaledX + KvUlp(of: scaledX)) * invScale
+        return floor(scaledX + KvEpsArg(scaledX).tolerance.value) * invScale
     }
 
 }

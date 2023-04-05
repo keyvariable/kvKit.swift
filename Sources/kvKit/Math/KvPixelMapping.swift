@@ -23,11 +23,11 @@
 
 import Foundation
 
-#if os(macOS)
-import Cocoa
-#elseif os(iOS)
+#if canImport(UIKit)
 import UIKit
-#endif // iOS
+#elseif canImport(AppKit)
+import AppKit
+#endif // AppKit
 
 
 
@@ -116,23 +116,22 @@ extension KvPixelMapping {
 
 extension KvPixelMapping {
 
-    #if canImport(Cocoa)
-    /// Set *scale* property equal to scale of a window given *view* is presented in.
-    @inlinable
-    public func setScale(for view: NSView) {
-        scale = view.window?.backingScaleFactor ?? 1
-    }
-    #endif // canImport(Cocoa)
-
-
-
-    #if canImport(UIKit)
+#if canImport(UIKit)
     /// Set *scale* property equal to scale of a window given *view* is presented in.
     @inlinable
     public func setScale(for view: UIView) {
         scale = view.window?.screen.scale ?? 1
     }
-    #endif // canImport(UIKit)
+
+
+#elseif canImport(AppKit)
+
+    /// Set *scale* property equal to scale of a window given *view* is presented in.
+    @inlinable
+    public func setScale(for view: NSView) {
+        scale = view.window?.backingScaleFactor ?? 1
+    }
+#endif // canImport(AppKit)
 
 }
 

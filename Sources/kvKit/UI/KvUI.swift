@@ -22,15 +22,19 @@
 //  Copyright © 2018 Svyatoslav Popov. All rights reserved.
 //
 
-#if canImport(Cocoa) || canImport(UIKit)
+#if canImport(AppKit) || canImport(UIKit)
 
 
 
-#if canImport(Cocoa)
-import Cocoa
-#elseif canImport(UIKit)
+#if canImport(UIKit)
 import UIKit
-#endif // canImport(UIKit)
+#elseif canImport(AppKit)
+import AppKit
+#endif // AppKit
+
+#if canImport(SwiftUI)
+import SwiftUI
+#endif // SwiftUI
 
 
 
@@ -38,17 +42,59 @@ public class KvUI { }
 
 
 
+// MARK: Views and Windows
+
+extension KvUI {
+
+#if canImport(UIKit)
+    public typealias View = UIView
+    public typealias ViewController = UIViewController
+    public typealias Window = UIWindow
+
+    public typealias Responder = UIResponder
+    public typealias Event = UIEvent
+
+#if canImport(SwiftUI)
+    @available(iOS 13.0, *)
+    public typealias ViewRepresentable = UIViewRepresentable
+
+    @available(iOS 13.0, *)
+    public typealias ViewControllerRepresentable = UIViewControllerRepresentable
+#endif // SwiftUI
+
+#elseif canImport(AppKit)
+    public typealias View = NSView
+    public typealias ViewController = NSViewController
+    public typealias Window = NSWindow
+
+    public typealias Responder = NSResponder
+    public typealias Event = NSEvent
+
+#if canImport(SwiftUI)
+    @available(macOS 10.15, *)
+    public typealias ViewRepresentable = NSViewRepresentable
+
+    @available(macOS 10.15, *)
+    public typealias ViewControllerRepresentable = NSViewControllerRepresentable
+#endif // SwiftUI
+#endif // AppKit
+
+}
+
+
+
 // MARK: .Color
 
 extension KvUI {
 
-    #if canImport(Cocoa)
-    /// Platform high level color type.
-    public typealias Color = NSColor
-    #elseif canImport(UIKit)
+#if canImport(UIKit)
     /// Platform high level color type.
     public typealias Color = UIColor
-    #endif // iOS
+
+#elseif canImport(AppKit)
+    /// Platform high level color type.
+    public typealias Color = NSColor
+#endif // AppKit
 
 
 
@@ -58,11 +104,11 @@ extension KvUI {
                           green: CGFloat((hexValue >> 8) & 0xFF) / 255,
                           blue: CGFloat(hexValue & 0xFF) / 255)
         
-        #if canImport(Cocoa)
-        return Color(calibratedRed: components.red, green: components.green, blue: components.blue, alpha: alpha)
-        #elseif canImport(UIKit)
+#if canImport(UIKit)
         return Color(red: components.red, green: components.green, blue: components.blue, alpha: alpha)
-        #endif // canImport(UIKit)
+#elseif canImport(AppKit)
+        return Color(calibratedRed: components.red, green: components.green, blue: components.blue, alpha: alpha)
+#endif // AppKit
     }
 
 }
@@ -73,13 +119,14 @@ extension KvUI {
 
 extension KvUI {
 
-    #if canImport(Cocoa)
-    /// Platform high level image type.
-    public typealias Image = NSImage
-    #elseif canImport(UIKit)
+#if canImport(UIKit)
     /// Platform high level image type.
     public typealias Image = UIImage
-    #endif // iOS
+
+#elseif canImport(AppKit)
+    /// Platform high level image type.
+    public typealias Image = NSImage
+#endif // AppKit
 
 }
 
@@ -91,7 +138,7 @@ extension KvUI {
 
     public struct Alert {
 
-        #if canImport(Cocoa)
+#if canImport(AppKit)
         public static func present(message: String, details: String? = nil, _ alertStyle: NSAlert.Style = .informational,
                                    in window: NSWindow? = nil, action: String = "Close", completion: (() -> Void)? = nil)
         {
@@ -148,11 +195,11 @@ extension KvUI {
                 completion?(modalResponse)
             }
         }
-        #endif // canImport(Cocoa)
+#endif // canImport(AppKit)
 
 
 
-        #if canImport(UIKit)
+#if canImport(UIKit)
         @available(iOS 13.0, *)
         public static func present(message: String, title: String? = nil, in viewController: UIViewController? = nil,
                                    action: String = "Close", completion: (() -> Void)? = nil)
@@ -209,7 +256,7 @@ extension KvUI {
 
             viewController.present(alertController, animated: true, completion: nil)
         }
-        #endif // canImport(UIKit)
+#endif // canImport(UIKit)
 
     }
 
@@ -266,4 +313,4 @@ extension KvUI {
 
 
 
-#endif // canImport(Cocoa) || canImport(UIKit)
+#endif // canImport(AppKit) || canImport(UIKit)

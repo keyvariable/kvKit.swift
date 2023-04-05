@@ -59,7 +59,7 @@ public protocol KvStatisticsProcessor : KvStatisticsStream {
 
 // MARK: - KvStatistics
 
-/// Various statistics auxliliaries.
+/// Various statistics auxiliaries.
 public class KvStatistics { }
 
 
@@ -555,30 +555,30 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsProcessor
 
-            public mutating func rollback(_ value: Value) { avgProcessor.rollback(value) }
+            public mutating func rollback(_ value: Value) { avgProcessor.rollback(value * value) }
 
 
 
             public mutating func rollback<S>(_ values: S) where S : Sequence, S.Element == Value {
-                avgProcessor.rollback(values)
+                avgProcessor.rollback(values.lazy.map { $0 * $0 })
             }
 
 
 
             public mutating func rollback<C>(_ values: C) where C : Collection, C.Element == Value {
-                avgProcessor.rollback(values)
+                avgProcessor.rollback(values.lazy.map { $0 * $0 })
             }
 
 
 
             public mutating func replace(_ oldValue: Value, with newValue: Value) {
-                avgProcessor.replace(oldValue, with: newValue)
+                avgProcessor.replace(oldValue * oldValue, with: newValue * newValue)
             }
 
 
 
             public mutating func replace<S>(_ oldValues: S, with newValues: S) where S : Sequence, S.Element == Value {
-                avgProcessor.replace(oldValues, with: newValues)
+                avgProcessor.replace(oldValues.lazy.map { $0 * $0 }, with: newValues.lazy.map { $0 * $0 })
             }
 
         }
@@ -1090,7 +1090,7 @@ extension KvStatistics {
 
 
 
-            // MARK: Auxliliaries
+            // MARK: Auxiliaries
 
             private func value(divider: Int) -> Value {
                 divider > 0 ? comoment / Value(divider) : 0

@@ -60,10 +60,11 @@ extension KvCachedAssets {
 
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult @inlinable
-    public func withData(for url: URL,
-                         on queue: DispatchQueue = .global(),
-                         completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable?
-    {
+    public func withData(
+        for url: URL,
+        on queue: DispatchQueue = .global(),
+        completion: @escaping (KvCancellableResult<Data>) -> Void
+    ) -> AnyCancellable? {
         withData(for: .init(url: url), on: queue, completion: completion)
     }
 
@@ -71,10 +72,11 @@ extension KvCachedAssets {
 
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData(for urlRequest: URLRequest,
-                         on queue: DispatchQueue = .global(),
-                         completion: @escaping (KvCancellableResult<Data>) -> Void) -> Cancellable?
-    {
+    public func withData(
+        for urlRequest: URLRequest,
+        on queue: DispatchQueue = .global(),
+        completion: @escaping (KvCancellableResult<Data>
+    ) -> Void) -> AnyCancellable? {
         switch urlRequest.url {
         case let .some(url) where url.isFileURL:
             queue.async {
@@ -134,9 +136,11 @@ extension KvCachedAssets {
     /// - Note: When download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult @inlinable
-    public func withData<URLs>(for urls: URLs,
-                               on queue: DispatchQueue = .global(),
-                               completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
+    public func withData<URLs>(
+        for urls: URLs,
+        on queue: DispatchQueue = .global(),
+        completion: @escaping (KvCancellableResult<UrlRequestDataPairs>
+    ) -> Void) -> AnyCancellable?
     where URLs : Sequence, URLs.Element == URL
     {
         withData(for: urls.lazy.map { .init(url: $0) }, on: queue, completion: completion)
@@ -147,7 +151,11 @@ extension KvCachedAssets {
     /// - Note: When download for any of *urls* fails then all other downloads are cancelled.
     @available(iOS 13.0, macOS 10.15, *)
     @discardableResult
-    public func withData<URLRequests>(for urlRequests: URLRequests, on queue: DispatchQueue = .global(), completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void) -> Cancellable?
+    public func withData<URLRequests>(
+        for urlRequests: URLRequests,
+        on queue: DispatchQueue = .global(),
+        completion: @escaping (KvCancellableResult<UrlRequestDataPairs>) -> Void
+    ) -> AnyCancellable?
     where URLRequests : Sequence, URLRequests.Element == URLRequest
     {
         var iterator = urlRequests.makeIterator()
@@ -188,7 +196,7 @@ extension KvCachedAssets {
             completion($0.map { $0 ?? .init() })
         }
 
-        return taskGroup
+        return .init(taskGroup)
     }
 
 }

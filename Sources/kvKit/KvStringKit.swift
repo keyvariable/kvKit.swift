@@ -25,7 +25,7 @@ import Foundation
 
 
 
-/// Collection of string auxliliaries.
+/// Collection of string auxiliaries.
 public class KvStringKit { }
 
 
