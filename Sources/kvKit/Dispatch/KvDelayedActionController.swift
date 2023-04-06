@@ -1,6 +1,6 @@
 //===----------------------------------------------------------------------===//
 //
-//  Copyright (c) 2021 Svyatoslav Popov.
+//  Copyright (c) 2021 Svyatoslav Popov (info@keyvar.com).
 //
 //  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 //  the License. You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 //  KvDelayedActionController.swift
 //  kvKit
 //
-//  Created by Svyatoslav Popov on 13.03.18.
+//  Created by Svyatoslav Popov on 13.03.2018.
 //
 
 #if canImport(Combine)

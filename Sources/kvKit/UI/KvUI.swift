@@ -1,6 +1,6 @@
 //===----------------------------------------------------------------------===//
 //
-//  Copyright (c) 2021 Svyatoslav Popov.
+//  Copyright (c) 2021 Svyatoslav Popov (info@keyvar.com).
 //
 //  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 //  the License. You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 //  KvKit
 //
 //  Created by Святослав on 15.03.2018.
-//  Copyright © 2018 Svyatoslav Popov. All rights reserved.
 //
 
 #if canImport(AppKit) || canImport(UIKit)

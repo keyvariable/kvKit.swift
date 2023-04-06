@@ -1,6 +1,6 @@
 //===----------------------------------------------------------------------===//
 //
-//  Copyright (c) 2021 Svyatoslav Popov.
+//  Copyright (c) 2022 Svyatoslav Popov (info@keyvar.com).
 //
 //  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 //  the License. You may obtain a copy of the License at
@@ -16,10 +16,12 @@
 //===----------------------------------------------------------------------===//
 //
 //  KvNumericallyComparable.swift
-//  
+//  kvKit
 //
 //  Created by Svyatoslav Popov on 21.09.2022.
 //
+
+
 
 // MARK: - KvNumericallyComparable
 
