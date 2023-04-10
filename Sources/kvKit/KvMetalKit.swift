@@ -60,7 +60,7 @@ extension KvMetalKit {
         let sliceBytes = UnsafeMutableBufferPointer<Texel>.allocate(capacity: descriptor.width * descriptor.height)
         defer { sliceBytes.deallocate() }
 
-        sliceBytes.assign(repeating: pattern)
+        sliceBytes.update(repeating: pattern)
 
         (0..<6).forEach { slice in
             texture.replace(region: .init(origin: .init(x: 0, y: 0, z: 0),

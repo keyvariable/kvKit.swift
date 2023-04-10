@@ -283,15 +283,15 @@ extension KvCVPixelBufferKit {
         private func newPixelBufferPool() throws -> CVPixelBufferPool {
             var pixelBufferPool: CVPixelBufferPool?
 
-            CVPixelBufferPoolCreate(kCFAllocatorDefault,
-                                    nil,
-                                    [ kCVPixelBufferPixelFormatTypeKey: pixelFormat,
-                                      kCVPixelBufferWidthKey: bufferSize.width,
-                                      kCVPixelBufferHeightKey: bufferSize.height,
-                                      kCVPixelBufferCGImageCompatibilityKey: true,
-                                      kCVPixelBufferIOSurfaceCoreAnimationCompatibilityKey: options.contains(.ioSurfaceCoreAnimationCompatibility),
-                                    ] as CFDictionary,
-                                    &pixelBufferPool)
+            let pixelBufferAttributes = [
+                kCVPixelBufferPixelFormatTypeKey: pixelFormat,
+                kCVPixelBufferWidthKey: bufferSize.width,
+                kCVPixelBufferHeightKey: bufferSize.height,
+                kCVPixelBufferCGImageCompatibilityKey: true,
+                kCVPixelBufferIOSurfaceCoreAnimationCompatibilityKey: options.contains(.ioSurfaceCoreAnimationCompatibility),
+            ] as [CFString : Any] as CFDictionary
+
+            CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, pixelBufferAttributes, &pixelBufferPool)
 
             guard pixelBufferPool != nil else { throw PoolError.unableToCreatePixelBufferPool }
 
