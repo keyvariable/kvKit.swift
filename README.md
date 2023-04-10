@@ -29,7 +29,7 @@ This package contains both crossplatform code and platform specific code.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/keyvariable/kvKit-Swift.git", from: "3.0.1"),
+    .package(url: "https://github.com/keyvariable/kvKit-Swift.git", from: "3.1.0"),
 ]
 ```
 
