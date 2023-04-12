@@ -47,7 +47,7 @@ extension KvCIFilterKit {
         while let filter = iterator.next() {
             filter.setValue(result, forKey: kCIInputImageKey)
 
-            guard let nextImage = filter.outputImage else { throw KvError("Failed to apply «\(filter.name)» core image filter") }
+            guard let nextImage = filter.outputImage else { throw KvError("Failed to apply «\(filter.name)» Core Image filter") }
 
             result = nextImage
         }

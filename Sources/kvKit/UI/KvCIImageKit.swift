@@ -35,7 +35,7 @@ public struct KvCIImageKit { private init() { } }
 
 
 
-// MARK: - Contertions
+// MARK: - Convertions
 
 extension KvCIImageKit {
 
@@ -60,7 +60,6 @@ extension KvCIImageKit {
 #endif // os(macOS)
 
 
-
 #if os(iOS)
     /// - Parameter uiImage: E.g. *UIImage* in iOS, *NSImage* in MacOS.
     ///
@@ -83,4 +82,29 @@ extension KvCIImageKit {
     }
 #endif // os(macOS)
 
+}
+
+
+
+// MARK: - Access
+
+extension KvCIImageKit {
+    
+    /// - Parameter colorSpace: Optional color scape for the resulting color. Default is sRGB.
+    /// - Parameter context: Optional context. If `nil` then default temporary context is created.
+    ///
+    /// - Returns: RGBA floating point components of pixel color at given *point*.
+    public static func pickColor(in image: CIImage,
+                                 at point: CGPoint,
+                                 colorSpace: CGColorSpace? = .init(name: CGColorSpace.sRGB),
+                                 context: CIContext? = nil
+    ) -> [Float] {
+        var bitmap: [Float] = .init(repeating: 0, count: 4)
+        let context = context ?? CIContext()
+        
+        context.render(image, toBitmap: &bitmap, rowBytes: bitmap.count * 4, bounds: CGRect(x: point.x, y: point.y, width: 1, height: 1), format: .RGBAf, colorSpace: colorSpace)
+        
+        return bitmap
+    }
+    
 }
