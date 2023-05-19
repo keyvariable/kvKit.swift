@@ -222,6 +222,33 @@ extension KvSceneKit {
 
 extension KvSceneKit {
 
+    /// - Returns: Root note of the hierarchy *node* is contained in.
+    @inlinable
+    public static func rootNode(containing node: SCNNode) -> SCNNode {
+        var node = node
+
+        while let parent = node.parent {
+            node = parent
+        }
+
+        return node
+    }
+
+
+    /// - Returns: A boolean value indicating whether *node* is a descendant of *ancestor* node. If *node* is the same as *ancestor* then `false` is returned.
+    @inlinable
+    public static func isAncestor(_ ancestor: SCNNode, of node: SCNNode) -> Bool {
+        var node = node
+
+        while let parent = node.parent {
+            if parent === ancestor { return true }
+            node = parent
+        }
+
+        return false
+    }
+
+
     /// Invokes *body* for given *node* and it's decendand nodes depending on result of *body* invocations.
     public static func traverseHierarchy(from node: SCNNode, body: (SCNNode) throws -> NodeHierarchyBodyResult) rethrows {
 
@@ -244,7 +271,6 @@ extension KvSceneKit {
 
         _ = try RunIteration(for: node, body: body)
     }
-
 
 
     // MARK: .NodeHierarchyBodyResult
