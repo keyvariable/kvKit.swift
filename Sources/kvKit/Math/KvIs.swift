@@ -30,7 +30,7 @@ import simd
 /// A lightweight container for numerical comparison tolerance.
 ///
 /// Use ``KvNumericToleranceMagnitude`` to combine magnitudes and calculate tolerance once.
-public struct KvNumericTolerance<T : FloatingPoint> {
+public struct KvNumericTolerance<T : BinaryFloatingPoint> {
 
     public typealias Argument = KvNumericToleranceArgument<T>
 
@@ -48,7 +48,7 @@ public struct KvNumericTolerance<T : FloatingPoint> {
 
     @inlinable
     public init(_ arg: Argument) {
-        self.init(value: .ulpOfOne * Swift.max(Swift.min(16 * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
+        self.init(value: T.ulpOfOne * Swift.max(Swift.min((16.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
     }
 
 
@@ -64,7 +64,7 @@ public struct KvNumericTolerance<T : FloatingPoint> {
 // MARK: .KvNumericToleranceMagnitude
 
 /// A lightweight container for magnitude of numerical comparison tolerance.
-public struct KvNumericToleranceArgument<T : FloatingPoint> : Hashable {
+public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
 
     public typealias Tolerance = KvNumericTolerance<T>
 
@@ -151,9 +151,9 @@ public struct KvNumericToleranceArgument<T : FloatingPoint> : Hashable {
 
 // MARK: FP Comparisons
 
-public typealias KvEps<T : FloatingPoint> = KvNumericTolerance<T>
+public typealias KvEps<T : BinaryFloatingPoint> = KvNumericTolerance<T>
 
-public typealias KvEpsArg<T : FloatingPoint> = KvNumericToleranceArgument<T>
+public typealias KvEpsArg<T : BinaryFloatingPoint> = KvNumericToleranceArgument<T>
 
 
 
@@ -161,7 +161,7 @@ public typealias KvEpsArg<T : FloatingPoint> = KvNumericToleranceArgument<T>
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, eps: KvEps<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, equalTo rhs: T, eps: KvEps<T>) -> Bool {
     abs(lhs - rhs) <= eps.value
 }
 
@@ -169,7 +169,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, eps: KvEps<T>) -> 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, equalTo rhs: T) -> Bool {
     KvIs(lhs, equalTo: rhs, eps: KvEpsArg(lhs, rhs).tolerance)
 }
 
@@ -183,7 +183,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, eps: KvEps<T>, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, equalTo rhs: T, eps: KvEps<T>, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
     greaterFlag = lhs > rhs + eps.value
 
     return lhs >= rhs - eps.value && !greaterFlag
@@ -197,7 +197,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, eps: KvEps<T>, als
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, equalTo: rhs, eps: KvEpsArg(lhs, rhs).tolerance, alsoIsGreaterThan: &greaterFlag)
 }
 
@@ -207,7 +207,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThan 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: KvEps<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: KvEps<T>) -> Bool {
     abs(rhs - lhs) > eps.value
 }
 
@@ -215,7 +215,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: KvEps<T>) -
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, inequalTo rhs: T) -> Bool {
     KvIs(lhs, inequalTo: rhs, eps: KvEpsArg(lhs, rhs).tolerance)
 }
 
@@ -229,7 +229,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: KvEps<T>, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: KvEps<T>, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
     greaterFlag = lhs > rhs + eps.value
 
     return lhs < rhs - eps.value || greaterFlag
@@ -243,7 +243,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, eps: KvEps<T>, a
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, inequalTo: rhs, eps: KvEpsArg(lhs, rhs).tolerance, alsoIsGreaterThan: &greaterFlag)
 }
 
@@ -253,7 +253,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterTha
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: KvEps<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: KvEps<T>) -> Bool {
     lhs > rhs + eps.value
 }
 
@@ -261,7 +261,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: KvEps<T>)
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThan rhs: T) -> Bool {
     KvIs(lhs, greaterThan: rhs, eps: KvEpsArg(lhs, rhs).tolerance)
 }
 
@@ -275,7 +275,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: KvEps<T>, alsoIsLessThan lessFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: KvEps<T>, alsoIsLessThan lessFlag: inout Bool) -> Bool {
     lessFlag = lhs < rhs - eps.value
 
     return lhs > rhs + eps.value
@@ -289,7 +289,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, eps: KvEps<T>,
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, alsoIsLessThan lessFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThan rhs: T, alsoIsLessThan lessFlag: inout Bool) -> Bool {
     KvIs(lhs, greaterThan: rhs, eps: KvEpsArg(lhs, rhs).tolerance, alsoIsLessThan: &lessFlag)
 }
 
@@ -299,7 +299,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThan rhs: T, alsoIsLessThan
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, eps: KvEps<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThan rhs: T, eps: KvEps<T>) -> Bool {
     lhs < rhs - eps.value
 }
 
@@ -307,7 +307,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, eps: KvEps<T>) ->
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThan rhs: T) -> Bool {
     KvIs(lhs, lessThan: rhs, eps: KvEpsArg(lhs, rhs).tolerance)
 }
 
@@ -321,7 +321,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T) -> Bool {
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, eps: KvEps<T>, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThan rhs: T, eps: KvEps<T>, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
     greaterFlag = lhs > rhs + eps.value
 
     return lhs < rhs - eps.value
@@ -335,7 +335,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, eps: KvEps<T>, al
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThan rhs: T, alsoIsGreaterThan greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, lessThan: rhs, eps: KvEpsArg(lhs, rhs).tolerance, alsoIsGreaterThan: &greaterFlag)
 }
 
@@ -345,7 +345,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThan rhs: T, alsoIsGreaterThan
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T, eps: KvEps<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T, eps: KvEps<T>) -> Bool {
     lhs >= rhs - eps.value
 }
 
@@ -353,7 +353,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T, eps: 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T) -> Bool {
     KvIs(lhs, greaterThanOrEqualTo: rhs, eps: KvEpsArg(lhs, rhs).tolerance)
 }
 
@@ -363,7 +363,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThanOrEqualTo rhs: T) -> Bo
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T, eps: KvEps<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T, eps: KvEps<T>) -> Bool {
     lhs <= rhs + eps.value
 }
 
@@ -371,7 +371,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T, eps: KvE
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T) -> Bool {
     KvIs(lhs, lessThanOrEqualTo: rhs, eps: KvEpsArg(lhs, rhs).tolerance)
 }
 
@@ -381,7 +381,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T, lessThanOrEqualTo rhs: T) -> Bool 
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
+public func KvIsZero<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     abs(value) <= eps.value
 }
 
@@ -395,7 +395,7 @@ public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) ->
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+public func KvIsZero<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
     positiveFlag = value > eps.value
 
     return !positiveFlag && value >= -eps.value
@@ -407,7 +407,7 @@ public func KvIsZero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, al
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
+public func KvIsNonzero<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     abs(value) > eps.value
 }
 
@@ -421,7 +421,7 @@ public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default)
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+public func KvIsNonzero<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
     positiveFlag = value > eps.value
 
     return positiveFlag || value < -eps.value
@@ -433,7 +433,7 @@ public func KvIsNonzero<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default,
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
+public func KvIsPositive<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value > eps.value
 }
 
@@ -447,7 +447,7 @@ public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsNegative negativeFlag: inout Bool) -> Bool {
+public func KvIsPositive<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsNegative negativeFlag: inout Bool) -> Bool {
     negativeFlag = value < -eps.value
 
     return value > eps.value
@@ -459,7 +459,7 @@ public func KvIsPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
+public func KvIsNegative<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value < -eps.value
 }
 
@@ -473,7 +473,7 @@ public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default
 /// - Note: It's faster to check the flag than to compare the same values twice.
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
+public func KvIsNegative<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default, alsoIsPositive positiveFlag: inout Bool) -> Bool {
     positiveFlag = value > eps.value
 
     return value < -eps.value
@@ -485,7 +485,7 @@ public func KvIsNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNotPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
+public func KvIsNotPositive<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value <= eps.value
 }
 
@@ -495,7 +495,7 @@ public func KvIsNotPositive<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .defa
 ///
 /// - Note: E.g. 1 – 0.1 · 10 is 0.0 but `(0..<10).reduce(1.0, { a, _ in a - 0.1 }) == 0.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIsNotNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
+public func KvIsNotNegative<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> = .default) -> Bool {
     value >= -eps.value
 }
 
@@ -507,7 +507,7 @@ public func KvIsNotNegative<T : FloatingPoint>(_ value: T, eps: KvEps<T> = .defa
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T?, equalTo rhs: T?) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T?, equalTo rhs: T?) -> Bool {
     switch (lhs, rhs) {
     case (.some(let lhs), .some(let rhs)):
         return KvIs(lhs, equalTo: rhs)
@@ -523,7 +523,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T?, equalTo rhs: T?) -> Bool {
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T?, inequalTo rhs: T?) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T?, inequalTo rhs: T?) -> Bool {
     switch (lhs, rhs) {
     case (.some(let lhs), .some(let rhs)):
         return KvIs(lhs, inequalTo: rhs)
@@ -542,7 +542,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: T?, inequalTo rhs: T?) -> Bool {
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, in range: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, in range: Range<T>) -> Bool {
     KvIs(value, greaterThanOrEqualTo: range.lowerBound) && KvIs(value, lessThan: range.upperBound)
 }
 
@@ -552,7 +552,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, in range: Range<T>) -> Bool {
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, in range: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, in range: ClosedRange<T>) -> Bool {
     KvIs(value, greaterThanOrEqualTo: range.lowerBound) && KvIs(value, lessThanOrEqualTo: range.upperBound)
 }
 
@@ -562,7 +562,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, in range: ClosedRange<T>) -> Boo
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, in range: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, in range: PartialRangeFrom<T>) -> Bool {
     KvIs(value, greaterThanOrEqualTo: range.lowerBound)
 }
 
@@ -572,7 +572,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, in range: PartialRangeFrom<T>) -
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, in range: PartialRangeUpTo<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, in range: PartialRangeUpTo<T>) -> Bool {
     KvIs(value, lessThan: range.upperBound)
 }
 
@@ -582,7 +582,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, in range: PartialRangeUpTo<T>) -
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, in range: PartialRangeThrough<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, in range: PartialRangeThrough<T>) -> Bool {
     KvIs(value, lessThanOrEqualTo: range.upperBound)
 }
 
@@ -592,7 +592,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, in range: PartialRangeThrough<T>
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, outOf range: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, outOf range: Range<T>) -> Bool {
     KvIs(value, lessThan: range.lowerBound) || KvIs(value, greaterThanOrEqualTo: range.upperBound)
 }
 
@@ -602,7 +602,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, outOf range: Range<T>) -> Bool {
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, outOf range: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, outOf range: ClosedRange<T>) -> Bool {
     KvIs(value, lessThan: range.lowerBound) || KvIs(value, greaterThan: range.upperBound)
 }
 
@@ -612,7 +612,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, outOf range: ClosedRange<T>) -> 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, outOf range: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, outOf range: PartialRangeFrom<T>) -> Bool {
     KvIs(value, lessThan: range.lowerBound)
 }
 
@@ -622,7 +622,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, outOf range: PartialRangeFrom<T>
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, outOf range: PartialRangeUpTo<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, outOf range: PartialRangeUpTo<T>) -> Bool {
     KvIs(value, greaterThanOrEqualTo: range.upperBound)
 }
 
@@ -632,7 +632,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, outOf range: PartialRangeUpTo<T>
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ value: T, outOf range: PartialRangeThrough<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ value: T, outOf range: PartialRangeThrough<T>) -> Bool {
     KvIs(value, greaterThan: range.upperBound)
 }
 
@@ -642,7 +642,7 @@ public func KvIs<T : FloatingPoint>(_ value: T, outOf range: PartialRangeThrough
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, equalTo rhs: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: Range<T>, equalTo rhs: Range<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound) && KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -650,7 +650,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, equalTo rhs: Range<T>) -> B
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, equalTo rhs: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: Range<T>, equalTo rhs: PartialRangeFrom<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound) && lhs.upperBound == .infinity
 }
 
@@ -658,7 +658,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, equalTo rhs: PartialRangeFr
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, equalTo rhs: PartialRangeUpTo<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: Range<T>, equalTo rhs: PartialRangeUpTo<T>) -> Bool {
     lhs.upperBound == -.infinity && KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -666,7 +666,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, equalTo rhs: PartialRangeUp
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: ClosedRange<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound) && KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -674,7 +674,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: ClosedRa
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: PartialRangeFrom<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound) && lhs.upperBound == .infinity
 }
 
@@ -682,7 +682,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: PartialR
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: PartialRangeThrough<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: PartialRangeThrough<T>) -> Bool {
     lhs.upperBound == -.infinity && KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -690,7 +690,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, equalTo rhs: PartialR
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: PartialRangeFrom<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound)
 }
 
@@ -698,7 +698,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: Par
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: Range<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound) && rhs.upperBound == .infinity
 }
 
@@ -706,7 +706,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: Ran
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: ClosedRange<T>) -> Bool {
     KvIs(lhs.lowerBound, equalTo: rhs.lowerBound) && rhs.upperBound == .infinity
 }
 
@@ -714,7 +714,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, equalTo rhs: Clo
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, equalTo rhs: PartialRangeUpTo<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeUpTo<T>, equalTo rhs: PartialRangeUpTo<T>) -> Bool {
     KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -722,7 +722,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, equalTo rhs: Par
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, equalTo rhs: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeUpTo<T>, equalTo rhs: Range<T>) -> Bool {
     rhs.lowerBound == -.infinity && KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -730,7 +730,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, equalTo rhs: Ran
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, equalTo rhs: PartialRangeThrough<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeThrough<T>, equalTo rhs: PartialRangeThrough<T>) -> Bool {
     KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -738,7 +738,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, equalTo rhs: 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, equalTo rhs: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeThrough<T>, equalTo rhs: ClosedRange<T>) -> Bool {
     rhs.lowerBound == -.infinity && KvIs(lhs.upperBound, equalTo: rhs.upperBound)
 }
 
@@ -748,7 +748,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, equalTo rhs: 
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, inequalTo rhs: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: Range<T>, inequalTo rhs: Range<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound) || KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -756,7 +756,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, inequalTo rhs: Range<T>) ->
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, inequalTo rhs: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: Range<T>, inequalTo rhs: PartialRangeFrom<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound) || lhs.upperBound != .infinity
 }
 
@@ -764,7 +764,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, inequalTo rhs: PartialRange
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, inequalTo rhs: PartialRangeUpTo<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: Range<T>, inequalTo rhs: PartialRangeUpTo<T>) -> Bool {
     lhs.upperBound != -.infinity || KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -772,7 +772,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: Range<T>, inequalTo rhs: PartialRange
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: ClosedRange<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound) || KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -780,7 +780,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: Closed
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: PartialRangeFrom<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound) || lhs.upperBound != .infinity
 }
 
@@ -788,7 +788,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: Partia
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: PartialRangeThrough<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: PartialRangeThrough<T>) -> Bool {
     lhs.upperBound != -.infinity || KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -796,7 +796,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: ClosedRange<T>, inequalTo rhs: Partia
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: PartialRangeFrom<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: PartialRangeFrom<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound)
 }
 
@@ -804,7 +804,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: P
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: Range<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound) || rhs.upperBound != .infinity
 }
 
@@ -812,7 +812,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: R
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: ClosedRange<T>) -> Bool {
     KvIs(lhs.lowerBound, inequalTo: rhs.lowerBound) || rhs.upperBound != .infinity
 }
 
@@ -820,7 +820,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeFrom<T>, inequalTo rhs: C
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, inequalTo rhs: PartialRangeUpTo<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeUpTo<T>, inequalTo rhs: PartialRangeUpTo<T>) -> Bool {
     KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -828,7 +828,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, inequalTo rhs: P
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, inequalTo rhs: Range<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeUpTo<T>, inequalTo rhs: Range<T>) -> Bool {
     rhs.lowerBound != -.infinity || KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -836,7 +836,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeUpTo<T>, inequalTo rhs: R
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, inequalTo rhs: PartialRangeThrough<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeThrough<T>, inequalTo rhs: PartialRangeThrough<T>) -> Bool {
     KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -844,7 +844,7 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, inequalTo rhs
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, inequalTo rhs: ClosedRange<T>) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeThrough<T>, inequalTo rhs: ClosedRange<T>) -> Bool {
     rhs.lowerBound != -.infinity || KvIs(lhs.upperBound, inequalTo: rhs.upperBound)
 }
 
@@ -853,12 +853,12 @@ public func KvIs<T : FloatingPoint>(_ lhs: PartialRangeThrough<T>, inequalTo rhs
 /// - Returns: A boolean value indicating whether given range is degenerate.
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
-@inlinable public func KvIsDegenerate<T : FloatingPoint>(_ r: Range<T>) -> Bool { KvIs(r.lowerBound, equalTo: r.upperBound) }
+@inlinable public func KvIsDegenerate<T : BinaryFloatingPoint>(_ r: Range<T>) -> Bool { KvIs(r.lowerBound, equalTo: r.upperBound) }
 
 /// - Returns: A boolean value indicating whether given range is degenerate.
 ///
 /// - Note: E.g. 0.1 · 10 is 1.0 but `(0..<10).reduce(0.0, { a, _ in a + 0.1 }) == 1.0` is *false*. It's due to 0.1 is unable to be exactly represented in a binary format.
-@inlinable public func KvIsDegenerate<T : FloatingPoint>(_ r: ClosedRange<T>) -> Bool { KvIs(r.lowerBound, equalTo: r.upperBound) }
+@inlinable public func KvIsDegenerate<T : BinaryFloatingPoint>(_ r: ClosedRange<T>) -> Bool { KvIs(r.lowerBound, equalTo: r.upperBound) }
 
 
 
@@ -890,52 +890,52 @@ extension KvNumericTolerance {
 
 @available(*, deprecated, renamed: "KvEps(for:)")
 @inlinable
-public func KvUlp<T : FloatingPoint>(of value: T) -> T { KvEpsArg(value).tolerance.value }
+public func KvUlp<T : BinaryFloatingPoint>(of value: T) -> T { KvEpsArg(value).tolerance.value }
 
 @available(*, deprecated, renamed: "KvIs(_:equalTo:alsoIsGreaterThan:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, equalTo: rhs, alsoIsGreaterThan: &greaterFlag)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:inequalTo:alsoIsGreaterThan:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, inequalTo: rhs, alsoIsGreaterThan: &greaterFlag)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:greaterThan:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThen rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThen rhs: T) -> Bool {
     KvIs(lhs, greaterThan: rhs)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:greaterThan:alsoIsLessThan:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThen rhs: T, alsoIsLessThen lessFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThen rhs: T, alsoIsLessThen lessFlag: inout Bool) -> Bool {
     KvIs(lhs, greaterThan: rhs, alsoIsLessThan: &lessFlag)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:lessThan:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThen rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThen rhs: T) -> Bool {
     KvIs(lhs, lessThan: rhs)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:lessThan:alsoIsGreaterThan:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThen rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThen rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
     KvIs(lhs, lessThan: rhs, alsoIsGreaterThan: &greaterFlag)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:greaterThanOrEqualTo:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, greaterThenOrEqualTo rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThenOrEqualTo rhs: T) -> Bool {
     KvIs(lhs, greaterThanOrEqualTo: rhs)
 }
 
 @available(*, deprecated, renamed: "KvIs(_:lessThanOrEqualTo:)")
 @inlinable
-public func KvIs<T : FloatingPoint>(_ lhs: T, lessThenOrEqualTo rhs: T) -> Bool {
+public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThenOrEqualTo rhs: T) -> Bool {
     KvIs(lhs, lessThanOrEqualTo: rhs)
 }

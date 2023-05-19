@@ -46,7 +46,9 @@ extension KvRangeSet {
     /// - Returns: Index of first element intersecting with *range*.
     @inlinable
     public func firstIndex(in range: PartialRangeFrom<Bound>) -> Index {
-        ranges.endIndex - KvSortedKit.index(for: range.lowerBound, inSorted: ranges.lazy.reversed().map { $0.upperBound }, by: >)
+        let offset: Index = KvSortedKit.index(for: range.lowerBound, inSorted: ranges.lazy.reversed().map { $0.upperBound }, by: >)
+
+        return ranges.endIndex - offset
     }
 
 }

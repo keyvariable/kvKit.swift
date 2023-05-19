@@ -241,7 +241,7 @@ extension KvStatistics {
 
             @inlinable
             public func nextAverage(for value: Value) -> Value {
-                count < capacity ? average + (value - average) / Value(count + 1) : average.addingProduct(value - buffer.first!, invCapacity)
+                count < capacity ? (average + (value - average) as Value / Value(count + 1)) : average.addingProduct(value - buffer.first!, invCapacity)
             }
 
 
@@ -251,9 +251,8 @@ extension KvStatistics {
             public mutating func process(_ value: Value) {
                 if let excludedValue = buffer.append(value) {
                     average.addProduct(value - excludedValue, invCapacity)
-
                 } else {
-                    average += (value - average) / Value(buffer.count)
+                    average += (value - average) as Value / Value(buffer.count)
                 }
             }
 
@@ -676,7 +675,7 @@ public protocol KvStatisticsVarianceProcessor : KvStatisticsVarianceStream, KvSt
 
 extension KvStatistics {
 
-    public class Variance<Value : FloatingPoint> {
+    public class Variance<Value : BinaryFloatingPoint> {
 
         // MARK: .Processor
 
@@ -957,67 +956,81 @@ extension KvStatistics {
         /// Collection of fast implementations of variance and related values for arithmetic progressions.
         public struct Uniform {
 
+            @usableFromInline
+            internal static var oneTwelfth: Value { 1.0 / (12.0 as Value) }
+
+
             /// - Returns: The moment value for [ 1∙d, 2∙d, ..., n∙d ].
+            @inlinable
             public static func moment(d: Value, n: Int) -> Value {
-                d * d * Value(n * (n * n - 1)) * (1 / 12)
+                d * d * Value(n * (n * n - 1)) * oneTwelfth
             }
 
 
             /// - Returns: The moment value for [ 1, 2, ..., n ].
+            @inlinable
             public static func moment(n: Int) -> Value {
-                Value(n * (n * n - 1)) * (1 / 12)
+                Value(n * (n * n - 1)) * oneTwelfth
             }
 
 
 
             /// - Returns: Standard deviation value for [ 1∙d, 2∙d, ..., n∙d ].
+            @inlinable
             public static func standardDeviation(d: Value, n: Int) -> Value {
-                d * (Value(n * n - 1) * (1 / 12)).squareRoot()
+                d * (Value(n * n - 1) * oneTwelfth).squareRoot()
             }
 
 
             /// - Returns: Standard deviation value for [ 1, 2, ..., n ].
+            @inlinable
             public static func standardDeviation(n: Int) -> Value {
-                (Value(n * n - 1) * (1 / 12)).squareRoot()
+                (Value(n * n - 1) * oneTwelfth).squareRoot()
             }
 
 
 
             /// - Returns: Variance value for [ 1∙d, 2∙d, ..., n∙d ].
+            @inlinable
             public static func variance(d: Value, n: Int) -> Value {
-                d * d * Value(n * n - 1) * (1 / 12)
+                d * d * Value(n * n - 1) * oneTwelfth
             }
 
 
             /// - Returns: Variance value for [ 1, 2, ..., n ].
+            @inlinable
             public static func variance(n: Int) -> Value {
-                Value(n * n - 1) * (1 / 12)
+                Value(n * n - 1) * oneTwelfth
             }
 
 
 
             /// - Returns: Unbiased standard deviation value for [ 1∙d, 2∙d, ..., n∙d ].
+            @inlinable
             public static func unbiasedStandardDeviation(d: Value, n: Int) -> Value {
-                d * (Value(n * (n + 1)) * (1 / 12)).squareRoot()
+                d * (Value(n * (n + 1)) * oneTwelfth).squareRoot()
             }
 
 
             /// - Returns: Unbiased standard deviation value for [ 1, 2, ..., n ].
+            @inlinable
             public static func unbiasedStandardDeviation(n: Int) -> Value {
-                (Value(n * (n + 1)) * (1 / 12)).squareRoot()
+                (Value(n * (n + 1)) * oneTwelfth).squareRoot()
             }
 
 
 
             /// - Returns: Unbiased variance value for [ 1∙d, 2∙d, ..., n∙d ].
+            @inlinable
             public static func unbiasedVariance(d: Value, n: Int) -> Value {
-                d * d * (Value(n * (n + 1)) * (1 / 12))
+                d * d * Value(n * (n + 1)) * oneTwelfth
             }
 
 
             /// - Returns: Unbiased variance value for [ 1, 2, ..., n ].
+            @inlinable
             public static func unbiasedVariance(n: Int) -> Value {
-                (Value(n * (n + 1)) * (1 / 12))
+                Value(n * (n + 1)) * oneTwelfth
             }
 
         }

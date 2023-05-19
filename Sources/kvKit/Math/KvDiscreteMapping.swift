@@ -32,9 +32,9 @@ public struct KvDiscreteMapping<T: BinaryFloatingPoint> {
 
 
 
-    public var step: T = 1 {
+    public var step: T = 1.0 {
         didSet {
-            guard abs(step - oldValue) >= step * .ulpOfOne else { return }
+            guard KvIsNonzero(step - oldValue, eps: KvEpsArg(oldValue).tolerance) else { return }
 
             update()
         }
