@@ -18,7 +18,7 @@
 //  KvSceneKit.swift
 //  kvKit
 //
-//  Created by Svyatoslav Popov on 26.10.2022.
+//  Created by Svyatoslav Popov on 25.02.2021.
 //
 
 #if canImport(SceneKit)
