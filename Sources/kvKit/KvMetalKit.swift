@@ -38,7 +38,7 @@ extension KvMetalKit {
     /// - Returns: Given color component as an unsigned byte integer.
     @inlinable
     public static func colorComponent<T : BinaryFloatingPoint>(from value: T) -> UInt8 {
-        UInt8(round(255 * clamp(value, 0, 1)))
+        UInt8(round(255.0 as T * clamp(value, 0.0 as T, 1.0 as T)))
     }
 
 
@@ -137,7 +137,8 @@ extension KvMetalKit {
         public var texel: simd_uchar4 {
             switch self {
             case let .grayScale(white, alpha, srgb: _):
-                return simd_uchar4(.init(repeating: colorComponent(from: white)), colorComponent(from: alpha))
+                let rgb = simd_uchar3(repeating: colorComponent(from: white))
+                return simd_uchar4(rgb, colorComponent(from: alpha))
             case let .hex(hex, srgb: _):
                 return simd_uchar4(numericCast((hex >> 16) & 0xFF),
                                    numericCast((hex >>  8) & 0xFF),
@@ -231,14 +232,15 @@ extension KvMetalKit {
         @inlinable
         static public func perspectiveProjectionMatrix<Math>(_ math: Math.Type, zNear: Math.Scalar, zFar: Math.Scalar) -> Math.Matrix4x4
         where Math : KvMathScope {
+            typealias Scalar = Math.Scalar
             typealias Column = Math.Matrix4x4.Column
 
-            let zLengthNegative⁻¹ = -1 / (zFar - zNear)
+            let zLengthNegative⁻¹: Scalar = -1.0 as Scalar / (zFar - zNear)
 
             return Math.Matrix4x4(Column.unitX,
                                   Column.unitY,
-                                  Column.init(0, 0,   (zFar + zNear) * zLengthNegative⁻¹, -1),
-                                  Column.init(0, 0, 2 * zFar * zNear * zLengthNegative⁻¹,  0))
+                                  Column.init(0.0 as Scalar, 0.0 as Scalar,               (zFar + zNear) * zLengthNegative⁻¹, -1.0 as Scalar),
+                                  Column.init(0.0 as Scalar, 0.0 as Scalar, 2.0 as Scalar * zFar * zNear * zLengthNegative⁻¹,  0.0 as Scalar))
         }
 
     }

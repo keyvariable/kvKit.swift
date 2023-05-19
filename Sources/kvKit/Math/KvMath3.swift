@@ -804,11 +804,11 @@ extension KvMath3 {
 
             guard KvIs(Swift.abs(nn), lessThan: 1) else { return nil }
 
-            let invD = 1 / (1 - nn * nn)
-            let c1 = (plane.d * nn - d) * invD
-            let c2 = (d * nn - plane.d) * invD
+            let invD: Scalar = 1.0 as Scalar / (1.0 as Scalar - nn * nn)
+            let c1: Scalar = (plane.d * nn - d) as Scalar * invD
+            let c2: Scalar = (d * nn - plane.d) as Scalar * invD
 
-            return Line(from: c1 * normal + c2 * plane.normal, in: cross(normal, plane.normal))
+            return Line(from: (c1 * normal) as Vector + (c2 * plane.normal) as Vector, in: cross(normal, plane.normal))
         }
 
 
@@ -1511,16 +1511,16 @@ extension KvMath3 {
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func cross(_ x: Vector, _ y: Vector) -> Vector {
-        Vector(x: x.y * y.z - x.z * y.y,
-               y: x.z * y.x - x.x * y.z,
-               z: x.x * y.y - x.y * y.x)
+        Vector(x: (x.y * y.z) as Scalar - (x.z * y.y) as Scalar,
+               y: (x.z * y.x) as Scalar - (x.x * y.z) as Scalar,
+               z: (x.x * y.y) as Scalar - (x.y * y.x) as Scalar)
     }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
-    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y + x.z * y.z }
+    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { (x.x * y.x) as Scalar + (x.y * y.y) as Scalar + (x.z * y.z) as Scalar }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
@@ -1544,11 +1544,11 @@ extension KvMath3 {
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
-        let oneMinusT = 1 - t
+        let oneMinusT: Scalar = 1.0 as Scalar - t
 
-        return Vector(x: x.x * oneMinusT + y.x * t,
-                      y: x.y * oneMinusT + y.y * t,
-                      z: x.z * oneMinusT + y.z * t)
+        return Vector(x: (x.x * oneMinusT) as Scalar + (y.x * t) as Scalar,
+                      y: (x.y * oneMinusT) as Scalar + (y.y * t) as Scalar,
+                      z: (x.z * oneMinusT) as Scalar + (y.z * t) as Scalar)
     }
 
 }

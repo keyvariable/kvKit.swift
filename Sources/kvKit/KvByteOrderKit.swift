@@ -215,8 +215,8 @@ extension KvByteOrderKit {
         switch stride > 1 {
         case true:
             (0 ..< (source.count / stride)).forEach { _ in
-                var s1 = src, s2 = src + stride - 1
-                var d1 = dest, d2 = dest + stride - 1
+                var s1 = src, s2 = src + (stride - 1)
+                var d1 = dest, d2 = dest + (stride - 1)
 
                 while s1 < s2 {
                     // - Note: This value is stored to prevent memory corruption when source and destination are the same.
@@ -225,8 +225,8 @@ extension KvByteOrderKit {
                     d2.pointee = s1.pointee
                     d1.pointee = t
 
-                    s1 += 1; s2 -= 1
-                    d1 += 1; d2 -= 1
+                    s1 = s1.successor(); s2 = s2.predecessor()
+                    d1 = d1.successor(); d2 = d2.predecessor()
                 }
 
                 if s1 == s2 {

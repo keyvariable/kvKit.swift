@@ -2343,6 +2343,7 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable
 
     public typealias Tolerance = Math.Eps
 
+    public typealias Scalar = Math.Scalar
     public typealias Vector = Math.Vector2
 
 
@@ -2352,34 +2353,34 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: Vector) {
-        Swift.assert(value.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+        Swift.assert(value.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
 
         self.value = Math.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector, _ v3: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector, _ v3: Vector, _ v4: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
-        Swift.assert(v4.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v4.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
@@ -2419,18 +2420,18 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a memberwise product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value * rhs.value) }
 
     /// - Returns: A tolerance of a division.
-    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
+    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value / rhs.value) }
 
     /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2 * Math.dot(value, rhs.value)) }
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2.0 as Scalar * Math.dot(value, rhs.value)) }
 
     /// - Returns: A tolerance of a cross product Z coordinate.
     @inlinable
     public func cross(_ rhs: Self) -> Math.EpsArg {
-        Math.EpsArg(values: value.max(), rhs.value.max(), 2 * (value.x * rhs.value.y + value.y * rhs.value.x))
+        Math.EpsArg(values: value.max(), rhs.value.max(), (2.0 as Scalar) * ((value.x * rhs.value.y) as Scalar + (value.y * rhs.value.x) as Scalar))
     }
 
 }
@@ -2444,6 +2445,7 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
 
     public typealias Tolerance = Math.Eps
 
+    public typealias Scalar = Math.Scalar
     public typealias Vector = Math.Vector3
 
 
@@ -2453,34 +2455,34 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: Vector) {
-        Swift.assert(value.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+        Swift.assert(value.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
 
         self.value = Math.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector, _ v3: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector, _ v3: Vector, _ v4: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
-        Swift.assert(v4.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v4.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
@@ -2520,21 +2522,21 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
     /// - Returns: A tolerance of a memberwise product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value * rhs.value) }
 
     /// - Returns: A tolerance of a division.
-    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
+    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value / rhs.value) }
 
     /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2 * Math.dot(value, rhs.value)) }
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2.0 as Scalar * Math.dot(value, rhs.value)) }
 
     /// - Returns: A tolerance of a cross product.
     @inlinable
     public func cross(_ rhs: Self) -> Self {
         Self(values: value, rhs.value,
-             2 * Vector(x: value.y * rhs.value.z + value.z * rhs.value.y,
-                        y: value.z * rhs.value.x + value.x * rhs.value.z,
-                        z: value.x * rhs.value.y + value.y * rhs.value.x))
+             (2.0 as Scalar) * Vector(x: (value.y * rhs.value.z) as Scalar + (value.z * rhs.value.y) as Scalar,
+                                      y: (value.z * rhs.value.x) as Scalar + (value.x * rhs.value.z) as Scalar,
+                                      z: (value.x * rhs.value.y) as Scalar + (value.y * rhs.value.x) as Scalar))
     }
 
 }
@@ -2548,6 +2550,7 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> : Hashable
 
     public typealias Tolerance = Math.Eps
 
+    public typealias Scalar = Math.Scalar
     public typealias Vector = Math.Vector4
 
 
@@ -2557,34 +2560,34 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> : Hashable
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: Vector) {
-        Swift.assert(value.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+        Swift.assert(value.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
 
         self.value = Math.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector, _ v3: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: Vector, _ v2: Vector, _ v3: Vector, _ v4: Vector) {
-        Swift.assert(v1.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(v2.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(v3.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
-        Swift.assert(v4.min() >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+        Swift.assert(v1.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(v2.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(v3.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(v4.min() >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
@@ -2643,6 +2646,7 @@ public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
 
     public typealias Tolerance = Math.Eps
 
+    public typealias Scalar = Math.Scalar
     public typealias Matrix = Math.Matrix2x2
 
 
@@ -2652,34 +2656,34 @@ public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: Matrix) {
-        Swift.assert(Math.min(value) >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+        Swift.assert(Math.min(value) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
 
         self.value = Math.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix, _ v4: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
-        Swift.assert(Math.min(v4) >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v4) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
@@ -2732,6 +2736,7 @@ public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
 
     public typealias Tolerance = Math.Eps
 
+    public typealias Scalar = Math.Scalar
     public typealias Matrix = Math.Matrix3x3
 
 
@@ -2741,34 +2746,34 @@ public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: Matrix) {
-        Swift.assert(Math.min(value) >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+        Swift.assert(Math.min(value) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
 
         self.value = Math.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix, _ v4: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
-        Swift.assert(Math.min(v4) >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v4) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }
@@ -2821,6 +2826,7 @@ public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
 
     public typealias Tolerance = Math.Eps
 
+    public typealias Scalar = Math.Scalar
     public typealias Matrix = Math.Matrix4x4
 
 
@@ -2830,34 +2836,34 @@ public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: Matrix) {
-        Swift.assert(Math.min(value) >= 0, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
+        Swift.assert(Math.min(value) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
 
         self.value = Math.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: Matrix, _ v2: Matrix, _ v3: Matrix, _ v4: Matrix) {
-        Swift.assert(Math.min(v1) >= 0, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
-        Swift.assert(Math.min(v2) >= 0, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
-        Swift.assert(Math.min(v3) >= 0, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
-        Swift.assert(Math.min(v4) >= 0, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
+        Swift.assert(Math.min(v1) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v1)) must be positive")
+        Swift.assert(Math.min(v2) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v2)) must be positive")
+        Swift.assert(Math.min(v3) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v3)) must be positive")
+        Swift.assert(Math.min(v4) >= 0.0 as Scalar, "Invalid argument: all components of a tolerance argument value (\(v4)) must be positive")
 
         self.value = Math.max(Math.max(v1, v2), Math.max(v3, v4))
     }

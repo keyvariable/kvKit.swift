@@ -79,7 +79,7 @@ public struct KvLinearMapping<Value: BinaryFloatingPoint> {
 
 
 
-    public init(k: Value = 0, b: Value = 0) {
+    public init(k: Value = 0.0, b: Value = 0.0) {
         self.k = k
         self.b = b
     }
@@ -93,9 +93,9 @@ public struct KvLinearMapping<Value: BinaryFloatingPoint> {
 extension KvLinearMapping : KvLinearMappingProtocol {
 
     public init(x₁: Value, y₁: Value, x₂: Value, y₂: Value) {
-        precondition(abs(x₂ - x₁) >= .ulpOfOne, "Invalid arguments: x₁ and x₂ must not be equal")
+        precondition(abs(x₂ - x₁) >= Value.ulpOfOne, "Invalid arguments: x₁ and x₂ must not be equal")
 
-        let d = 1 / (x₂ - x₁)
+        let d = 1.0 as Value / (x₂ - x₁) as Value
 
         self.init(k: (y₂ - y₁) * d, b: (y₁ * x₂ - y₂ * x₁) * d)
     }

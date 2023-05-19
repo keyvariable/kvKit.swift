@@ -168,7 +168,7 @@ public func min<T>(_ x: T?, _ y: T?, _ z: T?, _ rest: T?...) -> T? where T : Com
 
 @inlinable
 public func mix<T>(_ x: T, _ y: T, t: T) -> T where T : Numeric {
-    x * (1 - t) + y * t
+    x * ((1 as T) - t) as T + y * t
 }
 
 @inlinable public func mix(_ x: Float, _ y: Float, t: Float) -> Float { simd_mix(x, y, t) }
@@ -267,7 +267,7 @@ extension KvMath where Scalar : BinaryInteger {
 extension KvMath where Scalar : BinaryFloatingPoint {
 
     @available(*, deprecated, message: "Use KvMathScalar.mix(_:_:t:)")
-    @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { (1 - t) * a + t * b }
+    @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { ((1.0 as Scalar - t) as Scalar * a) as Scalar + (t * b) as Scalar }
 
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar) -> Sign {

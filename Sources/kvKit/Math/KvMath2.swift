@@ -668,7 +668,7 @@ extension KvMath2 {
 
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
-    @inlinable public static func cross2(_ lhs: Vector, _ rhs: Vector) -> Scalar { lhs.x * rhs.y - lhs.y * rhs.x }
+    @inlinable public static func cross2(_ lhs: Vector, _ rhs: Vector) -> Scalar { (lhs.x * rhs.y) as Scalar - (lhs.y * rhs.x) as Scalar }
 
 }
 
@@ -695,7 +695,7 @@ extension KvMath2 {
     @inlinable public static func distance(_ x: Vector, _ y: Vector) -> Scalar { length(y - x) }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
-    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { x.x * y.x + x.y * y.y }
+    @inlinable public static func dot(_ x: Vector, _ y: Vector) -> Scalar { (x.x * y.x) as Scalar + (x.y * y.y) as Scalar }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func length(_ v: Vector) -> Scalar { sqrt(dot(v, v)) }
@@ -717,10 +717,10 @@ extension KvMath2 {
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func mix(_ x: Vector, _ y: Vector, t: Scalar) -> Vector {
-        let oneMinusT = 1 - t
+        let oneMinusT: Scalar = 1.0 as Scalar - t
 
-        return Vector(x: x.x * oneMinusT + y.x * t,
-                      y: x.y * oneMinusT + y.y * t)
+        return Vector(x: (x.x * oneMinusT) as Scalar + (y.x * t) as Scalar,
+                      y: (x.y * oneMinusT) as Scalar + (y.y * t) as Scalar)
     }
 
 }
