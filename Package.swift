@@ -20,11 +20,8 @@
 import PackageDescription
 
 
-let targets: [Target] = [
-    .target(name: "kvKit", dependencies: [ ]),
-    .target(name: "kvTestKit", dependencies: [ "kvKit" ]),
-    .testTarget(name: "kvKitTests", dependencies: [ "kvKit", "kvTestKit" ]),
-]
+let swiftSettings: [SwiftSetting]? = nil
+
 
 let package = Package(
     name: "kvKit.swift",
@@ -36,5 +33,9 @@ let package = Package(
         .library(name: "kvTestKit", targets: [ "kvTestKit" ]),
     ],
 
-    targets: targets
+    targets: [
+        .target(name: "kvKit", dependencies: [ ], swiftSettings: swiftSettings),
+        .target(name: "kvTestKit", dependencies: [ "kvKit" ], swiftSettings: swiftSettings),
+        .testTarget(name: "kvKitTests", dependencies: [ "kvKit", "kvTestKit" ], swiftSettings: swiftSettings),
+    ]
 )
