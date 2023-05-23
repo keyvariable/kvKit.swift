@@ -22,7 +22,8 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  Collection of convinient protocols for SIMD quaternions to provide scalar independent generic math code.
+//  Collection of convenient protocols for standard SIMD quaternions
+//  helping to provide scalar type independent generic code.
 //
 
 import simd

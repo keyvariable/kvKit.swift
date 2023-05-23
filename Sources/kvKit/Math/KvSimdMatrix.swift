@@ -22,8 +22,8 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  Collection of missing protocols for standard SIMD matrices.
-//  Theese protocols help to provide scalar independent generic code.
+//  Collection of convenient protocols for standard SIMD matrices,
+//  helping to provide scalar type independent generic code.
 //
 
 import simd

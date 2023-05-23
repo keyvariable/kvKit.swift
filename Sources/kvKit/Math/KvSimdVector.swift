@@ -22,7 +22,8 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  Collection of convinient protocols for SIMD vectors to provide generic constarints for dimmensions of SIMD vectors.
+//  Collection of convenient protocols for standard SIMD vectors
+//  helping to provide scalar type independent generic code.
 //
 
 import simd
