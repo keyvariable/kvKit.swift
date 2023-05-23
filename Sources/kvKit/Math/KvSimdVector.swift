@@ -402,6 +402,42 @@ public protocol KvSimd2F : KvSimd2, KvSimdVectorF where Scalar : BinaryFloatingP
 }
 
 
+extension KvSimd2F where Scalar.RawSignificand : FixedWidthInteger {
+
+    // MARK: Creating a Random Vector
+
+    /// - Returns: Random vector of unit length.
+    @inlinable
+    public static func randomUnit() -> Self {
+        let x = Scalar.random(in: (-1.0 as Scalar)...(1.0 as Scalar))
+
+        var y = (((1.0 as Scalar) - x * x) as Scalar).squareRoot()
+        if Bool.random() {
+            y.negate()
+        }
+
+        return .init(x, y)
+    }
+
+
+    /// - Returns: Random vector of unit length using given *generator*.
+    @inlinable
+    public static func randomUnit<G>(using generator: inout G) -> Self
+    where G : RandomNumberGenerator
+    {
+        let x = Scalar.random(in: (-1.0 as Scalar) ... (1.0 as Scalar), using: &generator)
+
+        var y = (((1.0 as Scalar) - x * x) as Scalar).squareRoot()
+        if Bool.random(using: &generator) {
+            y.negate()
+        }
+
+        return .init(x, y)
+    }
+
+}
+
+
 
 // MARK: - KvSimd3
 
@@ -493,6 +529,48 @@ public protocol KvSimd3F : KvSimd3, KvSimdVectorF where Scalar : BinaryFloatingP
     init<Other>(_ other: SIMD3<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
     init<Other>(_ other: SIMD3<Other>) where Other : FixedWidthInteger, Other : SIMDScalar
+
+}
+
+
+extension KvSimd3F where Scalar.RawSignificand : FixedWidthInteger {
+
+    // MARK: Creating a Random Vector
+
+    /// - Returns: Random vector of unit length.
+    @inlinable
+    public static func randomUnit() -> Self {
+        let x = Scalar.random(in: (-1.0 as Scalar) ... (1.0 as Scalar))
+        let oneMinusXX = (1.0 as Scalar) - x * x
+
+        let y: Scalar = { maxY in Scalar.random(in: -maxY ... maxY) }(oneMinusXX.squareRoot())
+
+        var z = ((oneMinusXX - y * y) as Scalar).squareRoot()
+        if Bool.random() {
+            z.negate()
+        }
+
+        return .init(x, y, z)
+    }
+
+
+    /// - Returns: Random vector of unit length using given *generator*.
+    @inlinable
+    public static func randomUnit<G>(using generator: inout G) -> Self
+    where G : RandomNumberGenerator
+    {
+        let x = Scalar.random(in: (-1.0 as Scalar) ... (1.0 as Scalar), using: &generator)
+        let oneMinusXX = (1.0 as Scalar) - x * x
+
+        let y: Scalar = { maxY in Scalar.random(in: -maxY ... maxY, using: &generator) }(oneMinusXX.squareRoot())
+
+        var z = ((oneMinusXX - y * y) as Scalar).squareRoot()
+        if Bool.random(using: &generator) {
+            z.negate()
+        }
+
+        return .init(x, y, z)
+    }
 
 }
 
