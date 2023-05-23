@@ -29,9 +29,9 @@ class KvSimdVectorTests : XCTestCase {
 
 
 
-    // MARK: .testRandomUnit2
+    // MARK: .testUnitRandom2
 
-    func testRandomUnit2() {
+    func testUnitRandom2() {
 
         func Run<Math>(_ m: Math.Type) where Math : KvMathScope, Math.Scalar.RawSignificand : FixedWidthInteger {
             typealias Vector = Math.Vector2
@@ -39,8 +39,8 @@ class KvSimdVectorTests : XCTestCase {
             var generator = SystemRandomNumberGenerator()
 
             (0 ..< 32).forEach { _ in
-                XCTAssertTrue(Math.isUnit(Vector.randomUnit()))
-                XCTAssertTrue(Math.isUnit(Vector.randomUnit(using: &generator)))
+                XCTAssertTrue(Math.isUnit(Vector.unitRandom()))
+                XCTAssertTrue(Math.isUnit(Vector.unitRandom(using: &generator)))
             }
         }
 
@@ -50,9 +50,9 @@ class KvSimdVectorTests : XCTestCase {
 
 
 
-    // MARK: .testRandomUnit3
+    // MARK: .testUnitRandom3
 
-    func testRandomUnit3() {
+    func testUnitRandom3() {
 
         func Run<Math>(_ m: Math.Type) where Math : KvMathScope, Math.Scalar.RawSignificand : FixedWidthInteger {
             typealias Vector = Math.Vector3
@@ -60,8 +60,8 @@ class KvSimdVectorTests : XCTestCase {
             var generator = SystemRandomNumberGenerator()
 
             (0 ..< 32).forEach { _ in
-                XCTAssertTrue(Math.isUnit(Vector.randomUnit()))
-                XCTAssertTrue(Math.isUnit(Vector.randomUnit(using: &generator)))
+                XCTAssertTrue(Math.isUnit(Vector.unitRandom()))
+                XCTAssertTrue(Math.isUnit(Vector.unitRandom(using: &generator)))
             }
         }
 

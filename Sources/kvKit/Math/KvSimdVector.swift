@@ -408,7 +408,7 @@ extension KvSimd2F where Scalar.RawSignificand : FixedWidthInteger {
 
     /// - Returns: Random vector of unit length.
     @inlinable
-    public static func randomUnit() -> Self {
+    public static func unitRandom() -> Self {
         let x = Scalar.random(in: (-1.0 as Scalar)...(1.0 as Scalar))
 
         var y = (((1.0 as Scalar) - x * x) as Scalar).squareRoot()
@@ -422,7 +422,7 @@ extension KvSimd2F where Scalar.RawSignificand : FixedWidthInteger {
 
     /// - Returns: Random vector of unit length using given *generator*.
     @inlinable
-    public static func randomUnit<G>(using generator: inout G) -> Self
+    public static func unitRandom<G>(using generator: inout G) -> Self
     where G : RandomNumberGenerator
     {
         let x = Scalar.random(in: (-1.0 as Scalar) ... (1.0 as Scalar), using: &generator)
@@ -539,7 +539,7 @@ extension KvSimd3F where Scalar.RawSignificand : FixedWidthInteger {
 
     /// - Returns: Random vector of unit length.
     @inlinable
-    public static func randomUnit() -> Self {
+    public static func unitRandom() -> Self {
         let x = Scalar.random(in: (-1.0 as Scalar) ... (1.0 as Scalar))
         let oneMinusXX = (1.0 as Scalar) - x * x
 
@@ -556,7 +556,7 @@ extension KvSimd3F where Scalar.RawSignificand : FixedWidthInteger {
 
     /// - Returns: Random vector of unit length using given *generator*.
     @inlinable
-    public static func randomUnit<G>(using generator: inout G) -> Self
+    public static func unitRandom<G>(using generator: inout G) -> Self
     where G : RandomNumberGenerator
     {
         let x = Scalar.random(in: (-1.0 as Scalar) ... (1.0 as Scalar), using: &generator)
