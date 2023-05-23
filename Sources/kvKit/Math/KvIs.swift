@@ -133,17 +133,24 @@ public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
     @inlinable public var tolerance: Tolerance { Tolerance(self) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
+    /// - Returns: Tolerance of a product.
     @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
-    /// - Returns: A tolerance of a division.
+    /// - Returns: Tolerance of a division.
     @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
+
+
+    /// - Returns: Tolarance of the squared receiver.
+    @inlinable public func squared() -> Self { self * self }
+
+    /// - Returns: Tolarance of square root of the receiver.
+    @inlinable public func squareRoot() -> Self { .init(value: value.squareRoot()) }
 
 }
 
