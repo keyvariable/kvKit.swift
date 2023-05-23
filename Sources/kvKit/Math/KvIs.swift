@@ -48,14 +48,14 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
 
     @inlinable
     public init(_ arg: Argument) {
-        self.init(value: T.ulpOfOne * Swift.max(Swift.min((16.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
+        self.init(value: T.ulpOfOne * Swift.max(Swift.min((32.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
     }
 
 
     // MARK: Auxiliaries
 
     /// Default tolerance for comparisons.
-    @inlinable public static var `default`: Self { Self(value: (16.0 as T) * T.ulpOfOne) }
+    @inlinable public static var `default`: Self { Self(value: (32.0 as T) * T.ulpOfOne) }
 
 }
 
