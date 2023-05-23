@@ -52,17 +52,17 @@ extension KvMath3 where Scalar == Float {
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float2x2) -> simd_float3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
+        .init(Vector(base[0], 0.0 as Scalar), Vector(base[1], 0.0 as Scalar), [ 0.0 as Scalar, 0.0 as Scalar, 1.0 as Scalar ])
     }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float2x3) -> simd_float3x3 {
-        .init(base[0], base[1], [ 0, 0, 1 ])
+        .init(base[0], base[1], [ 0.0 as Scalar, 0.0 as Scalar, 1.0 as Scalar ])
     }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float3x2) -> simd_float3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
+        .init(Vector(base[0], 0.0 as Scalar), Vector(base[1], 0.0 as Scalar), Vector(base[2], 1.0 as Scalar))
     }
 
 }
@@ -76,17 +76,17 @@ extension KvMath3 where Scalar == Double {
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double2x2) -> simd_double3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), [ 0, 0, 1 ])
+        .init(Vector(base[0], 0.0 as Scalar), Vector(base[1], 0.0 as Scalar), [ 0.0 as Scalar, 0.0 as Scalar, 1.0 as Scalar ])
     }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double2x3) -> simd_double3x3 {
-        .init(base[0], base[1], [ 0, 0, 1 ])
+        .init(base[0], base[1], [ 0.0 as Scalar, 0.0 as Scalar, 1.0 as Scalar ])
     }
 
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_double3x2) -> simd_double3x3 {
-        .init(Vector(base[0], 0), Vector(base[1], 0), Vector(base[2], 1))
+        .init(Vector(base[0], 0.0 as Scalar), Vector(base[1], 0.0 as Scalar), Vector(base[2], 1.0 as Scalar))
     }
 
 }
@@ -802,9 +802,9 @@ extension KvMath3 {
         public func intersection(with plane: Plane) -> Line? {
             let nn = dot(normal, plane.normal)
 
-            guard KvIs(Swift.abs(nn), lessThan: 1) else { return nil }
+            guard KvIs(Swift.abs(nn), lessThan: 11.0 as Scalar) else { return nil }
 
-            let invD: Scalar = 1.0 as Scalar / (1.0 as Scalar - nn * nn)
+            let invD: Scalar = (1.0 as Scalar) / ((1.0 as Scalar - nn * nn) as Scalar)
             let c1: Scalar = (plane.d * nn - d) as Scalar * invD
             let c2: Scalar = (d * nn - plane.d) as Scalar * invD
 

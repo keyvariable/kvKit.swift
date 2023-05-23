@@ -121,7 +121,7 @@ extension KvStatistics {
             // MARK: : KvStatisticsAverageStream
 
             @inlinable
-            public func nextAverage(for value: Value) -> Value { average + (value - average) / Value(count + 1) }
+            public func nextAverage(for value: Value) -> Value { average + ((value - average) as Value) / Value(count + 1) }
 
 
 
@@ -1275,20 +1275,20 @@ extension KvStatistics {
             public let count: Value
 
 
-            public private(set) lazy var covariance: Value = count > 0 ? value / count : 0
+            public private(set) lazy var covariance: Value = count > (0.0 as Value) ? value / count : (0.0 as Value)
 
-            public private(set) lazy var unbiasedCovariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1 as Value)
+            public private(set) lazy var unbiasedCovariance: Value = { $0 > (0.0 as Value) ? value / $0 : (0.0 as Value) }(count - (1.0 as Value))
 
 
 
             public init<S₁, S₂>(x xs: S₁, y ys: S₂) where S₁: Sequence, S₁.Element == Value, S₂: Sequence, S₂.Element == Value {
-                var average: (Value, Value) = (0, 0), count: Value = 0
+                var average: (Value, Value) = (0.0, 0.0), count: Value = 0.0
 
                 value = zip(xs, ys).reduce(0) { (comoment, values) in
-                    count += 1
-                    let oneByCount = 1 / count
+                    count += 1.0 as Value
+                    let oneByCount = (1.0 as Value) / count
 
-                    let newAverage = (average.0 + (values.0 - average.0) * oneByCount, average.1 + (values.1 - average.1) * oneByCount)
+                    let newAverage = (average.0 + ((values.0 - average.0) as Value) * oneByCount, average.1 + ((values.1 - average.1) as Value) * oneByCount)
                     defer { average = newAverage }
 
                     return comoment.addingProduct(values.0 - newAverage.0, values.1 - average.1)
@@ -1301,12 +1301,12 @@ extension KvStatistics {
 
 
             public init<S>(dx: Value = 1, y values: S) where S: Sequence, S.Element == Value {
-                var average: (x: Value, y: Value) = (-0.5, 0), count: Value = 0
+                var average: (x: Value, y: Value) = (-0.5, 0.0), count: Value = 0.0
 
                 value = dx * values.reduce(0) { (comoment, value) in
-                    count += 1
+                    count += 1.0 as Value
 
-                    let newAverage = (x: average.x + 0.5, y: average.y + (value - average.y) / count)
+                    let newAverage = (x: average.x + (0.5 as Value), y: average.y + ((value - average.y) as Value) / count)
                     defer { average = newAverage }
 
                     return comoment.addingProduct(newAverage.x, value - average.y)

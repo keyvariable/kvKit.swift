@@ -64,13 +64,13 @@ public class KvDateKit {
                 return nil
         }
 
-        let startUnit = T(calendar.component(unit, from: startDateUnitInterval.start))
-        let endUnit = T(calendar.component(unit, from: endDateUnitInterval.end))
+        let startUnit = calendar.component(unit, from: startDateUnitInterval.start)
+        let endUnit = calendar.component(unit, from: endDateUnitInterval.end)
 
-        return endUnit
-            - startUnit
-            - T(startDateScaleInterval.start.timeIntervalSince(startDateUnitInterval.start) / startDateUnitInterval.duration)
-            - T(endDateUnitInterval.end.timeIntervalSince(endDateScaleInterval.end) / endDateUnitInterval.duration)
+        let startOffset = startDateScaleInterval.start.timeIntervalSince(startDateUnitInterval.start) / startDateUnitInterval.duration
+        let endOffset = endDateUnitInterval.end.timeIntervalSince(endDateScaleInterval.end) / endDateUnitInterval.duration
+
+        return (T(endUnit - startUnit) - T(startOffset + endOffset)) as T
     }
 
 }

@@ -41,7 +41,7 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
     /// Memberwise initializer.
     @usableFromInline
     internal init(value: T) {
-        Swift.assert(value >= 0, "Invalid argument: tolerance value (\(value)) must be positive")
+        Swift.assert(value >= (0.0 as T), "Invalid argument: tolerance value (\(value)) must be positive")
 
         self.value = value
     }
@@ -55,7 +55,7 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
     // MARK: Auxiliaries
 
     /// Default tolerance for comparisons.
-    @inlinable public static var `default`: Self { Self(value: 16 * T.ulpOfOne) }
+    @inlinable public static var `default`: Self { Self(value: (16.0 as T) * T.ulpOfOne) }
 
 }
 
@@ -75,40 +75,40 @@ public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: T) {
-        Swift.assert(value >= 0, "Invalid argument: tolerance argument value (\(value)) must be positive")
+        Swift.assert(value >= (0.0 as T), "Invalid argument: tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: T, _ v2: T) {
-        Swift.assert(v1 >= 0, "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
-        Swift.assert(v2 >= 0, "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
+        Swift.assert(v1 >= (0.0 as T), "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
+        Swift.assert(v2 >= (0.0 as T), "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
 
         self.value = Swift.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: T, _ v2: T, _ v3: T) {
-        Swift.assert(v1 >= 0, "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
-        Swift.assert(v2 >= 0, "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
-        Swift.assert(v3 >= 0, "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
+        Swift.assert(v1 >= (0.0 as T), "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
+        Swift.assert(v2 >= (0.0 as T), "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
+        Swift.assert(v3 >= (0.0 as T), "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
 
         self.value = Swift.max(Swift.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: T, _ v2: T, _ v3: T, _ v4: T) {
-        Swift.assert(v1 >= 0, "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
-        Swift.assert(v2 >= 0, "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
-        Swift.assert(v3 >= 0, "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
-        Swift.assert(v4 >= 0, "Invalid argument: tolerance argument v4 (\(v4)) must be positive")
+        Swift.assert(v1 >= (0.0 as T), "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
+        Swift.assert(v2 >= (0.0 as T), "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
+        Swift.assert(v3 >= (0.0 as T), "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
+        Swift.assert(v4 >= (0.0 as T), "Invalid argument: tolerance argument v4 (\(v4)) must be positive")
 
         self.value = Swift.max(Swift.max(v1, v2), Swift.max(v3, v4))
     }
 
     /// Zero argument initializer.
-    @inlinable public init() { value = 0 }
+    @inlinable public init() { value = 0.0 as T }
 
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: T) { self.init(value: abs(arg)) }

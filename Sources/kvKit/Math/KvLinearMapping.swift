@@ -95,9 +95,9 @@ extension KvLinearMapping : KvLinearMappingProtocol {
     public init(x₁: Value, y₁: Value, x₂: Value, y₂: Value) {
         precondition(abs(x₂ - x₁) >= Value.ulpOfOne, "Invalid arguments: x₁ and x₂ must not be equal")
 
-        let d = 1.0 as Value / (x₂ - x₁) as Value
+        let d = (1.0 as Value) / ((x₂ - x₁) as Value)
 
-        self.init(k: (y₂ - y₁) * d, b: (y₁ * x₂ - y₂ * x₁) * d)
+        self.init(k: ((y₂ - y₁) as Value) * d, b: ((y₁ * x₂ - y₂ * x₁) as Value) * d)
     }
 
 
@@ -147,7 +147,7 @@ public struct KvShiftedLinearMapping<Value: BinaryFloatingPoint> {
 extension KvShiftedLinearMapping {
 
     public init(_ comoment: KvStatistics.Covariance<Value>.Comoment, _ moment: Value) {
-        self.init(k: moment > .ulpOfOne ? comoment.value / moment : 0, x₀: comoment.average.x, y₀: comoment.average.y)
+        self.init(k: moment > Value.ulpOfOne ? comoment.value / moment : (0.0 as Value), x₀: comoment.average.x, y₀: comoment.average.y)
     }
 
 }
@@ -166,9 +166,9 @@ extension KvShiftedLinearMapping : KvLinearMappingProtocol {
     public init(x₁: Value, y₁: Value, x₂: Value, y₂: Value) {
         precondition(abs(x₂ - x₁) >= .ulpOfOne, "Invalid arguments: x₁ and x₂ must not be equal")
 
-        k = (y₂ - y₁) / (x₂ - x₁)
-        y₀ = (y₁ + y₂) / 2
-        x₀ = (x₁ + x₂) / 2
+        k = ((y₂ - y₁) as Value) / ((x₂ - x₁) as Value)
+        y₀ = (y₁ + y₂) / (2.0 as Value)
+        x₀ = (x₁ + x₂) / (2.0 as Value)
     }
 
 

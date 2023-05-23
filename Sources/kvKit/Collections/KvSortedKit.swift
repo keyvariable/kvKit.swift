@@ -83,7 +83,8 @@ public class KvSortedKit {
         var rIndex = collection.endIndex - 1
 
         while lIndex + 1 < rIndex {
-            let mIndex = (lIndex & rIndex) + ((lIndex ^ rIndex) >> 1)       // Overflow-safe equivalent for `(lIndex + rIndex) >> 1` where indices are nonnegative.
+            // Overflow-safe equivalent for `(lIndex + rIndex) >> 1` where indices are nonnegative.
+            let mIndex = (lIndex & rIndex) as C.Index + ((lIndex ^ rIndex) >> 1) as C.Index
             let mItem = collection[mIndex]
 
             if isLess(mItem, value) {
@@ -320,7 +321,8 @@ public class KvSortedKit {
         var rIndex = collection.endIndex - 1
 
         while lIndex + 1 < rIndex {
-            let mIndex = (lIndex & rIndex) + ((lIndex ^ rIndex) >> 1)       // Overflow-safe equivalent for `(lIndex + rIndex) >> 1` where indices are nonnegative.
+            // Overflow-safe equivalent for `(lIndex + rIndex) >> 1` where indices are nonnegative.
+            let mIndex = ((lIndex & rIndex) as C.Index) + (((lIndex ^ rIndex) >> 1) as C.Index)
 
             if isLess(collection[mIndex], value) {
                 lIndex = mIndex
