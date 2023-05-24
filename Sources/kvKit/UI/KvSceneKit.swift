@@ -500,7 +500,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 4.0.0
+    // TODO: Delete in 5.0.0
     @available(*, deprecated)
     public static func withPositions<R>(in sources: [SCNGeometrySource], body: (UnsafeBufferPointer<Float3>) -> R) -> R {
         assert(MemoryLayout<Float3>.stride == 3 * MemoryLayout<Float>.size)
@@ -527,7 +527,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 4.0.0
+    // TODO: Delete in 5.0.0
     @available(*, deprecated)
     @inlinable
     public static func withPositions<R>(in geometry: SCNGeometry, body: (UnsafeBufferPointer<Float3>) -> R) -> R {
@@ -536,7 +536,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 4.0.0
+    // TODO: Delete in 5.0.0
     @available(*, deprecated)
     public static func forEachTriangle(sources: [SCNGeometrySource],
                                        elements: [SCNGeometryElement]?,
@@ -589,7 +589,7 @@ extension KvSceneKit {
 
 
 
-    // TODO: Delete in 4.0.0
+    // TODO: Delete in 5.0.0
     @available(*, deprecated)
     @inlinable
     public static func forEachTriangle(in geometry: SCNGeometry, body: (simd_float3, simd_float3, simd_float3) -> Void) {
@@ -600,7 +600,7 @@ extension KvSceneKit {
 
     // MARK: .Float3
 
-    // TODO: Delete in 4.0.0
+    // TODO: Delete in 5.0.0
     @available(*, deprecated)
     /// Container for *Float* triplet having the stride equal to size and the same allignment as *Float* type.
     public struct Float3 : Hashable {
@@ -645,6 +645,7 @@ public protocol KvSCNGeometrySourcePosition3 : KvSCNGeometrySourceVertex {
     var simdPosition: simd_float3 { get }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to .simdPosition")
     var position: SCNVector3 { get }
 
@@ -678,6 +679,7 @@ extension KvSCNGeometrySourcePosition3 {
     }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to .simdPosition")
     @inlinable public var position: SCNVector3 { .init(simdPosition) }
 
@@ -693,6 +695,7 @@ public protocol KvSCNGeometrySourceNormal3 : KvSCNGeometrySourceVertex {
     var simdNormal: simd_float3 { get }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to .simdNormal")
     var normal: SCNVector3 { get }
 
@@ -726,6 +729,7 @@ extension KvSCNGeometrySourceNormal3 {
     }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to .simdNormal")
     @inlinable public var normal: SCNVector3 { .init(simdNormal) }
 
@@ -741,6 +745,7 @@ public protocol KvSCNGeometrySourceTx0uv : KvSCNGeometrySourceVertex {
     var simdTx0: simd_float2 { get }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to .simdTx0")
     var tx0: CGPoint { get }
 
@@ -774,6 +779,7 @@ extension KvSCNGeometrySourceTx0uv {
     }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to .simdTx0")
     @inlinable public var tx0: CGPoint { .init(x: CGFloat(simdTx0.x), y: CGFloat(simdTx0.y)) }
 

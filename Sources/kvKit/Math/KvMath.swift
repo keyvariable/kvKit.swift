@@ -219,56 +219,68 @@ public func sqr<T>(_ x: T) -> T where T : Numeric {
 
 // MARK: - Legacy
 
-// TODO: Delete when KvMath will become degenerate.
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 public enum KvMath<Scalar> { }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Numeric {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func sqr(_ x: Scalar) -> Scalar { x * x }
 
 }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func clamp(_ x: Scalar, _ min: Scalar, _ max: Scalar) -> Scalar { x < min ? min : (x > max ? max : x) }
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func clamp(_ x: Scalar, to range: ClosedRange<Scalar>) -> Scalar { clamp(x, range.lowerBound, range.upperBound) }
 
 }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : SignedNumeric & Comparable {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar, eps: Scalar) -> Sign { x >= eps ? 1 : (x > -eps ? 0 : -1) }
 
 }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : BinaryInteger {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar) -> Sign { x > 0 ? 1 : (x == 0 ? 0 : -1) }
 
 }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : BinaryFloatingPoint {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use KvMathScalar.mix(_:_:t:)")
     @inlinable public static func mix(_ a: Scalar, _ b: Scalar, t: Scalar) -> Scalar { ((1.0 as Scalar - t) as Scalar * a) as Scalar + (t * b) as Scalar }
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func sign<Sign: ExpressibleByIntegerLiteral>(_ x: Scalar) -> Sign {
         var isPositive = false
@@ -279,9 +291,11 @@ extension KvMath where Scalar : BinaryFloatingPoint {
 }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : FixedWidthInteger {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func lg₂(_ x: Scalar) -> Int { x.bitWidth - (x.leadingZeroBitCount + 1) }
 
@@ -291,17 +305,21 @@ extension KvMath where Scalar : FixedWidthInteger {
 
 // MARK: Minimum for Optionals
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func min(_ x: Scalar, _ y: Scalar?) -> Scalar { y.map({ Swift.min(x, $0) }) ?? x }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func min(_ x: Scalar, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar { rest.reduce(min(min(x, y), z), min) }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func min(_ x: Scalar?, _ y: Scalar?) -> Scalar? {
         switch (x, y) {
@@ -317,6 +335,7 @@ extension KvMath where Scalar : Comparable {
     }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func min(_ x: Scalar?, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar? {
         min(min(x, y), rest.reduce(z, min))
@@ -328,19 +347,23 @@ extension KvMath where Scalar : Comparable {
 
 // MARK: Maximum for Optionals
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func max(_ x: Scalar, _ y: Scalar?) -> Scalar { y.map({ Swift.max(x, $0) }) ?? x }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func max(_ x: Scalar, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar {
         rest.reduce(max(max(x, y), z), max)
     }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func max(_ x: Scalar?, _ y: Scalar?) -> Scalar? {
         switch (x, y) {
@@ -356,6 +379,7 @@ extension KvMath where Scalar : Comparable {
     }
 
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func max(_ x: Scalar?, _ y: Scalar?, _ z: Scalar?, _ rest: Scalar?...) -> Scalar? {
         max(max(x, y), rest.reduce(z, max))
@@ -367,9 +391,11 @@ extension KvMath where Scalar : Comparable {
 
 // MARK: - Legacy: Comparable
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, message: "Use global analogs instead of KvMath methods")
 extension KvMath where Scalar : Comparable {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Use global analog instead")
     @inlinable public static func clamp(_ x: Scalar, min: Scalar, max: Scalar) -> Scalar { clamp(x, min, max) }
 

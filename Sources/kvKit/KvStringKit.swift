@@ -645,37 +645,3 @@ extension KvStringKit {
     }
 
 }
-
-
-
-// MARK: Composing
-
-extension KvStringKit {
-
-    @available(*, deprecated, message: "Use KvStringKit.Accumulator instead")
-    public static func append<S1, S2>(_ string: inout String, with component: S1, separator: S2) where S1 : StringProtocol, S2 : StringProtocol {
-        if !string.isEmpty {
-            string.append(contentsOf: separator)
-        }
-
-        string.append(contentsOf: component)
-    }
-
-
-
-    @available(*, deprecated, message: "Use KvStringKit.Accumulator instead")
-    public static func append<S1, S2>(_ string: inout String, with firstComponent: S1, _ secondComponent: S1, _ otherComponents: S1..., separator: S2)
-        where S1 : StringProtocol, S2 : StringProtocol
-    {
-        append(&string, with: firstComponent, separator: separator)
-
-        string.append(contentsOf: separator)
-        string.append(contentsOf: secondComponent)
-
-        otherComponents.forEach { (component) in
-            string.append(contentsOf: separator)
-            string.append(contentsOf: component)
-        }
-    }
-
-}

@@ -54,26 +54,6 @@ extension KvSwiftUiKit {
 
 
 
-    @available(*, deprecated, message: "Use .ErrorAlertContent instead")
-    public static func alertContent(for error: Error) -> (title: Text, message: Text?) {
-        let message: Text? = {
-            var message = KvStringKit.Accumulator(separator: "\n")
-
-            if let error = error as? LocalizedError {
-                message.append(error.failureReason ?? "")
-                message.append(error.recoverySuggestion ?? "")
-            }
-
-            guard let string = message.string else { return nil }
-
-            return Text(string)
-        }()
-
-        return (title: Text(error.localizedDescription), message: message)
-    }
-
-
-
     // MARK: .ErrorAlertContent
 
     public struct ErrorAlertContent {

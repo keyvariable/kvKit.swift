@@ -884,65 +884,18 @@ public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : BinaryFloatingPoint {
 
 
 
-// TODO: Delete in 4.0.0
 // MARK: Legacy
 
 extension KvNumericTolerance {
 
+    // TODO: Delete in 5.0.0
     @available(*, deprecated, renamed: "default")
     @inlinable public static var zero: Self { .default }
 
 }
 
 
+// TODO: Delete in 5.0.0
 @available(*, deprecated, renamed: "KvEps(for:)")
 @inlinable
 public func KvUlp<T : BinaryFloatingPoint>(of value: T) -> T { KvEpsArg(value).tolerance.value }
-
-@available(*, deprecated, renamed: "KvIs(_:equalTo:alsoIsGreaterThan:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, equalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
-    KvIs(lhs, equalTo: rhs, alsoIsGreaterThan: &greaterFlag)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:inequalTo:alsoIsGreaterThan:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, inequalTo rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
-    KvIs(lhs, inequalTo: rhs, alsoIsGreaterThan: &greaterFlag)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:greaterThan:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThen rhs: T) -> Bool {
-    KvIs(lhs, greaterThan: rhs)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:greaterThan:alsoIsLessThan:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThen rhs: T, alsoIsLessThen lessFlag: inout Bool) -> Bool {
-    KvIs(lhs, greaterThan: rhs, alsoIsLessThan: &lessFlag)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:lessThan:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThen rhs: T) -> Bool {
-    KvIs(lhs, lessThan: rhs)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:lessThan:alsoIsGreaterThan:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThen rhs: T, alsoIsGreaterThen greaterFlag: inout Bool) -> Bool {
-    KvIs(lhs, lessThan: rhs, alsoIsGreaterThan: &greaterFlag)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:greaterThanOrEqualTo:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, greaterThenOrEqualTo rhs: T) -> Bool {
-    KvIs(lhs, greaterThanOrEqualTo: rhs)
-}
-
-@available(*, deprecated, renamed: "KvIs(_:lessThanOrEqualTo:)")
-@inlinable
-public func KvIs<T : BinaryFloatingPoint>(_ lhs: T, lessThenOrEqualTo rhs: T) -> Bool {
-    KvIs(lhs, lessThanOrEqualTo: rhs)
-}
