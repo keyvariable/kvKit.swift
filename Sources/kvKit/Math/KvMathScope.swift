@@ -2413,22 +2413,34 @@ public struct KvNumericalToleranceVectorArgument2<Math : KvMathScope> : Hashable
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a memberwise product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value * rhs.value) }
+    /// - Returns: Tolerance of a memberwise product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value * rhs.value) }
 
-    /// - Returns: A tolerance of a division.
-    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value / rhs.value) }
+    /// - Returns: Tolerance of a division.
+    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value / rhs.value) }
 
-    /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2.0 as Scalar * Math.dot(value, rhs.value)) }
+    /// - Returns: Tlerance of distance operation.
+    @inlinable public func distance(to rhs: Self) -> Math.EpsArg { distance²(to: rhs).squareRoot() }
 
-    /// - Returns: A tolerance of a cross product Z coordinate.
+    /// - Returns: Tlerance of squared distance operation.
+    @inlinable public func distance²(to rhs: Self) -> Math.EpsArg { dot(rhs - self) }
+
+    /// - Returns: Tolerance of length operation.
+    @inlinable public func length() -> Math.EpsArg { length²().squareRoot() }
+
+    /// - Returns: Tolerance of squared length operation.
+    @inlinable public func length²() -> Math.EpsArg { dot(self) }
+
+    /// - Returns: Tolerance of a dot product.
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), (2.0 as Scalar) * Math.dot(value, rhs.value)) }
+
+    /// - Returns: Tolerance of a cross product Z coordinate.
     @inlinable
     public func cross(_ rhs: Self) -> Math.EpsArg {
         Math.EpsArg(values: value.max(), rhs.value.max(), (2.0 as Scalar) * ((value.x * rhs.value.y) as Scalar + (value.y * rhs.value.x) as Scalar))
@@ -2515,22 +2527,34 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a memberwise product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value * rhs.value) }
+    /// - Returns: Tolerance of a memberwise product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value * rhs.value) }
 
-    /// - Returns: A tolerance of a division.
-    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2.0 as Scalar * lhs.value / rhs.value) }
+    /// - Returns: Tolerance of a division.
+    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value / rhs.value) }
 
-    /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2.0 as Scalar * Math.dot(value, rhs.value)) }
+    /// - Returns: Tolerance of distance operation.
+    @inlinable public func distance(to rhs: Self) -> Math.EpsArg { distance²(to: rhs).squareRoot() }
 
-    /// - Returns: A tolerance of a cross product.
+    /// - Returns: Tolerance of squared distance operation.
+    @inlinable public func distance²(to rhs: Self) -> Math.EpsArg { dot(rhs - self) }
+
+    /// - Returns: Tolerance of length operation.
+    @inlinable public func length() -> Math.EpsArg { length²().squareRoot() }
+
+    /// - Returns: Tolerance of squared length operation.
+    @inlinable public func length²() -> Math.EpsArg { dot(self) }
+
+    /// - Returns: Tolerance of a dot product.
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), (2.0 as Scalar) * Math.dot(value, rhs.value)) }
+
+    /// - Returns: Tolerance of a cross product.
     @inlinable
     public func cross(_ rhs: Self) -> Self {
         Self(values: value, rhs.value,
@@ -2620,20 +2644,32 @@ public struct KvNumericalToleranceVectorArgument4<Math : KvMathScope> : Hashable
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a memberwise product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
+    /// - Returns: Tolerance of a memberwise product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value * rhs.value) }
 
-    /// - Returns: A tolerance of a division.
-    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
+    /// - Returns: Tolerance of a division.
+    @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value / rhs.value) }
 
-    /// - Returns: A tolerance of a dot product.
-    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), 2 * Math.dot(value, rhs.value)) }
+    /// - Returns: Tolerance of distance operation.
+    @inlinable public func distance(to rhs: Self) -> Math.EpsArg { distance²(to: rhs).squareRoot() }
+
+    /// - Returns: Tolerance of squared distance operation.
+    @inlinable public func distance²(to rhs: Self) -> Math.EpsArg { dot(rhs - self) }
+
+    /// - Returns: Tolerance of length operation.
+    @inlinable public func length() -> Math.EpsArg { length²().squareRoot() }
+
+    /// - Returns: Tolerance of squared length operation.
+    @inlinable public func length²() -> Math.EpsArg { dot(self) }
+
+    /// - Returns: Tolerance of a dot product.
+    @inlinable public func dot(_ rhs: Self) -> Math.EpsArg { Math.EpsArg(values: value.max(), rhs.value.max(), (2.0 as Scalar) * Math.dot(value, rhs.value)) }
 
 }
 
@@ -2716,14 +2752,14 @@ public struct KvNumericalToleranceVectorArgument2x2<Math : KvMathScope> {
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
+    /// - Returns: Tolerance of a product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value * rhs.value) }
 
 }
 
@@ -2806,14 +2842,14 @@ public struct KvNumericalToleranceVectorArgument3x3<Math : KvMathScope> {
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
+    /// - Returns: Tolerance of a product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value * rhs.value) }
 
 }
 
@@ -2896,13 +2932,13 @@ public struct KvNumericalToleranceVectorArgument4x4<Math : KvMathScope> {
     @inlinable public var tolerance: Tolerance { Tolerance(scalar) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
-    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
+    /// - Returns: Tolerance of a product.
+    @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: (2.0 as Scalar) * lhs.value * rhs.value) }
 
 }

@@ -246,23 +246,77 @@ public enum KvImageOrientation : Hashable, CustomStringConvertible, CaseIterable
 
     @inlinable
     public func concatenated(with rhs: Self) -> Self {
-        switch (self, rhs) {
-        case (.deg0, .deg0), (.deg0m, .deg0m), (.deg90, .deg270), (.deg90m, .deg90m), (.deg180, .deg180), (.deg180m, .deg180m), (.deg270, .deg90), (.deg270m, .deg270m):
-            return .deg0
-        case (.deg0, .deg0m), (.deg0m, .deg0), (.deg90, .deg90m), (.deg90m, .deg270), (.deg180, .deg180m), (.deg180m, .deg180), (.deg270, .deg270m), (.deg270m, .deg90):
-            return .deg0m
-        case (.deg0, .deg90), (.deg0m, .deg90m), (.deg90, .deg0), (.deg90m, .deg180m), (.deg180, .deg270), (.deg180m, .deg270m), (.deg270, .deg180), (.deg270m, .deg0m):
-            return .deg90
-        case (.deg0, .deg90m), (.deg0m, .deg90), (.deg90, .deg180m), (.deg90m, .deg0), (.deg180, .deg270m), (.deg180m, .deg270), (.deg270, .deg0m), (.deg270m, .deg180):
-            return .deg90m
-        case (.deg0, .deg180), (.deg0m, .deg180m), (.deg90, .deg90), (.deg90m, .deg270m), (.deg180, .deg0), (.deg180m, .deg0m), (.deg270, .deg270), (.deg270m, .deg90m):
-            return .deg180
-        case (.deg0, .deg180m), (.deg0m, .deg180), (.deg90, .deg270m), (.deg90m, .deg90), (.deg180, .deg0m), (.deg180m, .deg0), (.deg270, .deg90m), (.deg270m, .deg270):
-            return .deg180m
-        case (.deg0, .deg270), (.deg0m, .deg270m), (.deg90, .deg180), (.deg90m, .deg0m), (.deg180, .deg90), (.deg180m, .deg90m), (.deg270, .deg0), (.deg270m, .deg180m):
-            return .deg270
-        case (.deg0, .deg270m), (.deg0m, .deg270), (.deg90, .deg0m), (.deg90m, .deg180), (.deg180, .deg90m), (.deg180m, .deg90), (.deg270, .deg180m), (.deg270m, .deg0):
-            return .deg270m
+        switch self {
+        case .deg0:
+            return rhs
+        case .deg0m:
+            return rhs.mirrored()
+        case .deg90:
+            switch rhs {
+            case .deg0: return .deg90
+            case .deg0m: return .deg270m
+            case .deg90: return .deg180
+            case .deg90m: return .deg0m
+            case .deg180:  return .deg270
+            case .deg180m: return .deg90m
+            case .deg270: return .deg0
+            case .deg270m: return .deg180m
+            }
+        case .deg90m:
+            switch rhs {
+            case .deg0: return .deg90m
+            case .deg0m: return .deg270
+            case .deg90: return .deg180m
+            case .deg90m: return .deg0
+            case .deg180:  return .deg270m
+            case .deg180m: return .deg90
+            case .deg270: return .deg0m
+            case .deg270m: return .deg180
+            }
+        case .deg180:
+            switch rhs {
+            case .deg0: return .deg180
+            case .deg0m: return .deg180m
+            case .deg90: return .deg270
+            case .deg90m: return .deg270m
+            case .deg180:  return .deg0
+            case .deg180m: return .deg0m
+            case .deg270: return .deg90
+            case .deg270m: return .deg90m
+            }
+        case .deg180m:
+            switch rhs {
+            case .deg0: return .deg180m
+            case .deg0m: return .deg180
+            case .deg90: return .deg270m
+            case .deg90m: return .deg270
+            case .deg180:  return .deg0m
+            case .deg180m: return .deg0
+            case .deg270: return .deg90m
+            case .deg270m: return .deg90
+            }
+        case .deg270:
+            switch rhs {
+            case .deg0: return .deg270
+            case .deg0m: return .deg90m
+            case .deg90: return .deg0
+            case .deg90m: return .deg180m
+            case .deg180:  return .deg90
+            case .deg180m: return .deg270m
+            case .deg270: return .deg180
+            case .deg270m: return .deg0m
+            }
+        case .deg270m:
+            switch rhs {
+            case .deg0: return .deg270m
+            case .deg0m: return .deg90
+            case .deg90: return .deg0m
+            case .deg90m: return .deg180
+            case .deg180:  return .deg90m
+            case .deg180m: return .deg270
+            case .deg270: return .deg180m
+            case .deg270m: return .deg0
+            }
         }
     }
 

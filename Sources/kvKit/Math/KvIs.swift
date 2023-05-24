@@ -41,21 +41,21 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
     /// Memberwise initializer.
     @usableFromInline
     internal init(value: T) {
-        Swift.assert(value >= 0, "Invalid argument: tolerance value (\(value)) must be positive")
+        Swift.assert(value >= (0.0 as T), "Invalid argument: tolerance value (\(value)) must be positive")
 
         self.value = value
     }
 
     @inlinable
     public init(_ arg: Argument) {
-        self.init(value: T.ulpOfOne * Swift.max(Swift.min((16.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
+        self.init(value: T.ulpOfOne * Swift.max(Swift.min((32.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
     }
 
 
     // MARK: Auxiliaries
 
     /// Default tolerance for comparisons.
-    @inlinable public static var `default`: Self { Self(value: 16 * T.ulpOfOne) }
+    @inlinable public static var `default`: Self { Self(value: (32.0 as T) * T.ulpOfOne) }
 
 }
 
@@ -75,40 +75,40 @@ public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
     /// Memerwise initializer.
     @usableFromInline
     internal init(value: T) {
-        Swift.assert(value >= 0, "Invalid argument: tolerance argument value (\(value)) must be positive")
+        Swift.assert(value >= (0.0 as T), "Invalid argument: tolerance argument value (\(value)) must be positive")
 
         self.value = value
     }
 
     @usableFromInline
     internal init(values v1: T, _ v2: T) {
-        Swift.assert(v1 >= 0, "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
-        Swift.assert(v2 >= 0, "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
+        Swift.assert(v1 >= (0.0 as T), "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
+        Swift.assert(v2 >= (0.0 as T), "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
 
         self.value = Swift.max(v1, v2)
     }
 
     @usableFromInline
     internal init(values v1: T, _ v2: T, _ v3: T) {
-        Swift.assert(v1 >= 0, "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
-        Swift.assert(v2 >= 0, "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
-        Swift.assert(v3 >= 0, "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
+        Swift.assert(v1 >= (0.0 as T), "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
+        Swift.assert(v2 >= (0.0 as T), "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
+        Swift.assert(v3 >= (0.0 as T), "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
 
         self.value = Swift.max(Swift.max(v1, v2), v3)
     }
 
     @usableFromInline
     internal init(values v1: T, _ v2: T, _ v3: T, _ v4: T) {
-        Swift.assert(v1 >= 0, "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
-        Swift.assert(v2 >= 0, "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
-        Swift.assert(v3 >= 0, "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
-        Swift.assert(v4 >= 0, "Invalid argument: tolerance argument v4 (\(v4)) must be positive")
+        Swift.assert(v1 >= (0.0 as T), "Invalid argument: tolerance argument v1 (\(v1)) must be positive")
+        Swift.assert(v2 >= (0.0 as T), "Invalid argument: tolerance argument v2 (\(v2)) must be positive")
+        Swift.assert(v3 >= (0.0 as T), "Invalid argument: tolerance argument v3 (\(v3)) must be positive")
+        Swift.assert(v4 >= (0.0 as T), "Invalid argument: tolerance argument v4 (\(v4)) must be positive")
 
         self.value = Swift.max(Swift.max(v1, v2), Swift.max(v3, v4))
     }
 
     /// Zero argument initializer.
-    @inlinable public init() { value = 0 }
+    @inlinable public init() { value = 0.0 as T }
 
     /// Initializes single argument tolerance.
     @inlinable public init(_ arg: T) { self.init(value: abs(arg)) }
@@ -133,17 +133,24 @@ public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
     @inlinable public var tolerance: Tolerance { Tolerance(self) }
 
 
-    /// - Returns: A tolerance of a sum.
+    /// - Returns: Tolerance of a sum.
     @inlinable public static func +(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a subtraction.
+    /// - Returns: Tolerance of a subtraction.
     @inlinable public static func -(lhs: Self, rhs: Self) -> Self { Self(value: lhs.value + rhs.value) }
 
-    /// - Returns: A tolerance of a product.
+    /// - Returns: Tolerance of a product.
     @inlinable public static func *(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value * rhs.value) }
 
-    /// - Returns: A tolerance of a division.
+    /// - Returns: Tolerance of a division.
     @inlinable public static func /(lhs: Self, rhs: Self) -> Self { Self(value: 2 * lhs.value / rhs.value) }
+
+
+    /// - Returns: Tolarance of the squared receiver.
+    @inlinable public func squared() -> Self { self * self }
+
+    /// - Returns: Tolarance of square root of the receiver.
+    @inlinable public func squareRoot() -> Self { .init(value: value.squareRoot()) }
 
 }
 
