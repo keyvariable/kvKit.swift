@@ -240,13 +240,6 @@ public enum KvCompressionKit {
 
     }
 
-
-
-    // MARK: Legacy
-
-    @available(*, deprecated, renamed: "Constants.bufferSize")
-    public static let bufferSize = 32 << 10
-
 }
 
 

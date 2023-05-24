@@ -83,38 +83,4 @@ extension KvThreadKit {
         try body()
     }
 
-
-
-    /// A shortcut to execute *body* while *lock* is being locked. If *lock* is `nil` then nothing execued and `nil` is returned.
-    ///
-    /// - Returns: The result of *body* invocation or `nil`.
-    @available(*, deprecated, message: "Use other version of this method")
-    public static func locking<T, R>(_ lock: T?, body: (T) throws -> R) rethrows -> R?
-    where T : NSLocking
-    {
-        guard let lock = lock else { return nil }
-
-        lock.lock()
-        defer { lock.unlock() }
-
-        return try body(lock)
-    }
-
-
-
-    /// A shortcut to execute *body* while *lock* is being locked. If *lock* is `nil` then nothing execued and `nil` is returned.
-    ///
-    /// - Returns: The result of *body* invocation or `nil`.
-    @available(*, deprecated, message: "Use other version of this method")
-    public static func locking<T>(_ lock: T?, body: (T) throws -> Void) rethrows -> Void
-    where T : NSLocking
-    {
-        guard let lock = lock else { return }
-
-        lock.lock()
-        defer { lock.unlock() }
-
-        try body(lock)
-    }
-
 }

@@ -47,14 +47,6 @@ extension KvPowerManagement {
 
 
 
-    /// - returns: A RAII token if succeeded or `nil` if error occurs.
-    @available(*, deprecated, renamed: "preventSystemSleep(reason:)")
-    public static func preventSystemSleep(with reason: String) -> SystemSleepPreventionToken? {
-        SystemSleepPreventionToken(reason: reason)
-    }
-
-
-
     /// A RAII token cancelling system sleep prevention.
     public class SystemSleepPreventionToken : CustomStringConvertible {
 
@@ -101,14 +93,6 @@ extension KvPowerManagement {
     #elseif os(iOS)
     /// - returns: A RAII token if succeeded or `nil` if error occurs.
     public static func preventSystemSleep(reason: String) -> SystemSleepPreventionToken? {
-        SystemSleepPreventionToken(reason: reason)
-    }
-
-
-
-    /// - returns: A RAII token if succeeded or `nil` if error occurs.
-    @available(*, deprecated, renamed: "preventSystemSleep(reason:)")
-    public static func preventSystemSleep(with reason: String) -> SystemSleepPreventionToken? {
         SystemSleepPreventionToken(reason: reason)
     }
 

@@ -45,7 +45,7 @@ extension KvDispatchQueueKit {
         public static let utility = DispatchQueue(label: "com.keyvar.GlobalSerialQueue.utility", qos: .utility, autoreleaseFrequency: .inherit)
 
 
-        // TODO: Delete in 4.0.0
+        // TODO: Delete in 5.0.0
         @available(*, unavailable, renamed: "userInitiated")
         public static var userInitialted: DispatchQueue { self.userInitiated }
 
@@ -82,18 +82,6 @@ extension KvDispatchQueueKit {
         Thread.isMainThread
             ? DispatchQueue.global(qos: .default).async(execute: block)
             : block()
-    }
-
-
-
-    /// Invokes *block* on the main thread synchronously if method is invoked on the main thread. Otherwise *block* is invoked on the main thread asynchronously.
-    @available(*, deprecated, message: "Use DispatchQueue.global(qos:).async(execute:) instead")
-    public static func globalAsyncIfNeeded(qos: DispatchQoS.QoSClass = .default, _ block: @escaping () -> Void) {
-        let globalQueue = DispatchQueue.global(qos: qos)
-
-        OperationQueue.current?.underlyingQueue === globalQueue
-            ? block()
-            : globalQueue.async(execute: block)
     }
 
 }

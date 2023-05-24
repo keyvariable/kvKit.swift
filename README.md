@@ -1,4 +1,4 @@
-# kvKit-Swift
+# kvKit.swift
 
 ![Swift 5.2](https://img.shields.io/badge/swift-5.2-green.svg)
 ![Linux](https://img.shields.io/badge/os-linux-green.svg)
@@ -29,7 +29,7 @@ This package contains both crossplatform code and platform specific code.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/keyvariable/kvKit-Swift.git", from: "3.3.0"),
+    .package(url: "https://github.com/keyvariable/kvKit-Swift.git", from: "4.0.0"),
 ]
 ```
 
