@@ -27,7 +27,7 @@ let targets: [Target] = [
 ]
 
 let package = Package(
-    name: "kvKit-Swift",
+    name: "kvKit.swift",
 
     platforms: [ .iOS(.v11), ],
 
