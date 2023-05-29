@@ -91,20 +91,20 @@ public protocol KvStatisticsAverageProcessor : KvStatisticsAverageStream, KvStat
 extension KvStatistics {
 
     /// Simple average.
-    public class Average<Value : FloatingPoint> {
+    public class Average<Value : BinaryFloatingPoint> {
 
         // MARK: .Processor
 
         /// Simple average online algorithm that is less prone to loss of precision due to catastrophic cancellation.
         public struct Processor : KvStatisticsAverageProcessor {
 
-            public private(set) var average: Value = 0
+            public private(set) var average: Value = 0.0 as Value
 
             public private(set) var count: Int = 0 {
-                didSet { invCount = count != 0 ? 1 / Value(count) : 0 }
+                didSet { invCount = count != 0 ? ((1.0 as Value) / Value(count)) : (0.0 as Value) }
             }
 
-            public private(set) var invCount: Value = 0
+            public private(set) var invCount: Value = 0.0 as Value
 
 
 
@@ -150,7 +150,7 @@ extension KvStatistics {
 
 
             public mutating func reset() {
-                average = 0
+                average = 0.0 as Value
                 count = 0
             }
 
@@ -206,7 +206,7 @@ extension KvStatistics {
         /// A(n) = (a_(n-l+1) + ... + a_n) / l; A(n+1) = (a_(n-l+2) + ... + a_(n+1)) / l, where l is the limit, n >= l.
         public struct MovingStream : KvStatisticsAverageStream {
 
-            public private(set) var average: Value = 0
+            public private(set) var average: Value = 0.0 as Value
 
             public private(set) var buffer: KvCircularBuffer<Value>
 
@@ -224,7 +224,7 @@ extension KvStatistics {
             public init(capacity: Int) {
                 buffer = .init(capacity: capacity)
 
-                invCapacity = 1 / Value(capacity)
+                invCapacity = (1.0 as Value) / Value(capacity)
             }
 
 
@@ -241,7 +241,7 @@ extension KvStatistics {
 
             @inlinable
             public func nextAverage(for value: Value) -> Value {
-                count < capacity ? (average + (value - average) as Value / Value(count + 1)) : average.addingProduct(value - buffer.first!, invCapacity)
+                count < capacity ? (average + ((value - average) as Value) / Value(count + 1)) : average.addingProduct(value - buffer.first!, invCapacity)
             }
 
 
@@ -252,7 +252,7 @@ extension KvStatistics {
                 if let excludedValue = buffer.append(value) {
                     average.addProduct(value - excludedValue, invCapacity)
                 } else {
-                    average += (value - average) as Value / Value(buffer.count)
+                    average += ((value - average) as Value) / Value(buffer.count)
                 }
             }
 
@@ -289,7 +289,7 @@ extension KvStatistics {
 
 
             public mutating func reset() {
-                average = 0
+                average = 0.0 as Value
                 buffer.removeAll()
             }
         }
@@ -305,14 +305,14 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Weighted mean.
-    public class WeightedMean<Value : FloatingPoint> {
+    public class WeightedMean<Value : BinaryFloatingPoint> {
 
         // MARK: .MovingStream
 
         /// Weighted moving average online algorithm that is less prone to loss of precision due to catastrophic cancellation.
         public struct MovingStream : KvStatisticsAverageStream {
 
-            public var average: Value { zip(buffer, weights).reduce(0, { $0.addingProduct($1.0, $1.1) }) }
+            public var average: Value { zip(buffer, weights).reduce(0.0 as Value, { $0.addingProduct($1.0, $1.1) }) }
 
             public private(set) var buffer: KvCircularBuffer<Value>
 
@@ -324,11 +324,11 @@ extension KvStatistics {
 
 
 
-            public init<Weights>(initialValue: Value = 0, weights: Weights) where Weights : Sequence, Weights.Element == Value {
+            public init<Weights>(initialValue: Value = 0.0 as Value, weights: Weights) where Weights : Sequence, Weights.Element == Value {
                 let scale: Value = {
-                    let totalWeight = weights.reduce(0, +)
+                    let totalWeight = weights.reduce(0.0 as Value, +)
 
-                    return abs(totalWeight) >= .ulpOfOne ? 1 / totalWeight : 0
+                    return abs(totalWeight) >= Value.ulpOfOne ? ((1.0 as Value) / totalWeight) : 0.0 as Value
                 }()
 
                 self.weights = weights.map { $0 * scale }   // Normalization of weights.
@@ -350,7 +350,7 @@ extension KvStatistics {
 
                 _ = valueIterator.next()    // Skip first value
 
-                let sum: Value = (0..<(capacity - 1)).reduce(0, { (result, _) in result.addingProduct(weightIterator.next()!, valueIterator.next()!) })
+                let sum: Value = (0..<(capacity - 1)).reduce(0.0 as Value, { (result, _) in result.addingProduct(weightIterator.next()!, valueIterator.next()!) })
 
                 return sum + weightIterator.next()! * value
             }
@@ -396,7 +396,7 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Exponential mean.
-    public class ExponentialMean<Value : FloatingPoint> {
+    public class ExponentialMean<Value : BinaryFloatingPoint> {
 
         // MARK: .Stream
 
@@ -406,19 +406,19 @@ extension KvStatistics {
             public let period: Int
             public let alpha: Value
 
-            public private(set) var average: Value = 0
+            public private(set) var average: Value = 0.0 as Value
 
             public private(set) var count: Int = 0
 
 
 
             public init(period: Int, alpha: Value) {
-                assert(period > 0 && alpha >= 0 && alpha <= 1)
+                assert(period > 0 && alpha >= (0.0 as Value) && alpha <= (1.0 as Value))
 
                 self.period = period
                 self.alpha = alpha
 
-                oneMinusAlpha = 1 - alpha
+                oneMinusAlpha = (1.0 as Value) - alpha
             }
 
 
@@ -438,7 +438,7 @@ extension KvStatistics {
             // MARK: : KvStatisticsStream
 
             public mutating func process(_ value: Value) {
-                average = count > 0 ? alpha * value + oneMinusAlpha * average : value
+                average = count > 0 ? (alpha * value + oneMinusAlpha * average) : value
 
                 count += 1
             }
@@ -482,7 +482,7 @@ extension KvStatistics {
 
 
             public mutating func reset() {
-                average = 0
+                average = 0.0 as Value
                 count = 0
             }
 
@@ -499,7 +499,7 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Root mean square
-    public class RMS<Value : FloatingPoint> {
+    public class RMS<Value : BinaryFloatingPoint> {
 
         // MARK: .Processor
 
@@ -694,10 +694,10 @@ extension KvStatistics {
             public var unbiasedVariance: Value { value(divider: avgProcessor.count - 1) }
 
 
-            public private(set) var moment: Value = 0
+            public private(set) var moment: Value = 0.0 as Value
 
 
-            public private(set) var average: Value = 0
+            public private(set) var average: Value = 0.0 as Value
 
 
             public var count: Int { return avgProcessor.count }
@@ -714,7 +714,7 @@ extension KvStatistics {
 
             // MARK: Auxiliaries
 
-            private func value(divider: Int) -> Value { divider > 0 ? moment / Value(divider) : 0 }
+            private func value(divider: Int) -> Value { divider > 0 ? moment / Value(divider) : (0.0 as Value) }
 
 
 
@@ -745,8 +745,8 @@ extension KvStatistics {
 
 
             public mutating func reset() {
-                moment = 0
-                average = 0
+                moment = 0.0 as Value
+                average = 0.0 as Value
                 avgProcessor.reset()
             }
 
@@ -784,7 +784,7 @@ extension KvStatistics {
                 let newAverage = avgProcessor.average
                 defer { average = newAverage }
 
-                moment.addProduct(newValue - oldValue, newValue - newAverage + oldValue - average)
+                moment.addProduct(newValue - oldValue, (newValue - newAverage) as Value + (oldValue - average) as Value)
 
                 #if DEBUG
                 if KvIsNegative(moment) {
@@ -833,10 +833,10 @@ extension KvStatistics {
             }
 
 
-            public private(set) var moment: Value = 0
+            public private(set) var moment: Value = 0.0 as Value
 
 
-            public private(set) var average: Value = 0
+            public private(set) var average: Value = 0.0 as Value
 
 
             public var count: Int { return avgStream.count }
@@ -853,8 +853,8 @@ extension KvStatistics {
 
                 avgStream = .init(capacity: capacity)
 
-                invCapacity = 1 / Value(capacity)
-                invCapacityMinusOne = 1 / Value(capacity - 1)
+                invCapacity = (1.0 as Value) / Value(capacity)
+                invCapacityMinusOne = (1.0 as Value) / Value(capacity - 1)
             }
 
 
@@ -866,7 +866,7 @@ extension KvStatistics {
             // MARK: Auxiliaries
 
             private func value(divider: Int) -> Value {
-                divider > 0 ? moment / Value(count) : 0
+                divider > 0 ? moment / Value(count) : (0.0 as Value)
             }
 
 
@@ -890,7 +890,7 @@ extension KvStatistics {
                     let newAverage = avgStream.average
                     defer { average = newAverage }
 
-                    moment.addProduct(value - excludedValue, value - average + excludedValue - newAverage)
+                    moment.addProduct(value - excludedValue, (value - average) as Value + (excludedValue - newAverage) as Value)
                 }
             }
 
@@ -904,8 +904,8 @@ extension KvStatistics {
 
 
             public mutating func reset() {
-                moment = 0
-                average = 0
+                moment = 0.0 as Value
+                average = 0.0 as Value
                 avgStream.reset()
             }
 
@@ -921,23 +921,23 @@ extension KvStatistics {
             public let value, average, count: Value
 
 
-            public private(set) lazy var standardDeviation: Value = count > 0 ? (value / count).squareRoot() : 0
+            public private(set) lazy var standardDeviation: Value = count > (0.0 as Value) ? (value / count).squareRoot() : (0.0 as Value)
 
-            public private(set) lazy var variance: Value = count > 0 ? value / count : 0
+            public private(set) lazy var variance: Value = count > (0.0 as Value) ? (value / count) : (0.0 as Value)
 
-            public private(set) lazy var unbiasedStandardDeviation: Value = { $0 > 0 ? (value / $0).squareRoot() : 0 }(count - 1 as Value)
+            public private(set) lazy var unbiasedStandardDeviation: Value = { $0 > (0.0 as Value) ? (value / $0).squareRoot() : (0.0 as Value) }((count - (1.0 as Value)) as Value)
 
-            public private(set) lazy var unbiasedVariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1 as Value)
+            public private(set) lazy var unbiasedVariance: Value = { $0 > (0.0 as Value) ? (value / $0) : (0.0 as Value) }((count - (1.0 as Value)) as Value)
 
 
 
             public init<S>(_ values: S) where S: Sequence, S.Element == Value {
-                var average: Value = 0, count: Value = 0
+                var average = (0.0 as Value), count = (0.0 as Value)
 
-                value = values.reduce(0) { (moment, x) in
-                    count += 1
+                value = values.reduce(0.0 as Value) { (moment, x) in
+                    count += 1.0 as Value
 
-                    let newAverage = average + (x - average) / count
+                    let newAverage = average + ((x - average) as Value) / count
                     defer { average = newAverage }
 
                     return moment.addingProduct(x - average, x - newAverage)
@@ -957,7 +957,7 @@ extension KvStatistics {
         public struct Uniform {
 
             @usableFromInline
-            internal static var oneTwelfth: Value { 1.0 / (12.0 as Value) }
+            internal static var oneTwelfth: Value { (1.0 as Value) / (12.0 as Value) }
 
 
             /// - Returns: The moment value for [ 1∙d, 2∙d, ..., n∙d ].
@@ -1085,10 +1085,10 @@ extension KvStatistics {
             public var unbiasedCovariance: Value { value(divider: count - 1) }
 
 
-            public private(set) var comoment: Value = 0
+            public private(set) var comoment: Value = 0.0 as Value
 
 
-            public private(set) var average: SourceValue = (0, 0)
+            public private(set) var average: SourceValue = (0.0 as Value, 0.0 as Value)
 
 
             public var count: Int { return avgProcessor.0.count }
@@ -1106,7 +1106,7 @@ extension KvStatistics {
             // MARK: Auxiliaries
 
             private func value(divider: Int) -> Value {
-                divider > 0 ? comoment / Value(divider) : 0
+                divider > 0 ? comoment / Value(divider) : (0.0 as Value)
             }
 
 
@@ -1163,8 +1163,8 @@ extension KvStatistics {
 
 
             public mutating func reset() {
-                comoment = 0
-                average = (0, 0)
+                comoment = 0.0 as Value
+                average = (0.0 as Value, 0.0 as Value)
                 avgProcessor.0.reset()
                 avgProcessor.1.reset()
             }
@@ -1301,7 +1301,7 @@ extension KvStatistics {
 
 
             public init<S>(dx: Value = 1, y values: S) where S: Sequence, S.Element == Value {
-                var average: (x: Value, y: Value) = (-0.5, 0.0), count: Value = 0.0
+                var average: (x: Value, y: Value) = (-0.5 as Value, 0.0 as Value), count: Value = 0.0 as Value
 
                 value = dx * values.reduce(0) { (comoment, value) in
                     count += 1.0 as Value
@@ -1636,7 +1636,7 @@ extension KvStatistics {
 
             public var k: Value {
                 let moment = varianceProcessor.moment
-                return moment >= .ulpOfOne ? covarianceProcessor.comoment / moment : 0
+                return moment >= Value.ulpOfOne ? (covarianceProcessor.comoment / moment) : (0.0 as Value)
             }
             public var b: Value { return covarianceProcessor.average.1 - k * covarianceProcessor.average.0 }
 

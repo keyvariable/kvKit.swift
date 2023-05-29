@@ -32,7 +32,7 @@ public struct KvDiscreteMapping<T: BinaryFloatingPoint> {
 
 
 
-    public var step: T = 1.0 {
+    public var step: T = 1.0 as T {
         didSet {
             guard KvIsNonzero(step - oldValue, eps: KvEpsArg(oldValue).tolerance) else { return }
 
@@ -42,7 +42,7 @@ public struct KvDiscreteMapping<T: BinaryFloatingPoint> {
 
 
 
-    public init(step: T = 1) {
+    public init(step: T = 1.0 as T) {
         self.step = step
 
         update()
@@ -50,8 +50,8 @@ public struct KvDiscreteMapping<T: BinaryFloatingPoint> {
 
 
 
-    private var scale: T = 1
-    private var invScale: T = 1
+    private var scale: T = 1.0 as T
+    private var invScale: T = 1.0 as T
 
 }
 
@@ -105,8 +105,8 @@ extension KvDiscreteMapping {
 extension KvDiscreteMapping {
 
     private mutating func update() {
-        invScale = abs(step) >= .ulpOfOne ? step : KvDebug.pause(code: 1, "Warning: .step = \(step) is too small in absolute value")
-        scale = 1 / invScale
+        invScale = abs(step) >= T.ulpOfOne ? step : KvDebug.pause(code: 1.0 as T, "Warning: .step = \(step) is too small in absolute value")
+        scale = (1.0 as T) / invScale
     }
 
 }

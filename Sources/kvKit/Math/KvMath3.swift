@@ -55,7 +55,7 @@ extension KvMath3 where Scalar == Float {
     // TODO: Delete in 5.0.0
     @available(*, deprecated, message: "Migrate to KvMathScope")
     @inlinable public static func supplemented(_ base: simd_float2x2) -> simd_float3x3 {
-        .init(Vector(base[0], 0.0 as Scalar), Vector(base[1], 0.0 as Scalar), [ 0.0 as Scalar, 0.0 as Scalar, 1.0 as Scalar ])
+        .init(Vector(base[0], 0.0 as Scalar), Vector(base[1], 0.0 as Scalar), Vector.unitZ)
     }
 
     // TODO: Delete in 5.0.0
