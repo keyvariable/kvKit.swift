@@ -29,7 +29,7 @@ public class KvEventCenter<Sender, Event> {
 
     public typealias Callback = (Sender, Event) -> Void
 
-    public typealias Token = KvRAII.Token
+    public typealias Token = KvRAII.Token<Void>
 
 
     public typealias EmptyCallback = (KvEventCenter) -> Void

@@ -34,62 +34,92 @@ public enum KvRAII { }
 
 extension KvRAII {
 
-    /// Invokes the callback when destroyed.
-    public class Token : Hashable {
+    /// Invokes associated callbacks when destroyed.
+    ///
+    /// - Note: This class is not threadsafe.
+    public class Token<Wrapped> : Hashable {
 
-        public typealias ReleaseCallback = (Any?) -> Void
+        public typealias Wrapped = Wrapped
+
+        public typealias ReleaseCallback = (Wrapped) -> Void
 
 
-
-        public var userData: Any?
-
+        public var wrapped: Wrapped
 
 
-        public init(userData: Any? = nil, releaseCallback: @escaping ReleaseCallback) {
-            self.userData = userData
+        @inlinable
+        public init(_ wrapped: Wrapped, releaseCallback: @escaping ReleaseCallback) {
+            self.wrapped = wrapped
             self.releaseCallbacks = [ releaseCallback ]
         }
-
 
 
         deinit { release() }
 
 
-
-        private var releaseCallbacks: [ReleaseCallback]
-
+        @usableFromInline
+        internal private(set) var releaseCallbacks: [ReleaseCallback]
 
 
         // MARK: : Equatable
 
-        public static func ==(lhs: Token, rhs: Token) -> Bool { lhs === rhs }
-
+        @inlinable public static func ==(lhs: Token, rhs: Token) -> Bool { lhs === rhs }
 
 
         // MARK: : Hashable
 
-        public func hash(into hasher: inout Hasher) { ObjectIdentifier(self).hash(into: &hasher) }
-
+        @inlinable public func hash(into hasher: inout Hasher) { ObjectIdentifier(self).hash(into: &hasher) }
 
 
         // MARK: Operations
 
+        @inlinable
         public func addReleaseCallback(_ releaseCallback: @escaping ReleaseCallback) {
             releaseCallbacks.append(releaseCallback)
         }
 
 
-
         /// Invoke this method to release the receiver immediately.
         ///
         /// - Note: Sometimes it helps to prevent the «never read» compiler warning.
+        @inlinable
         public func release() {
-            releaseCallbacks.removeAll {
-                $0(userData)
-                return true
-            }
+            releaseCallbacks.forEach { $0(wrapped) }
+            releaseCallbacks.removeAll()
         }
 
+    }
+
+}
+
+
+extension KvRAII.Token where Wrapped == Void {
+
+    @inlinable
+    public convenience init(releaseCallback: @escaping ReleaseCallback) {
+        self.init((), releaseCallback: releaseCallback)
+    }
+
+}
+
+
+// TODO: Remove in 6.0.0.
+extension KvRAII.Token where Wrapped == Any? {
+
+    // TODO: Remove in 6.0.0.
+    @available(*, deprecated, renamed: "wrapped")
+    @inlinable
+    public var userData: Any? {
+        get { wrapped }
+        set { wrapped = newValue }
+    }
+
+
+    // TODO: Remove in 6.0.0.
+    @available(*, deprecated, message: "Use generic .init(_:releaseCallback:)")
+    @inlinable
+    public convenience init(userData: Any? = nil, releaseCallback: @escaping ReleaseCallback) {
+        self.init(userData, releaseCallback: releaseCallback)
     }
 
 }
@@ -100,82 +130,134 @@ extension KvRAII {
 
 extension KvRAII {
 
-    /// Executes a callback when becomes empty.
+    /// This class manages a set of tokens and executes given callback when it's empty state changes.
+    ///
+    /// Tokens are removed automatically when released. So there is no need to remove tokens explicitely.
+    ///
+    /// - Note: This class is thread-safe.
     public class TokenSet {
 
-        public typealias IsEmptyCallback = (Bool) -> Void
+        public typealias EmptyCallback = (Bool) -> Void
+
+        // TODO: Remove in 6.0.0
+        @available(*, deprecated, renamed: "EmptyCallback")
+        public typealias IsEmptyCallback = EmptyCallback
 
 
-
-        public var isEmptyCallback: IsEmptyCallback
-
-
-
-        public init(isEmptyCallback: @escaping IsEmptyCallback) {
-            self.isEmptyCallback = isEmptyCallback
+        /// A callback to be invoked when the receiver's empty state is changed.
+        public var emptyCallback: EmptyCallback {
+            get { KvThreadKit.locking(mutationLock) { _emptyCallback } }
+            set { KvThreadKit.locking(mutationLock) { _emptyCallback = newValue } }
         }
 
+        // TODO: Remove in 6.0.0
+        @available(*, deprecated, renamed: "emptyCallback")
+        @inlinable
+        public var isEmptyCallback: IsEmptyCallback {
+            get { emptyCallback }
+            set { emptyCallback = newValue }
+        }
+
+
+        public init(emptyCallback: @escaping EmptyCallback) {
+            self._emptyCallback = emptyCallback
+        }
+
+        // TODO: Remove in 6.0.0
+        @available(*, deprecated, renamed: "init(emptyCallback:)")
+        @inlinable
+        public convenience init(isEmptyCallback: @escaping IsEmptyCallback) {
+            self.init(emptyCallback: isEmptyCallback)
+        }
 
 
         private let mutationLock = NSLock()
 
-        private var count: Int = 0 {
+        /// - Warning: Access must be protected by `.mutationLock`.
+        private var _count: Int = 0 {
             willSet { assert(newValue >= 0, "Internal inconsistency: attempt to assign \(newValue) to count property") }
         }
 
+        /// - Warning: Access must be protected by `.mutationLock`.
+        private var _emptyCallback: EmptyCallback
 
 
         // MARK: Access
 
-        public var isEmpty: Bool { KvThreadKit.locking(mutationLock) { count <= 0 } }
-
+        /// - Returns: A boolean value indicating whether the receiver is empty.
+        public var isEmpty: Bool { KvThreadKit.locking(mutationLock) { _count <= 0 } }
 
 
         // MARK: Mutation
 
-        /// This method creates a token and stores it in the receiver. This method is convenient when empty state of the receiver is observed.
-        public func make() -> Token {
-            increateCount()
+        /// This method creates a token and stores it in the receiver.
+        public func make<Wrapped>(_ wrapped: Wrapped) -> Token<Wrapped> {
+            increaseCount()
 
-            return .init { [weak self] _ in
+            return Token<Wrapped>(wrapped) { [weak self] _ in
                 self?.decreaseCount()
             }
         }
 
 
+        /// This method creates a token and stores it in the receiver.
+        @inlinable
+        public func make() -> Token<Void> { make(()) }
 
-        public func make(userData: Any? = nil, releaseCallback: @escaping Token.ReleaseCallback) -> Token {
-            let token = make()
 
-            token.userData = userData
+        /// This method creates a token and stores it in the receiver.
+        public func make<Wrapped>(_ wrapped: Wrapped, releaseCallback: @escaping Token<Wrapped>.ReleaseCallback) -> Token<Wrapped> {
+            let token = make(wrapped)
+
             token.addReleaseCallback(releaseCallback)
 
             return token
         }
 
 
+        // TODO: Delete in 6.0.0
+        /// This method creates a token and stores it in the receiver.
+        @available(*, deprecated, renamed: "make(_:releaseCallback:)")
+        @inlinable
+        public func make(userData: Any? = nil, releaseCallback: @escaping Token<Any?>.ReleaseCallback) -> Token<Any?> {
+            make(userData, releaseCallback: releaseCallback)
+        }
 
-        private func increateCount() {
-            let wasEmpty: Bool = KvThreadKit.locking(mutationLock) {
-                defer { count += 1 }
-                return count == 0
+
+        private func increaseCount() {
+            let wasEmpty: Bool
+            let emptyCallback: EmptyCallback
+            do {
+                mutationLock.lock()
+                defer { mutationLock.unlock() }
+
+                emptyCallback = _emptyCallback
+
+                defer { _count += 1 }
+                wasEmpty = _count == 0
             }
 
             if wasEmpty {
-                isEmptyCallback(false)
+                emptyCallback(false)
             }
         }
 
 
-
         private func decreaseCount() {
-            let becameEmpty: Bool = KvThreadKit.locking(mutationLock) {
-                count -= 1
-                return count == 0
+            let becameEmpty: Bool
+            let emptyCallback: EmptyCallback
+            do {
+                mutationLock.lock()
+                defer { mutationLock.unlock() }
+
+                emptyCallback = _emptyCallback
+
+                _count -= 1
+                becameEmpty = _count == 0
             }
 
             if becameEmpty {
-                isEmptyCallback(true)
+                emptyCallback(true)
             }
         }
 
