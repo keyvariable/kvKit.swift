@@ -106,7 +106,7 @@ extension KvRAII.Token where Wrapped == Void {
 // TODO: Remove in 6.0.0.
 extension KvRAII.Token where Wrapped == Any? {
 
-    // TODO: Remove in 6.0.0.
+    // TODO: Delete in 6.0.0.
     @available(*, deprecated, renamed: "wrapped")
     @inlinable
     public var userData: Any? {
@@ -115,7 +115,7 @@ extension KvRAII.Token where Wrapped == Any? {
     }
 
 
-    // TODO: Remove in 6.0.0.
+    // TODO: Delete in 6.0.0.
     @available(*, deprecated, message: "Use generic .init(_:releaseCallback:)")
     @inlinable
     public convenience init(userData: Any? = nil, releaseCallback: @escaping ReleaseCallback) {
@@ -139,18 +139,18 @@ extension KvRAII {
 
         public typealias EmptyCallback = (Bool) -> Void
 
-        // TODO: Remove in 6.0.0
+        // TODO: Delete in 6.0.0
         @available(*, deprecated, renamed: "EmptyCallback")
         public typealias IsEmptyCallback = EmptyCallback
 
 
         /// A callback to be invoked when the receiver's empty state is changed.
         public var emptyCallback: EmptyCallback {
-            get { KvThreadKit.locking(mutationLock) { _emptyCallback } }
-            set { KvThreadKit.locking(mutationLock) { _emptyCallback = newValue } }
+            get { mutationLock.withLock { _emptyCallback } }
+            set { mutationLock.withLock { _emptyCallback = newValue } }
         }
 
-        // TODO: Remove in 6.0.0
+        // TODO: Delete in 6.0.0
         @available(*, deprecated, renamed: "emptyCallback")
         @inlinable
         public var isEmptyCallback: IsEmptyCallback {
@@ -163,7 +163,7 @@ extension KvRAII {
             self._emptyCallback = emptyCallback
         }
 
-        // TODO: Remove in 6.0.0
+        // TODO: Delete in 6.0.0
         @available(*, deprecated, renamed: "init(emptyCallback:)")
         @inlinable
         public convenience init(isEmptyCallback: @escaping IsEmptyCallback) {
@@ -185,7 +185,7 @@ extension KvRAII {
         // MARK: Access
 
         /// - Returns: A boolean value indicating whether the receiver is empty.
-        public var isEmpty: Bool { KvThreadKit.locking(mutationLock) { _count <= 0 } }
+        public var isEmpty: Bool { mutationLock.withLock { _count <= 0 } }
 
 
         // MARK: Mutation

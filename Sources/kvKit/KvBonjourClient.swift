@@ -61,12 +61,8 @@ extension KvBonjour {
     open class Client : NSObject {
 
         public var delegate: KvBonjourClientDelegate? {
-            get { KvThreadKit.locking(mutationLock) { _delegate } }
-            set {
-                KvThreadKit.locking(mutationLock) {
-                    _delegate = newValue
-                }
-            }
+            get { mutationLock.withLock { _delegate } }
+            set { mutationLock.withLock { _delegate = newValue } }
         }
 
 
@@ -290,7 +286,7 @@ extension KvBonjour.Client {
 
     /// - returns: First received data from the queue if avaialble.
     public func take() -> Data? {
-        return KvThreadKit.locking(inputQueueLock) {
+        inputQueueLock.withLock {
             !inputQueue.isEmpty ? inputQueue.removeFirst() : nil
         }
     }
@@ -300,7 +296,7 @@ extension KvBonjour.Client {
     private func pushReceived(_ data: Data) {
         //NSLog("[KvBonjour.Client \(ObjectIdentifier(self))] Did receive \(data.count) bytes")
 
-        KvThreadKit.locking(inputQueueLock) {
+        inputQueueLock.withLock {
             inputQueue.append(data)
         }
 
@@ -318,7 +314,7 @@ extension KvBonjour.Client {
     public func send(_ data: Data) {
         guard !data.isEmpty else { return }
 
-        KvThreadKit.locking(outputQueueLock) {
+        outputQueueLock.withLock {
             outputQueue.append(data)
 
             sendPendingData()
@@ -536,7 +532,7 @@ extension KvBonjour.Client : StreamDelegate {
                 break
 
             case .hasSpaceAvailable:
-                KvThreadKit.locking(outputQueueLock) {
+                outputQueueLock.withLock {
                     canWriteToOutput = true
 
                     sendPendingData()

@@ -78,9 +78,7 @@ public final class KvConsoleApplication {
 
     private static let mutationLock = NSRecursiveLock()
 
-    private static var needsStop: Bool {
-        KvThreadKit.locking(mutationLock) { shared.needsStop }
-    }
+    private static var needsStop: Bool { mutationLock.withLock { shared.needsStop } }
 
 
     private var needsStop: Bool = false {
@@ -109,7 +107,7 @@ extension KvConsoleApplication {
         KvDebug.mainThreadCheck("⚠️ KvConsoleApplication.main() must be invoked on main thread")
 
 
-        KvThreadKit.locking(mutationLock) { () -> Void in
+        mutationLock.withLock { () -> Void in
             guard shared == nil else {
                 return KvDebug.pause("Attempt to simultaneously run two applications")
             }
@@ -135,7 +133,7 @@ extension KvConsoleApplication {
 
 
     public func setNeedsStop() {
-        KvThreadKit.locking(Self.mutationLock) {
+        Self.mutationLock.withLock {
             precondition(self === Self.shared, "Internal inconsistency: unexpected application instance")
             
             needsStop = true

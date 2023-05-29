@@ -44,8 +44,8 @@ public class KvSerialTaskController<Input, Output> : NSLocking  {
 
     /// Nil context cancels current task and doesn't start new task.
     public var input: Input? {
-        get { KvThreadKit.locking(mutationLock) { _input } }
-        set { KvThreadKit.locking(mutationLock) { _input = newValue } }
+        get { mutationLock.withLock { _input } }
+        set { mutationLock.withLock { _input = newValue } }
     }
 
 
@@ -173,7 +173,7 @@ extension KvSerialTaskController {
         // Result is committed when the lock is released.
         resultSubject.send(result)
 
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             status.remove(.running)
 
             // Run next task if requested
