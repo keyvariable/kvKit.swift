@@ -30,6 +30,8 @@ import simd
 /// A lightweight container for numerical comparison tolerance.
 ///
 /// Use ``KvNumericToleranceMagnitude`` to combine magnitudes and calculate tolerance once.
+///
+/// E.g. `KvNumericTolerance<Double>(100.0)` defines a tolerance near 100.0 with double precision.
 public struct KvNumericTolerance<T : BinaryFloatingPoint> {
 
     public typealias Argument = KvNumericToleranceArgument<T>
@@ -41,8 +43,7 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
     /// Initializes an instance with explicit tolerance value.
     ///
     /// Consider implicit way of tolerance handling with ``KvNumericToleranceArgument``.
-    /// E.g. if tolerance near `100.0 as Double` is needed then `KvNumericTolerance<Double>(100.0)` is preferred.
-    ///
+    /// E.g. `KvNumericTolerance<Double>(100.0)` defines a tolerance near 100.0 with double precision.
     @inlinable
     public init(explicit value: T) {
         Swift.assert(value >= (0.0 as T), "Invalid argument: tolerance value (\(value)) must be positive")
@@ -62,6 +63,13 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
 
     /// Default tolerance for comparisons.
     @inlinable public static var `default`: Self { Self(explicit: (32.0 as T) * T.ulpOfOne) }
+
+
+    /// A shorthand for ``init(explicit:)``.
+    @inlinable public static func explicit(_ value: T) -> Self { .init(explicit: value) }
+
+    /// A shorthand for ``init(_:)``.
+    @inlinable public static func near(_ arg: Argument) -> Self { .init(arg) }
 
 }
 
