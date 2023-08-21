@@ -30,6 +30,8 @@ import simd
 /// A lightweight container for numerical comparison tolerance.
 ///
 /// Use ``KvNumericToleranceMagnitude`` to combine magnitudes and calculate tolerance once.
+///
+/// E.g. `KvNumericTolerance<Double>(100.0)` defines a tolerance near 100.0 with double precision.
 public struct KvNumericTolerance<T : BinaryFloatingPoint> {
 
     public typealias Argument = KvNumericToleranceArgument<T>
@@ -38,24 +40,60 @@ public struct KvNumericTolerance<T : BinaryFloatingPoint> {
     public let value: T
 
 
-    /// Memberwise initializer.
-    @usableFromInline
-    internal init(value: T) {
+    /// Initializes an instance with explicit tolerance value.
+    ///
+    /// Consider implicit way of tolerance handling with ``KvNumericToleranceArgument``.
+    /// E.g. `KvNumericTolerance<Double>(100.0)` defines a tolerance near 100.0 with double precision.
+    @inlinable
+    public init(explicit value: T) {
         Swift.assert(value >= (0.0 as T), "Invalid argument: tolerance value (\(value)) must be positive")
 
         self.value = value
     }
 
+
+    /// Initializes a default tolerance for simple operations with given argument.
     @inlinable
     public init(_ arg: Argument) {
-        self.init(value: T.ulpOfOne * Swift.max(Swift.min((32.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
+        self.init(explicit: T.ulpOfOne * Swift.max(Swift.min((32.0 as T) * arg.value, T.greatestFiniteMagnitude), T.ulpOfOne))
     }
 
 
     // MARK: Auxiliaries
 
     /// Default tolerance for comparisons.
-    @inlinable public static var `default`: Self { Self(value: (32.0 as T) * T.ulpOfOne) }
+    @inlinable public static var `default`: Self { Self(explicit: (32.0 as T) * T.ulpOfOne) }
+
+
+    /// A shorthand for ``init(explicit:)``.
+    @inlinable public static func explicit(_ value: T) -> Self { .init(explicit: value) }
+
+    /// A shorthand for ``init(_:)``.
+    @inlinable public static func near(_ arg: Argument) -> Self { .init(arg) }
+
+}
+
+
+// MARK: : ExpressibleByIntegerLiteral
+
+extension KvNumericTolerance : ExpressibleByIntegerLiteral where T : ExpressibleByIntegerLiteral {
+
+    @inlinable
+    public init(integerLiteral value: T.IntegerLiteralType) {
+        self.init(explicit: .init(integerLiteral: value))
+    }
+
+}
+
+
+// MARK: : ExpressibleByFloatLiteral
+
+extension KvNumericTolerance : ExpressibleByFloatLiteral where T : ExpressibleByFloatLiteral {
+
+    @inlinable
+    public init(floatLiteral value: T.FloatLiteralType) {
+        self.init(explicit: .init(floatLiteral: value))
+    }
 
 }
 
@@ -110,16 +148,16 @@ public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
     /// Zero argument initializer.
     @inlinable public init() { value = 0.0 as T }
 
-    /// Initializes single argument tolerance.
+    /// Initializes a single argument tolerance.
     @inlinable public init(_ arg: T) { self.init(value: abs(arg)) }
 
-    /// Initializes tolerance by simple combination of two arguments.
+    /// Initializes a tolerance by simple combination of two arguments.
     @inlinable public init(_ a1: T, _ a2: T) { self.init(values: abs(a1), abs(a2)) }
 
-    /// Initializes tolerance by simple combination of three arguments.
+    /// Initializes a tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: T, _ a2: T, _ a3: T) { self.init(values: abs(a1), abs(a2), abs(a3)) }
 
-    /// Initializes tolerance by simple combination of three arguments.
+    /// Initializes a tolerance by simple combination of three arguments.
     @inlinable public init(_ a1: T, _ a2: T, _ a3: T, _ a4: T) { self.init(values: abs(a1), abs(a2), abs(a3), abs(a4)) }
 
 
@@ -151,6 +189,30 @@ public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
 
     /// - Returns: Tolarance of square root of the receiver.
     @inlinable public func squareRoot() -> Self { .init(value: value.squareRoot()) }
+
+}
+
+
+// MARK: : ExpressibleByIntegerLiteral
+
+extension KvNumericToleranceArgument : ExpressibleByIntegerLiteral where T : ExpressibleByIntegerLiteral {
+
+    @inlinable
+    public init(integerLiteral value: T.IntegerLiteralType) {
+        self.init(.init(integerLiteral: value))
+    }
+
+}
+
+
+// MARK: : ExpressibleByFloatLiteral
+
+extension KvNumericToleranceArgument : ExpressibleByFloatLiteral where T : ExpressibleByFloatLiteral {
+
+    @inlinable
+    public init(floatLiteral value: T.FloatLiteralType) {
+        self.init(.init(floatLiteral: value))
+    }
 
 }
 

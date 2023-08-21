@@ -49,9 +49,11 @@ public enum KvCompressionKit {
 
     /// Performs *operation* using *algorithm* reading data from *input* and writting the result to *output*.
     public static func run(_ operation: FilterOperation, using algorithm: Algorithm, input: Input, output: Output) throws {
+        typealias RaiiToken = KvRAII.Token<Void>
+
 
         /// - Returns: Opens given *stream* when it's status is `.notOpen` and returns a RAII token closing the stream. Otherwise `nil` is returned.
-        func OpenOfNotOpen(_ stream: Stream) throws -> KvRAII.Token? {
+        func OpenIfNotOpen(_ stream: Stream) throws -> RaiiToken? {
             guard stream.streamStatus == .notOpen else { return nil }
 
             stream.open()
@@ -65,7 +67,7 @@ public enum KvCompressionKit {
         }
 
 
-        var tokens: (input: KvRAII.Token?, output: KvRAII.Token?) = (nil, nil)
+        var tokens: (input: RaiiToken?, output: RaiiToken?) = (nil, nil)
         defer {
             // - Note: .release() is called to prevent the warning.
             tokens.input?.release()
@@ -80,7 +82,7 @@ public enum KvCompressionKit {
                 writingBlock = block
 
             case .stream(let outputStream):
-                tokens.output = try OpenOfNotOpen(outputStream)
+                tokens.output = try OpenIfNotOpen(outputStream)
 
                 writingBlock = {
                     guard let data = $0, !data.isEmpty else { return }
@@ -149,7 +151,7 @@ public enum KvCompressionKit {
             }
 
         case .stream(let inputStream):
-            tokens.input = try OpenOfNotOpen(inputStream)
+            tokens.input = try OpenIfNotOpen(inputStream)
 
             let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Constants.bufferSize)
             defer { buffer.deallocate() }

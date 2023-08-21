@@ -58,11 +58,10 @@ public class KvDateKit {
                                                         _ calendar: Calendar) -> T?
     {
         guard let startDateUnitInterval = calendar.dateInterval(of: unit, for: startDate),
-            let startDateScaleInterval = calendar.dateInterval(of: scale, for: startDate),
-            let endDateUnitInterval = calendar.dateInterval(of: unit, for: endDate),
-            let endDateScaleInterval = calendar.dateInterval(of: scale, for: endDate) else {
-                return nil
-        }
+              let startDateScaleInterval = calendar.dateInterval(of: scale, for: startDate),
+              let endDateUnitInterval = calendar.dateInterval(of: unit, for: endDate),
+              let endDateScaleInterval = calendar.dateInterval(of: scale, for: endDate)
+        else { return nil }
 
         let startUnit = calendar.component(unit, from: startDateUnitInterval.start)
         let endUnit = calendar.component(unit, from: endDateUnitInterval.end)
@@ -70,7 +69,10 @@ public class KvDateKit {
         let startOffset = startDateScaleInterval.start.timeIntervalSince(startDateUnitInterval.start) / startDateUnitInterval.duration
         let endOffset = endDateUnitInterval.end.timeIntervalSince(endDateScaleInterval.end) / endDateUnitInterval.duration
 
-        return (T(endUnit - startUnit) - T(startOffset + endOffset)) as T
+        let duration = T((endUnit - startUnit) as Int)
+        let offset = T(startOffset + endOffset)
+
+        return duration - offset
     }
 
 }

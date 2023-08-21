@@ -1411,7 +1411,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func sincos(_ angle: Scalar) -> (sin: Scalar, cos: Scalar) { (sin(angle), cos(angle)) }
 
 
-    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { sin(x * .pi) }
+    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { sin(x * Scalar.pi) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func sinpi(_ v: Vector2) -> Vector2 { simd.sinpi(v) }
@@ -1471,7 +1471,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func tan(_ v: Vector4) -> Vector4 { simd.tan(v) }
 
 
-    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { tan(x * .pi) }
+    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { tan(x * Scalar.pi) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tanpi(_ v: Vector2) -> Vector2 { simd.tanpi(v) }
@@ -2261,7 +2261,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func sincos(_ angle: Scalar) -> (sin: Scalar, cos: Scalar) { (sin(angle), cos(angle)) }
 
 
-    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { sin(x * .pi) }
+    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { sin(x * Scalar.pi) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func sinpi(_ v: Vector2) -> Vector2 { simd.sinpi(v) }
@@ -2302,7 +2302,7 @@ public struct KvMathDoubleScope : KvMathScope {
     public static func slerp_longest(_ lhs: Vector3, _ rhs: Vector3, t: Scalar) -> Vector3 {
         let q = Quaternion(from: lhs, to: rhs)
 
-        return Quaternion(angle: t * (q.angle - 2 * Scalar.pi), axis: q.axis).act(lhs)
+        return Quaternion(angle: t * ((q.angle - (2.0 as Scalar) * Scalar.pi) as Scalar), axis: q.axis).act(lhs)
     }
 
     /// - Returns A spherical linearly interpolated value along the longest arc between two quaternions.
@@ -2321,7 +2321,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func tan(_ v: Vector4) -> Vector4 { simd.tan(v) }
 
 
-    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { tan(x * .pi) }
+    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { tan(x * Scalar.pi) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tanpi(_ v: Vector2) -> Vector2 { simd.tanpi(v) }
@@ -2557,10 +2557,11 @@ public struct KvNumericalToleranceVectorArgument3<Math : KvMathScope> : Hashable
     /// - Returns: Tolerance of a cross product.
     @inlinable
     public func cross(_ rhs: Self) -> Self {
-        Self(values: value, rhs.value,
-             (2.0 as Scalar) * Vector(x: (value.y * rhs.value.z) as Scalar + (value.z * rhs.value.y) as Scalar,
-                                      y: (value.z * rhs.value.x) as Scalar + (value.x * rhs.value.z) as Scalar,
-                                      z: (value.x * rhs.value.y) as Scalar + (value.y * rhs.value.x) as Scalar))
+        let x: Scalar = (value.y * rhs.value.z) as Scalar + (value.z * rhs.value.y) as Scalar
+        let y: Scalar = (value.z * rhs.value.x) as Scalar + (value.x * rhs.value.z) as Scalar
+        let z: Scalar = (value.x * rhs.value.y) as Scalar + (value.y * rhs.value.x) as Scalar
+        
+        return Self(values: value, rhs.value, (2.0 as Scalar) * Vector(x, y, z))
     }
 
 }

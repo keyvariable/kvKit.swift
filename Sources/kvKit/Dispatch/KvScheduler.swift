@@ -112,7 +112,7 @@ extension KvScheduler {
 extension KvScheduler {
 
     public func add(_ task: Task) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             KvSortedKit.insert(task, inSorted: &tasks, by: { $0.fireDate < $1.fireDate })
 
             scheduleAction()
@@ -122,7 +122,7 @@ extension KvScheduler {
 
 
     public func remove(where predicate: (Task) -> Bool) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             tasks.removeAll(where: predicate)
 
             scheduleAction()
@@ -134,7 +134,7 @@ extension KvScheduler {
     public func executeTasks(where predicate: (Task) -> Bool) {
         var tasksToExecute: [Task] = .init()
 
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             tasks.removeAll { (task) -> Bool in
                 guard predicate(task) else { return false }
 
@@ -156,7 +156,7 @@ extension KvScheduler {
 
         var tasksToExecute: [Task] = .init()
 
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             do {
                 let endIndex = tasks.firstIndex(where: { $0.fireDate >= maxDate }) ?? tasks.endIndex
 
@@ -194,7 +194,7 @@ extension KvScheduler {
 extension KvScheduler {
 
     private func scheduleAction() {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             guard let nextFireDate = tasks.first?.fireDate
             else { return action.cancel() }
 

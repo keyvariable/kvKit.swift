@@ -135,7 +135,7 @@ extension KvWkTask {
 
 
     private func stop(with result: Event) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             guard webView != nil else { return }
 
 

@@ -384,7 +384,7 @@ extension KvMath2 {
         public func y(x: Scalar) -> Scalar? {
             guard KvIsNonzero(direction.x) else { return nil }
 
-            return origin.y - (direction.y / direction.x) * (origin.x - x)
+            return origin.y - (direction.y / direction.x) * ((origin.x - x) as Scalar)
         }
 
         /// - Returns: X coordinate for y coordinate or nil whether the receiver is not horizontal.
@@ -392,7 +392,7 @@ extension KvMath2 {
         public func x(y: Scalar) -> Scalar? {
             guard KvIsNonzero(direction.y) else { return nil }
 
-            return origin.x - (direction.x / direction.y) * (origin.y - y)
+            return origin.x - (direction.x / direction.y) * ((origin.y - y) as Scalar)
         }
 
 

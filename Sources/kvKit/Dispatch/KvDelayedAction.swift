@@ -49,13 +49,9 @@ public final class KvDelayedAction {
     public private(set) var tolerance: TimeInterval = Defaults.tolerance
 
 
-    public var isScheduled: Bool {
-        KvThreadKit.locking(mutationLock) { _isScheduled }
-    }
+    public var isScheduled: Bool { mutationLock.withLock { _isScheduled } }
 
-    public var isRepeated: Bool {
-        KvThreadKit.locking(mutationLock) { _isRepeated }
-    }
+    public var isRepeated: Bool { mutationLock.withLock { _isRepeated } }
 
 
 
@@ -156,7 +152,7 @@ extension KvDelayedAction {
 extension KvDelayedAction {
 
     public func cancel() {
-        KvThreadKit.locking(mutationLock, body: _cancel)
+        mutationLock.withLock(_cancel)
     }
 
 
@@ -174,7 +170,7 @@ extension KvDelayedAction {
     ///
     /// - Note: Receivers being repeated are rescheduled to trigger net time after *interval*.
     public func trigger() {
-        KvThreadKit.locking(mutationLock, body: rescheduleOnTrigger)
+        mutationLock.withLock(rescheduleOnTrigger)
 
         dispatchQueue.schedule {
             self.action(self)
@@ -221,7 +217,7 @@ extension KvDelayedAction {
     public func schedule(on fireDate: Date? = nil, interval: TimeInterval, tolerance: TimeInterval = Defaults.tolerance,
                          options: ScheduleOptions = [ ])
     {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             do {
                 var newFireDate = fireDate != nil
                     ? (fireDate!.timeIntervalSinceNow > tolerance ? fireDate! : .init(timeIntervalSinceNow: tolerance))
@@ -274,7 +270,7 @@ extension KvDelayedAction {
     private func fire() {
         action(self)
 
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             if _isScheduled, fireDate.timeIntervalSinceNow < tolerance {
                 _isRepeated ? fireDate += interval : _cancel()
             }
@@ -314,7 +310,7 @@ extension KvDelayedAction {
     ///
     /// - Returns: The value returned by *body*.
     public func locking<T>(_ body: (KvDelayedAction) throws -> T) rethrows -> T {
-        try KvThreadKit.locking(mutationLock) {
+        try mutationLock.withLock {
             try body(self)
         }
     }

@@ -35,9 +35,7 @@ public class KvAsyncOperation : Operation {
     
 
     public var state: State {
-        get {
-            KvThreadKit.locking(mutationLock) { _state }
-        }
+        get { mutationLock.withLock { _state } }
         set {
             willChangeValue(forKey: _state.keyPath)
             willChangeValue(forKey: newValue.keyPath)
@@ -47,7 +45,7 @@ public class KvAsyncOperation : Operation {
                 didChangeValue(forKey: newValue.keyPath)
             }
 
-            KvThreadKit.locking(mutationLock) {
+            mutationLock.withLock {
                 _state = newValue
             }
         }

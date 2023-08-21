@@ -36,7 +36,7 @@ public struct KvRoundedRectangle : InsettableShape {
 
 
     @inlinable
-    public init(radii: Radii, segments: Segments = .all, inset: CGFloat = 0) {
+    public init(radii: Radii, segments: Segments = .all, inset: CGFloat = 0.0) {
         self.radii = radii
         self.segments = segments
         self.inset = inset
@@ -47,7 +47,7 @@ public struct KvRoundedRectangle : InsettableShape {
     // MARK: : Shape
 
     public func path(in rect: CGRect) -> Path {
-        let rect = rect.insetBy(dx: min(inset, 0.5 * rect.width), dy: min(inset, 0.5 * rect.height))
+        let rect = rect.insetBy(dx: min(inset, (0.5 as CGFloat) * rect.width), dy: min(inset, (0.5 as CGFloat) * rect.height))
 
         let radii = radii
             .inset(by: inset)
@@ -122,28 +122,28 @@ public struct KvRoundedRectangle : InsettableShape {
             let r₂ = radii.bottomRight, p₂ = CGPoint(x: rect.maxX - r₂, y: rect.maxY)
 
             AddLineSegment(.bottom, from: p₀, to: p₂)
-            AddArcSegment(.bottomRight, from: p₂, center: .init(x: p₂.x, y: p₂.y - r₂), radius: r₂, startAngle: 0.5 * .pi, endAngle: 0)
+            AddArcSegment(.bottomRight, from: p₂, center: .init(x: p₂.x, y: p₂.y - r₂), radius: r₂, startAngle: (0.5 as CGFloat) * CGFloat.pi, endAngle: 0.0 as CGFloat)
         }
         do {
             let r₁ = radii.bottomRight, p₁ = CGPoint(x: rect.maxX, y: rect.maxY - r₁)
             let r₂ = radii.topRight, p₂ = CGPoint(x: rect.maxX, y: rect.minY + r₂)
 
             AddLineSegment(.right, from: p₁, to: p₂)
-            AddArcSegment(.topRight, from: p₂, center: .init(x: p₂.x - r₂, y: p₂.y), radius: r₂, startAngle: 0, endAngle: -0.5 * .pi)
+            AddArcSegment(.topRight, from: p₂, center: .init(x: p₂.x - r₂, y: p₂.y), radius: r₂, startAngle: (0.0 as CGFloat), endAngle: (-0.5 as CGFloat) * CGFloat.pi)
         }
         do {
             let r₁ = radii.topRight, p₁ = CGPoint(x: rect.maxX - r₁, y: rect.minY)
             let r₂ = radii.topLeft, p₂ = CGPoint(x: rect.minX + r₂, y: rect.minY)
 
             AddLineSegment(.top, from: p₁, to: p₂)
-            AddArcSegment(.topLeft, from: p₂, center: .init(x: p₂.x, y: p₂.y + r₂), radius: r₂, startAngle: 1.5 * .pi, endAngle: .pi)
+            AddArcSegment(.topLeft, from: p₂, center: .init(x: p₂.x, y: p₂.y + r₂), radius: r₂, startAngle: (1.5 as CGFloat) * CGFloat.pi, endAngle: CGFloat.pi)
         }
         do {
             let r₁ = radii.topLeft, p₁ = CGPoint(x: rect.minX, y: rect.minY + r₁)
             let r₂ = radii.bottomLeft, p₂ = CGPoint(x: rect.minX, y: rect.maxY - r₂)
 
             AddLineSegment(.left, from: p₁, to: p₂)
-            AddArcSegment(.bottomLeft, from: p₂, center: .init(x: p₂.x + r₂, y: p₂.y), radius: r₂, startAngle: .pi, endAngle: 0.5 * .pi)
+            AddArcSegment(.bottomLeft, from: p₂, center: .init(x: p₂.x + r₂, y: p₂.y), radius: r₂, startAngle: CGFloat.pi, endAngle: (0.5 as CGFloat) * CGFloat.pi)
         }
 
 

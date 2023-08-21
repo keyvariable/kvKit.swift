@@ -56,7 +56,7 @@ extension KvOperationQueueKit {
         // MARK: Managing Operations
 
         public func addOperation(_ operation: Operation) {
-            KvThreadKit.locking(mutationLock) {
+            mutationLock.withLock {
                 if let lastOperation = lastOperation {
                     operation.addDependency(lastOperation)
                 }
@@ -75,7 +75,7 @@ extension KvOperationQueueKit {
 
 
         public func addOperations(_ operations: [Operation], waitUntilFinished waitFlag: Bool) {
-            KvThreadKit.locking(mutationLock) {
+            mutationLock.withLock {
                 var operationIterator = operations.makeIterator()
 
                 if var prevOperation = operationIterator.next() {

@@ -58,7 +58,7 @@ extension KvTaskGroup {
         dispatchGroup.enter()
 
         if let cancellable = cancellable {
-            KvThreadKit.locking(mutationLock) {
+            mutationLock.withLock {
                 cancellables.append(cancellable)
             }
         }
@@ -73,7 +73,7 @@ extension KvTaskGroup {
         let cancellable = taskInitiator()
 
         if cancellable != nil {
-            KvThreadKit.locking(mutationLock) {
+            mutationLock.withLock {
                 cancellables.append(cancellable!)
             }
         }
@@ -88,7 +88,7 @@ extension KvTaskGroup {
 
 
     public func leave(_ value: T) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             resultAccumulator.merge(with: value)
         }
 
@@ -98,7 +98,7 @@ extension KvTaskGroup {
 
 
     public func leave(_ error: Error) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             resultAccumulator.merge(with: error)
         }
 
@@ -126,7 +126,7 @@ extension KvTaskGroup {
 
 
     public func leave(with result: KvCancellableResult<T?>) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             resultAccumulator.merge(with: result)
         }
 
@@ -136,7 +136,7 @@ extension KvTaskGroup {
 
 
     public func leave(with result: KvCancellableResult<T>) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             resultAccumulator.merge(with: result)
         }
 
@@ -155,7 +155,7 @@ extension KvTaskGroup {
     /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*. The *callbcak* is invoked with *.success(.none)* if result value has never been provided.
     public func notify(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T?>) -> Void) {
         dispatchGroup.notify(queue: queue) {
-            callback(KvThreadKit.locking(self.mutationLock) {
+            callback(self.mutationLock.withLock {
                 self.cancellables.removeAll()
                 defer { self.resultAccumulator.reset() }
 
@@ -169,7 +169,7 @@ extension KvTaskGroup {
     /// Provided *callback* is invoked when *leave()* is invoked the same times as *enter()*.
     public func notifyUnwrapping(on queue: DispatchQueue, callback: @escaping (KvCancellableResult<T>) -> Void) {
         dispatchGroup.notify(queue: queue) {
-            callback(KvThreadKit.locking(self.mutationLock) {
+            callback(self.mutationLock.withLock {
                 self.cancellables.removeAll()
                 defer { self.resultAccumulator.reset() }
 
@@ -192,7 +192,7 @@ extension KvTaskGroup {
 extension KvTaskGroup : Cancellable {
 
     public func cancel() {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             cancellables.forEach {
                 $0.cancel()
             }
@@ -311,7 +311,7 @@ extension KvTaskGroup {
 extension KvTaskGroup where T : RangeReplaceableCollection {
 
     public func leave(_ value: T.Element) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             resultAccumulator.merge(with: value)
         }
 
@@ -321,7 +321,7 @@ extension KvTaskGroup where T : RangeReplaceableCollection {
 
 
     public func leave(with result: KvCancellableResult<T.Element>) {
-        KvThreadKit.locking(mutationLock) {
+        mutationLock.withLock {
             resultAccumulator.merge(with: result)
         }
 

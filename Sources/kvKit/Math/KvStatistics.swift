@@ -33,7 +33,6 @@ public protocol KvStatisticsStream {
     associatedtype SourceValue
 
 
-
     mutating func process(_ value: SourceValue)
     mutating func process<S>(_ values: S) where S : Sequence, S.Element == SourceValue
 
@@ -91,47 +90,67 @@ public protocol KvStatisticsAverageProcessor : KvStatisticsAverageStream, KvStat
 extension KvStatistics {
 
     /// Simple average.
-    public class Average<Value : FloatingPoint> {
+    public class Average<Value : BinaryFloatingPoint> {
 
         // MARK: .Processor
 
         /// Simple average online algorithm that is less prone to loss of precision due to catastrophic cancellation.
         public struct Processor : KvStatisticsAverageProcessor {
 
-            public private(set) var average: Value = 0
+            @inlinable
+            public var average: Value { _average }
 
-            public private(set) var count: Int = 0 {
-                didSet { invCount = count != 0 ? 1 / Value(count) : 0 }
+            @inlinable
+            public var count: Int { _count }
+
+            @inlinable
+            public var count⁻¹: Value { _count⁻¹ }
+
+
+            @usableFromInline
+            internal private(set) var _average: Value = 0.0 as Value
+
+            @usableFromInline
+            internal private(set) var _count: Int = 0 {
+                didSet { _count⁻¹ = _count != 0 ? ((1.0 as Value) / Value(_count)) : (0.0 as Value) }
             }
 
-            public private(set) var invCount: Value = 0
+            @usableFromInline
+            internal private(set) var _count⁻¹: Value = 0.0 as Value
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(with values: S) where S : Sequence, S.Element == Value { process(values) }
 
-            public init<S>(_ values: S) where S : Sequence, S.Element == Value {
-                process(values)
-            }
+
+            // TODO: Delete in 6.0.0.
+            @available(*, deprecated, renamed: "init(with:)")
+            public init<S>(_ values: S) where S : Sequence, S.Element == Value { self.init(with: values) }
 
 
 
             // MARK: : KvStatisticsAverageStream
 
+            /// - Returns: The result as if given *value* had been processed.
             @inlinable
-            public func nextAverage(for value: Value) -> Value { average + ((value - average) as Value) / Value(count + 1) }
+            public func nextAverage(for value: Value) -> Value { _average + ((value - _average) as Value) / Value(_count + 1) }
 
 
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
-                count += 1
-                average.addProduct(value - average, invCount)
+                _count += 1
+                _average.addProduct(value - _average, _count⁻¹)
             }
-
 
 
             @inlinable
@@ -140,29 +159,29 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func process<C>(_ values: C) where C : Collection, C.Element == Value {
-                count += values.count
+                _count += values.count
 
-                average = values.reduce(average, { $0.addingProduct($1 - average, invCount) })
+                _average = values.reduce(_average, { $0.addingProduct($1 - _average, _count⁻¹) })
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                average = 0
-                count = 0
+                _average = 0.0 as Value
+                _count = 0
             }
 
 
 
             // MARK: : KvStatisticsProcessor
 
+            @inlinable
             public mutating func rollback(_ value: Value) {
-                count -= 1
-                average.addProduct(average - value, invCount)
+                _count -= 1
+                _average.addProduct(_average - value, _count⁻¹)
             }
-
 
 
             @inlinable
@@ -171,19 +190,18 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func rollback<C>(_ values: C) where C : Collection, C.Element == SourceValue {
-                count -= values.count
+                _count -= values.count
 
-                average = values.reduce(average, { $0.addingProduct(average - $1, invCount) })
+                _average = values.reduce(_average, { $0.addingProduct(_average - $1, _count⁻¹) })
             }
 
 
-
+            @inlinable
             public mutating func replace(_ oldValue: Value, with newValue: Value) {
-                average.addProduct(newValue - oldValue, invCount)
+                _average.addProduct(newValue - oldValue, _count⁻¹)
             }
-
 
 
             @inlinable
@@ -206,91 +224,111 @@ extension KvStatistics {
         /// A(n) = (a_(n-l+1) + ... + a_n) / l; A(n+1) = (a_(n-l+2) + ... + a_(n+1)) / l, where l is the limit, n >= l.
         public struct MovingStream : KvStatisticsAverageStream {
 
-            public private(set) var average: Value = 0
+            @inlinable
+            public var average: Value { _average }
 
-            public private(set) var buffer: KvCircularBuffer<Value>
+            @inlinable
+            public var buffer: KvCircularBuffer<Value> { _buffer }
 
 
             @inlinable
-            public var count: Int { return buffer.count }
+            public var count: Int { return _buffer.count }
             @inlinable
-            public var capacity: Int { return buffer.capacity }
+            public var capacity: Int { return _buffer.capacity }
 
 
             public let invCapacity: Value
 
 
+            @usableFromInline
+            internal private(set) var _average: Value = 0.0 as Value
 
+            @usableFromInline
+            internal private(set) var _buffer: KvCircularBuffer<Value>
+
+
+
+            /// Creates an instance in initial state.
+            @inlinable
             public init(capacity: Int) {
-                buffer = .init(capacity: capacity)
+                _buffer = .init(capacity: capacity)
 
-                invCapacity = 1 / Value(capacity)
+                invCapacity = (1.0 as Value) / Value(capacity)
             }
 
 
-
-            public init<S>(capacity: Int, _ values: S) where S : Sequence, S.Element == Value {
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(capacity: Int, with values: S) where S : Sequence, S.Element == Value {
                 self.init(capacity: capacity)
-
                 process(values)
+            }
+
+
+            // TODO: Delete in 6.0.0.
+            @available(*, deprecated, renamed: "init(capacity:with:)")
+            public init<S>(capacity: Int, _ values: S) where S : Sequence, S.Element == Value {
+                self.init(capacity: capacity, with: values)
             }
 
 
 
             // MARK: : KvStatisticsAverageStream
 
+            /// - Returns: The result as if given *value* had been processed.
             @inlinable
             public func nextAverage(for value: Value) -> Value {
-                count < capacity ? (average + (value - average) as Value / Value(count + 1)) : average.addingProduct(value - buffer.first!, invCapacity)
+                count < capacity ? (_average + ((value - _average) as Value) / Value(count + 1)) : _average.addingProduct(value - _buffer.first!, invCapacity)
             }
 
 
 
             // MARK: KvStatisticsStream Protocol
 
+            @inlinable
             public mutating func process(_ value: Value) {
-                if let excludedValue = buffer.append(value) {
-                    average.addProduct(value - excludedValue, invCapacity)
+                if let excludedValue = _buffer.append(value) {
+                    _average.addProduct(value - excludedValue, invCapacity)
                 } else {
-                    average += (value - average) as Value / Value(buffer.count)
+                    _average += ((value - _average) as Value) / Value(_buffer.count)
                 }
             }
 
 
-
+            @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
                 values.forEach { process($0) }
             }
 
 
-
+            @inlinable
             public mutating func process<C>(_ values: C) where C : Collection, C.Element == Value {
-                guard values.count < buffer.capacity else {
-                    average = values[values.index(values.endIndex, offsetBy: -buffer.capacity)...].reduce(0, { $0.addingProduct($1, invCapacity) })
+                guard values.count < _buffer.capacity else {
+                    _average = values[values.index(values.endIndex, offsetBy: -_buffer.capacity)...].reduce(0, { $0.addingProduct($1, invCapacity) })
                     return
                 }
 
-                let k = buffer.capacity - buffer.count
+                let k = _buffer.capacity - _buffer.count
                 let m = values.count - k
 
                 let index = m > 0 ? values.index(values.startIndex, offsetBy: k) : values.endIndex
 
                 if k > 0 {
-                    average = values[..<index].reduce(average, { $0.addingProduct($1 - average, invCapacity) })
+                    _average = values[..<index].reduce(_average, { $0.addingProduct($1 - _average, invCapacity) })
                 }
 
                 if m > 0 {
-                    var iterator = buffer.makeIterator()
+                    var iterator = _buffer.makeIterator()
 
-                    average = values[index...].reduce(average, { $0.addingProduct($1 - iterator.next()!, invCapacity) })
+                    _average = values[index...].reduce(_average, { $0.addingProduct($1 - iterator.next()!, invCapacity) })
                 }
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                average = 0
-                buffer.removeAll()
+                _average = 0.0 as Value
+                _buffer.removeAll()
             }
         }
 
@@ -305,64 +343,86 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Weighted mean.
-    public class WeightedMean<Value : FloatingPoint> {
+    public class WeightedMean<Value : BinaryFloatingPoint> {
 
         // MARK: .MovingStream
 
         /// Weighted moving average online algorithm that is less prone to loss of precision due to catastrophic cancellation.
         public struct MovingStream : KvStatisticsAverageStream {
 
-            public var average: Value { zip(buffer, weights).reduce(0, { $0.addingProduct($1.0, $1.1) }) }
+            public let weights: [Value]
 
-            public private(set) var buffer: KvCircularBuffer<Value>
+            @inlinable
+            public var buffer: KvCircularBuffer<Value> { _buffer }
+
+            @inlinable
+            public var average: Value { zip(_buffer, weights).reduce(0.0 as Value, { $0.addingProduct($1.0, $1.1) }) }
 
 
             @inlinable
-            public var count: Int { return buffer.count }
+            public var count: Int { return _buffer.count }
 
+            @inlinable
             public var capacity: Int { return weights.count }
 
 
+            @usableFromInline
+            internal private(set) var _buffer: KvCircularBuffer<Value>
 
-            public init<Weights>(initialValue: Value = 0, weights: Weights) where Weights : Sequence, Weights.Element == Value {
+
+
+            /// Creates an instance in initial state.
+            @inlinable
+            public init<Weights>(weights: Weights) where Weights : Sequence, Weights.Element == Value {
                 let scale: Value = {
-                    let totalWeight = weights.reduce(0, +)
+                    let totalWeight = weights.reduce(0.0 as Value, +)
 
-                    return abs(totalWeight) >= .ulpOfOne ? 1 / totalWeight : 0
+                    return abs(totalWeight) >= Value.ulpOfOne ? ((1.0 as Value) / totalWeight) : 0.0 as Value
                 }()
 
                 self.weights = weights.map { $0 * scale }   // Normalization of weights.
 
-                buffer = .init(capacity: self.weights.count, repeating: initialValue)
+                _buffer = .init(capacity: self.weights.count)
             }
 
 
-
-            private let weights: [Value]
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<Weights, S>(weights: Weights, with values: S)
+            where Weights : Sequence, Weights.Element == Value,
+                  S : Sequence, S.Element == Value
+            {
+                self.init(weights: weights)
+                process(values)
+            }
 
 
 
             // MARK: : KvStatisticsAverageStream
 
+            /// - Returns: The result as if given *value* had been processed.
+            @inlinable
             public func nextAverage(for value: Value) -> Value {
-                var valueIterator = buffer.makeIterator()
+                var valueIterator = _buffer.makeIterator()
                 var weightIterator = weights.makeIterator()
 
                 _ = valueIterator.next()    // Skip first value
 
-                let sum: Value = (0..<(capacity - 1)).reduce(0, { (result, _) in result.addingProduct(weightIterator.next()!, valueIterator.next()!) })
+                let sum: Value = (0..<(capacity - 1)).reduce(0.0 as Value, { (result, _) in
+                    result.addingProduct(weightIterator.next() ?? 0.0, valueIterator.next()!)
+                })
 
-                return sum + weightIterator.next()! * value
+                return sum + (weightIterator.next() ?? 0.0) * value
             }
 
 
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
-                buffer.append(value)
+                _buffer.append(value)
             }
-
 
 
             @inlinable
@@ -371,16 +431,15 @@ extension KvStatistics {
             }
 
 
-
             @inlinable
             public mutating func process<C>(_ values: C) where C : Collection, C.Element == Value {
                 values.forEach { process($0) }
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                buffer.removeAll()
+                _buffer.removeAll()
             }
 
         }
@@ -395,8 +454,8 @@ extension KvStatistics {
 
 extension KvStatistics {
 
-    /// Exponential mean.
-    public class ExponentialMean<Value : FloatingPoint> {
+    /// Exponential weightet mean. See [Wikipedia](https://wikipedia.org/wiki/Exponential_smoothing ). E.g. it's used in EMA indicator.
+    public class ExponentialMean<Value : BinaryFloatingPoint> {
 
         // MARK: .Stream
 
@@ -406,84 +465,109 @@ extension KvStatistics {
             public let period: Int
             public let alpha: Value
 
-            public private(set) var average: Value = 0
 
-            public private(set) var count: Int = 0
+            @inlinable
+            public var average: Value { _average }
+
+            @inlinable
+            public var count: Int { _count }
+
+
+            @usableFromInline
+            internal var _average: Value = 0.0 as Value
+
+            @usableFromInline
+            internal var _count: Int = 0
+
+
+            @usableFromInline
+            internal let oneMinusAlpha: Value
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init(period: Int, alpha: Value) {
-                assert(period > 0 && alpha >= 0 && alpha <= 1)
+                assert(period > 0 && alpha >= (0.0 as Value) && alpha <= (1.0 as Value))
 
                 self.period = period
                 self.alpha = alpha
 
-                oneMinusAlpha = 1 - alpha
+                oneMinusAlpha = (1.0 as Value) - alpha
             }
 
 
-
-            private let oneMinusAlpha: Value
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(period: Int, alpha: Value, with values: S)
+            where S : Sequence, S.Element == Value
+            {
+                self.init(period: period, alpha: alpha)
+                process(values)
+            }
 
 
 
             // MARK: : KvStatisticsAverageStream
 
+            /// - Returns: The result as if given *value* had been processed.
+            @inlinable
             public func nextAverage(for value: Value) -> Value {
-                alpha * value + oneMinusAlpha * average
+                alpha * value + oneMinusAlpha * _average
             }
 
 
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
-                average = count > 0 ? alpha * value + oneMinusAlpha * average : value
+                _average = _count > 0 ? (alpha * value + oneMinusAlpha * _average) : value
 
-                count += 1
+                _count += 1
             }
 
 
-
+            @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
                 var iterator = values.makeIterator()
 
-                if count == 0 {
+                if _count == 0 {
                     guard let value = iterator.next() else { return }
 
-                    average = value
-                    count = 1
+                    _average = value
+                    _count = 1
                 }
 
                 while let value = iterator.next() {
-                    average = alpha * value + oneMinusAlpha * average
-                    count += 1
+                    _average = alpha * value + oneMinusAlpha * _average
+                    _count += 1
                 }
             }
 
 
-
+            @inlinable
             public mutating func process<C>(_ values: C) where C : Collection, C.Element == Value {
                 var iterator = values.makeIterator()
 
-                if count == 0 {
+                if _count == 0 {
                     guard let value = iterator.next() else { return }
 
-                    average = value
+                    _average = value
                 }
 
                 while let value = iterator.next() {
-                    average = alpha * value + oneMinusAlpha * average
+                    _average = alpha * value + oneMinusAlpha * _average
                 }
 
-                count += values.count
+                _count += values.count
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                average = 0
-                count = 0
+                _average = 0.0 as Value
+                _count = 0
             }
 
         }
@@ -499,35 +583,47 @@ extension KvStatistics {
 extension KvStatistics {
 
     /// Root mean square
-    public class RMS<Value : FloatingPoint> {
+    public class RMS<Value : BinaryFloatingPoint> {
 
         // MARK: .Processor
 
         /// Root mean square online algorithm that is less prone to loss of precision due to catastrophic cancellation.
         public struct Processor : KvStatisticsAverageProcessor {
 
-            public var average: Value { return avgProcessor.average.squareRoot() }
+            @inlinable
+            public var average: Value { avgProcessor._average.squareRoot() }
 
-            public var count: Int { return avgProcessor.count }
+            @inlinable
+            public var count: Int { avgProcessor._count }
+
+
+            @usableFromInline
+            internal private(set) var avgProcessor = Average<Value>.Processor()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
-
-            public init<S>(_ values: S) where S : Sequence, S.Element == Value {
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(with values: S) where S : Sequence, S.Element == Value {
                 process(values)
             }
 
 
-
-            private var avgProcessor = Average<Value>.Processor()
+            // TODO: Delete in 6.0.0.
+            @available(*, deprecated, renamed: "init(with:)")
+            public init<S>(_ values: S) where S : Sequence, S.Element == Value { self.init(with: values) }
 
 
 
             // MARK: : KvStatisticsAverageStream
 
+            /// - Returns: The result as if given *value* had been processed.
+            @inlinable
             public func nextAverage(for value: Value) -> Value {
                 avgProcessor.nextAverage(for: value * value).squareRoot()
             }
@@ -536,46 +632,48 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
                 avgProcessor.process(value * value)
             }
 
 
-
+            @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
                 avgProcessor.process(values.lazy.map { $0 * $0 })
             }
 
 
-
+            @inlinable
             public mutating func reset() { avgProcessor.reset() }
 
 
 
             // MARK: : KvStatisticsProcessor
 
+            @inlinable
             public mutating func rollback(_ value: Value) { avgProcessor.rollback(value * value) }
 
 
-
+            @inlinable
             public mutating func rollback<S>(_ values: S) where S : Sequence, S.Element == Value {
                 avgProcessor.rollback(values.lazy.map { $0 * $0 })
             }
 
 
-
+            @inlinable
             public mutating func rollback<C>(_ values: C) where C : Collection, C.Element == Value {
                 avgProcessor.rollback(values.lazy.map { $0 * $0 })
             }
 
 
-
+            @inlinable
             public mutating func replace(_ oldValue: Value, with newValue: Value) {
                 avgProcessor.replace(oldValue * oldValue, with: newValue * newValue)
             }
 
 
-
+            @inlinable
             public mutating func replace<S>(_ oldValues: S, with newValues: S) where S : Sequence, S.Element == Value {
                 avgProcessor.replace(oldValues.lazy.map { $0 * $0 }, with: newValues.lazy.map { $0 * $0 })
             }
@@ -589,33 +687,47 @@ extension KvStatistics {
         /// Moving root mean square online algorithm that is less prone to loss of precision due to catastrophic cancellation.
         public struct MovingStream : KvStatisticsAverageStream {
 
-            public var average: Value { return avgStream.average.squareRoot() }
+            @inlinable
+            public var average: Value { avgStream._average.squareRoot() }
 
-            public var capacity: Int { return avgStream.capacity }
-            public var count: Int { return avgStream.count }
+            @inlinable
+            public var capacity: Int { avgStream.capacity }
+
+            @inlinable
+            public var count: Int { avgStream.count }
+
+
+            @usableFromInline
+            internal private(set) var avgStream: Average<Value>.MovingStream
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init(capacity: Int) {
                 avgStream = .init(capacity: capacity)
             }
 
 
-
-            public init<S>(capacity: Int, _ values: S) where S : Sequence, S.Element == Value {
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(capacity: Int, with values: S) where S : Sequence, S.Element == Value {
                 self.init(capacity: capacity)
                 
                 process(values)
             }
 
 
-
-            private var avgStream: Average<Value>.MovingStream
+            // TODO: Delete in 6.0.0.
+            @available(*, deprecated, renamed: "init(capacity:with:)")
+            public init<S>(capacity: Int, _ values: S) where S : Sequence, S.Element == Value { self.init(capacity: capacity, with: values) }
 
 
 
             // MARK: : KvStatisticsAverageStream
 
+            /// - Returns: The result as if given *value* had been processed.
+            @inlinable
             public func nextAverage(for value: Value) -> Value {
                 avgStream.nextAverage(for: value * value).squareRoot()
             }
@@ -624,16 +736,17 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) { avgStream.process(value * value) }
 
 
-
+            @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
                 avgStream.process(values.lazy.map { $0 * $0 })
             }
 
 
-
+            @inlinable
             public mutating func reset() { avgStream.reset() }
 
         }
@@ -649,7 +762,6 @@ extension KvStatistics {
 public protocol KvStatisticsVarianceStream : KvStatisticsStream {
 
     associatedtype Result
-
 
 
     var standardDeviation: Result { get }
@@ -675,6 +787,7 @@ public protocol KvStatisticsVarianceProcessor : KvStatisticsVarianceStream, KvSt
 
 extension KvStatistics {
 
+    /// [Wikipedia](https://wikipedia.org/wiki/Variance): variance is the squared deviation from the mean of a random variable.
     public class Variance<Value : BinaryFloatingPoint> {
 
         // MARK: .Processor
@@ -685,56 +798,77 @@ extension KvStatistics {
             @inlinable
             public var standardDeviation: Value { variance.squareRoot() }
 
-            public var variance: Value { value(divider: avgProcessor.count) }
+            @inlinable
+            public var variance: Value { value(divider: avgProcessor._count) }
 
 
             @inlinable
             public var unbiasedStandardDeviation: Value { unbiasedVariance.squareRoot() }
 
-            public var unbiasedVariance: Value { value(divider: avgProcessor.count - 1) }
+            @inlinable
+            public var unbiasedVariance: Value { value(divider: avgProcessor._count - 1) }
 
 
-            public private(set) var moment: Value = 0
+            @inlinable
+            public var moment: Value { _moment }
 
 
-            public private(set) var average: Value = 0
+            @inlinable
+            public var average: Value { _average }
 
 
-            public var count: Int { return avgProcessor.count }
+            @inlinable
+            public var count: Int { avgProcessor._count }
+
+
+            @usableFromInline
+            internal private(set) var _moment: Value = 0.0 as Value
+
+
+            @usableFromInline
+            internal private(set) var _average: Value = 0.0 as Value
+
+
+            @usableFromInline
+            internal private(set) var avgProcessor = Average<Value>.Processor()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
-
-            private var avgProcessor = Average<Value>.Processor()
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(with values: S) where S : Sequence, S.Element == Value { process(values) }
 
 
 
             // MARK: Auxiliaries
 
-            private func value(divider: Int) -> Value { divider > 0 ? moment / Value(divider) : 0 }
+            @usableFromInline
+            internal func value(divider: Int) -> Value { divider > 0 ? _moment / Value(divider) : (0.0 as Value) }
 
 
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
                 avgProcessor.process(value)
 
-                let newAverage = avgProcessor.average
-                defer { average = newAverage }
+                let newAverage = avgProcessor._average
+                defer { _average = newAverage }
 
-                moment.addProduct(value - average, value - newAverage)
+                _moment.addProduct(value - _average, value - newAverage)
 
                 #if DEBUG
-                if KvIsNegative(moment) {
-                    KvDebug.pause("The moment (\(moment)) must be positive")
+                if KvIsNegative(_moment) {
+                    KvDebug.pause("The moment (\(_moment)) must be positive")
                 }
                 #endif // DEBUG
             }
-
 
 
             @inlinable
@@ -743,10 +877,10 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                moment = 0
-                average = 0
+                _moment = 0.0 as Value
+                _average = 0.0 as Value
                 avgProcessor.reset()
             }
 
@@ -754,21 +888,21 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsProcessor
 
+            @inlinable
             public mutating func rollback(_ value: Value) {
                 avgProcessor.rollback(value)
 
-                let newAverage = avgProcessor.average
-                defer { average = newAverage }
+                let newAverage = avgProcessor._average
+                defer { _average = newAverage }
 
-                moment.addProduct(value - average, newAverage - value)
+                _moment.addProduct(value - _average, newAverage - value)
 
                 #if DEBUG
-                if KvIsNegative(moment) {
-                    KvDebug.pause("The moment (\(moment)) must be positive")
+                if KvIsNegative(_moment) {
+                    KvDebug.pause("The moment (\(_moment)) must be positive")
                 }
                 #endif // DEBUG
             }
-
 
 
             @inlinable
@@ -777,22 +911,21 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func replace(_ oldValue: Value, with newValue: Value) {
                 avgProcessor.replace(oldValue, with: newValue)
 
-                let newAverage = avgProcessor.average
-                defer { average = newAverage }
+                let newAverage = avgProcessor._average
+                defer { _average = newAverage }
 
-                moment.addProduct(newValue - oldValue, newValue - newAverage + oldValue - average)
+                _moment.addProduct(newValue - oldValue, (newValue - newAverage) as Value + (oldValue - _average) as Value)
 
                 #if DEBUG
-                if KvIsNegative(moment) {
-                    KvDebug.pause("The moment (\(moment)) must be positive")
+                if KvIsNegative(_moment) {
+                    KvDebug.pause("The moment (\(_moment)) must be positive")
                 }
                 #endif // DEBUG
             }
-
 
 
             @inlinable
@@ -816,84 +949,111 @@ extension KvStatistics {
             @inlinable
             public var standardDeviation: Value { variance.squareRoot() }
 
+            @inlinable
             public var variance: Value {
                 let count = self.count
 
-                return max(0, count < capacity ? value(divider: count) : (moment * invCapacity))
+                return max(0, count < capacity ? value(divider: count) : (_moment * invCapacity))
             }
 
 
             @inlinable
             public var unbiasedStandardDeviation: Value { unbiasedVariance.squareRoot() }
 
+            @inlinable
             public var unbiasedVariance: Value {
                 let count = self.count
 
-                return max(0, count < capacity ? value(divider: count - 1) : (moment * invCapacityMinusOne))
+                return max(0, count < capacity ? value(divider: count - 1) : (_moment * invCapacityMinusOne))
             }
 
 
-            public private(set) var moment: Value = 0
+            @inlinable
+            public var moment: Value { _moment }
 
 
-            public private(set) var average: Value = 0
+            @inlinable
+            public var average: Value { _average }
 
 
-            public var count: Int { return avgStream.count }
-            public var capacity: Int { return avgStream.capacity }
+            @inlinable
+            public var count: Int { avgStream.count }
+
+            @inlinable
+            public var capacity: Int { avgStream.capacity }
 
 
             public let invCapacity: Value
             public let invCapacityMinusOne: Value
 
 
+            @usableFromInline
+            internal private(set) var _moment: Value = 0.0 as Value
 
+
+            @usableFromInline
+            internal private(set) var _average: Value = 0.0 as Value
+
+
+            @usableFromInline
+            internal private(set) var avgStream: Average<Value>.MovingStream
+
+
+
+            /// Creates an instance in initial state.
+            @inlinable
             public init(capacity: Int) {
                 assert(capacity >= 2)
 
                 avgStream = .init(capacity: capacity)
 
-                invCapacity = 1 / Value(capacity)
-                invCapacityMinusOne = 1 / Value(capacity - 1)
+                invCapacity = (1.0 as Value) / Value(capacity)
+                invCapacityMinusOne = (1.0 as Value) / Value(capacity - 1)
             }
 
 
-
-            private var avgStream: Average<Value>.MovingStream
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(capacity: Int, with values: S)
+            where S : Sequence, S.Element == Value {
+                self.init(capacity: capacity)
+                process(values)
+            }
 
 
 
             // MARK: Auxiliaries
 
-            private func value(divider: Int) -> Value {
-                divider > 0 ? moment / Value(count) : 0
+            @usableFromInline
+            internal func value(divider: Int) -> Value {
+                divider > 0 ? _moment / Value(count) : (0.0 as Value)
             }
 
 
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
                 if count < capacity {
                     avgStream.process(value)
 
-                    let newAverage = avgStream.average
-                    defer { average = newAverage }
+                    let newAverage = avgStream._average
+                    defer { _average = newAverage }
 
-                    moment.addProduct(value - average, value - newAverage)
+                    _moment.addProduct(value - _average, value - newAverage)
 
                 } else {
-                    let excludedValue = avgStream.buffer.first!
+                    let excludedValue = avgStream._buffer.first!
 
                     avgStream.process(value)
 
-                    let newAverage = avgStream.average
-                    defer { average = newAverage }
+                    let newAverage = avgStream._average
+                    defer { _average = newAverage }
 
-                    moment.addProduct(value - excludedValue, value - average + excludedValue - newAverage)
+                    _moment.addProduct(value - excludedValue, (value - _average) as Value + (excludedValue - newAverage) as Value)
                 }
             }
-
 
 
             @inlinable
@@ -902,10 +1062,10 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                moment = 0
-                average = 0
+                _moment = 0.0 as Value
+                _average = 0.0 as Value
                 avgStream.reset()
             }
 
@@ -921,23 +1081,24 @@ extension KvStatistics {
             public let value, average, count: Value
 
 
-            public private(set) lazy var standardDeviation: Value = count > 0 ? (value / count).squareRoot() : 0
+            public private(set) lazy var standardDeviation: Value = count > (0.0 as Value) ? (value / count).squareRoot() : (0.0 as Value)
 
-            public private(set) lazy var variance: Value = count > 0 ? value / count : 0
+            public private(set) lazy var variance: Value = count > (0.0 as Value) ? (value / count) : (0.0 as Value)
 
-            public private(set) lazy var unbiasedStandardDeviation: Value = { $0 > 0 ? (value / $0).squareRoot() : 0 }(count - 1 as Value)
+            public private(set) lazy var unbiasedStandardDeviation: Value = { $0 > (0.0 as Value) ? (value / $0).squareRoot() : (0.0 as Value) }((count - (1.0 as Value)) as Value)
 
-            public private(set) lazy var unbiasedVariance: Value = { $0 > 0 ? value / $0 : 0 }(count - 1 as Value)
+            public private(set) lazy var unbiasedVariance: Value = { $0 > (0.0 as Value) ? (value / $0) : (0.0 as Value) }((count - (1.0 as Value)) as Value)
 
 
 
+            @inlinable
             public init<S>(_ values: S) where S: Sequence, S.Element == Value {
-                var average: Value = 0, count: Value = 0
+                var average = (0.0 as Value), count = (0.0 as Value)
 
-                value = values.reduce(0) { (moment, x) in
-                    count += 1
+                value = values.reduce(0.0 as Value) { (moment, x) in
+                    count += 1.0 as Value
 
-                    let newAverage = average + (x - average) / count
+                    let newAverage = average + ((x - average) as Value) / count
                     defer { average = newAverage }
 
                     return moment.addingProduct(x - average, x - newAverage)
@@ -957,7 +1118,7 @@ extension KvStatistics {
         public struct Uniform {
 
             @usableFromInline
-            internal static var oneTwelfth: Value { 1.0 / (12.0 as Value) }
+            internal static var oneTwelfth: Value { (1.0 as Value) / (12.0 as Value) }
 
 
             /// - Returns: The moment value for [ 1∙d, 2∙d, ..., n∙d ].
@@ -1048,7 +1209,6 @@ public protocol KvStatisticsCovarianceStream : KvStatisticsStream {
     associatedtype Result
 
 
-
     var covariance: Result { get }
     var unbiasedCovariance: Result { get }
 
@@ -1069,6 +1229,7 @@ public protocol KvStatisticsCovarianceProcessor : KvStatisticsCovarianceStream, 
 
 extension KvStatistics {
 
+    /// [Wikipedia](https://wikipedia.org/wiki/Covariance) : covariance is a measure of the joint variability of two random variables.
     public class Covariance<Value : BinaryFloatingPoint> {
 
         public typealias SourceValue = (Value, Value)
@@ -1080,70 +1241,91 @@ extension KvStatistics {
         /// Analog of Welford's online algorithm for variance. The algorithm is less prone to loss of precision due to catastrophic cancellation.
         public struct Processor : KvStatisticsCovarianceProcessor {
 
+            @inlinable
             public var covariance: Value { value(divider: count) }
 
+            @inlinable
             public var unbiasedCovariance: Value { value(divider: count - 1) }
 
 
-            public private(set) var comoment: Value = 0
+            @inlinable
+            public var comoment: Value { _comoment }
 
 
-            public private(set) var average: SourceValue = (0, 0)
+            @inlinable
+            public var average: SourceValue { _average }
 
 
-            public var count: Int { return avgProcessor.0.count }
+            @inlinable
+            public var count: Int { avgProcessor.0._count }
+
+
+            @usableFromInline
+            internal private(set) var _comoment: Value = 0.0 as Value
+
+
+            @usableFromInline
+            internal private(set) var _average: SourceValue = (0.0 as Value, 0.0 as Value)
+
+
+            @usableFromInline
+            internal private(set) var avgProcessor = (Average<Value>.Processor(), Average<Value>.Processor())
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
-
-            private var avgProcessor = (Average<Value>.Processor(), Average<Value>.Processor())
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(with values: S) where S : Sequence, S.Element == SourceValue { process(values) }
 
 
 
             // MARK: Auxiliaries
 
-            private func value(divider: Int) -> Value {
-                divider > 0 ? comoment / Value(divider) : 0
+            @usableFromInline
+            internal func value(divider: Int) -> Value {
+                divider > 0 ? _comoment / Value(divider) : (0.0 as Value)
             }
 
 
-
+            @inlinable
             public mutating func process(_ v0: Value, _ v1: Value) {
                 avgProcessor.0.process(v0)
-                average.0 = avgProcessor.0.average
+                _average.0 = avgProcessor.0._average
 
-                comoment.addProduct(v0 - average.0, v1 - average.1)
+                _comoment.addProduct(v0 - _average.0, v1 - _average.1)
 
                 avgProcessor.1.process(v1)
-                average.1 = avgProcessor.1.average
+                _average.1 = avgProcessor.1._average
             }
 
 
-
+            @inlinable
             public mutating func rollback(_ v0: Value, _ v1: Value) {
                 avgProcessor.1.rollback(v1)
-                average.1 = avgProcessor.1.average
+                _average.1 = avgProcessor.1._average
 
-                comoment.addProduct(v0 - average.0, average.1 - v1)
+                _comoment.addProduct(v0 - _average.0, _average.1 - v1)
 
                 avgProcessor.0.rollback(v0)
-                average.0 = avgProcessor.0.average
+                _average.0 = avgProcessor.0._average
             }
 
 
-
+            @inlinable
             public mutating func replace(_ old0: Value, _ old1: Value, with new0: Value, _ new1: Value) {
                 avgProcessor.0.replace(old0, with: new0)
-                average.0 = avgProcessor.0.average
+                _average.0 = avgProcessor.0._average
 
-                comoment.addProduct(new0 - average.0, new1 - old1)
-                comoment.addProduct(new0 - old0, old1 - average.1)
+                _comoment.addProduct(new0 - _average.0, new1 - old1)
+                _comoment.addProduct(new0 - old0, old1 - _average.1)
 
                 avgProcessor.1.replace(old1, with: new1)
-                average.1 = avgProcessor.1.average
+                _average.1 = avgProcessor.1._average
             }
 
 
@@ -1154,17 +1336,16 @@ extension KvStatistics {
             public mutating func process(_ value: SourceValue) { process(value.0, value.1) }
 
 
-
             @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
                 values.forEach { process($0.0, $0.1) }
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                comoment = 0
-                average = (0, 0)
+                _comoment = 0.0 as Value
+                _average = (0.0 as Value, 0.0 as Value)
                 avgProcessor.0.reset()
                 avgProcessor.1.reset()
             }
@@ -1177,19 +1358,16 @@ extension KvStatistics {
             public mutating func rollback(_ value: SourceValue) { rollback(value.0, value.1) }
 
 
-
             @inlinable
             public mutating func rollback<S>(_ values: S) where S : Sequence, S.Element == SourceValue {
                 values.forEach { rollback($0.0, $0.1) }
             }
 
 
-
             @inlinable
             public mutating func replace(_ oldValue: SourceValue, with newValue: SourceValue) {
                 replace(oldValue.0, oldValue.1, with: newValue.0, newValue.1)
             }
-
 
 
             @inlinable
@@ -1208,47 +1386,67 @@ extension KvStatistics {
         /// Analog of Welford's online algorithm for moving variance. The algorithm is less prone to loss of precision due to catastrophic cancellation.
         public struct MovingStream : KvStatisticsCovarianceStream {
 
-            public private(set) var buffer: KvCircularBuffer<SourceValue>
+            @inlinable
+            public var buffer: KvCircularBuffer<SourceValue> { _buffer }
 
 
             @inlinable
-            public var count: Int { return buffer.count }
+            public var count: Int { _buffer.count }
 
             @inlinable
-            public var capacity: Int { return buffer.capacity }
+            public var capacity: Int { _buffer.capacity }
+
+
+            @usableFromInline
+            internal private(set) var _buffer: KvCircularBuffer<SourceValue>
+
+
+            @usableFromInline
+            internal private(set) var covarianceProcessor: Processor = .init()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init(capacity: Int) {
-                buffer = .init(capacity: capacity)
+                _buffer = .init(capacity: capacity)
             }
 
 
-
-            private var covarianceProcessor: Processor = .init()
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(capacity: Int, with values: S)
+            where S : Sequence, S.Element == SourceValue
+            {
+                self.init(capacity: capacity)
+                process(values)
+            }
 
 
 
             // MARK: : KvStatisticsCovarianceStream
 
+            @inlinable
             public var covariance: Value { covarianceProcessor.covariance }
 
+            @inlinable
             public var unbiasedCovariance: Value { covarianceProcessor.unbiasedCovariance }
 
-            public var comoment: Value { covarianceProcessor.comoment }
+            @inlinable
+            public var comoment: Value { covarianceProcessor._comoment }
 
 
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: SourceValue) {
-                if let oldValue = buffer.append(value) {
+                if let oldValue = _buffer.append(value) {
                     covarianceProcessor.replace(oldValue, with: value)
                 } else {
                     covarianceProcessor.process(value)
                 }
             }
-
 
 
             @inlinable
@@ -1257,9 +1455,9 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                buffer.removeAll()
+                _buffer.removeAll()
                 covarianceProcessor.reset()
             }
 
@@ -1281,6 +1479,7 @@ extension KvStatistics {
 
 
 
+            @inlinable
             public init<S₁, S₂>(x xs: S₁, y ys: S₂) where S₁: Sequence, S₁.Element == Value, S₂: Sequence, S₂.Element == Value {
                 var average: (Value, Value) = (0.0, 0.0), count: Value = 0.0
 
@@ -1300,8 +1499,9 @@ extension KvStatistics {
 
 
 
+            @inlinable
             public init<S>(dx: Value = 1, y values: S) where S: Sequence, S.Element == Value {
-                var average: (x: Value, y: Value) = (-0.5, 0.0), count: Value = 0.0
+                var average: (x: Value, y: Value) = (-0.5 as Value, 0.0 as Value), count: Value = 0.0 as Value
 
                 value = dx * values.reduce(0) { (comoment, value) in
                     count += 1.0 as Value
@@ -1340,14 +1540,25 @@ extension KvStatistics {
 
         public struct Processor : KvStatisticsProcessor {
 
-            public var correlation: Value { covarianceProcessor.comoment / sqrt(varianceProcessors.0.moment * varianceProcessors.1.moment) }
+            @inlinable
+            public var correlation: Value { covarianceProcessor._comoment / sqrt(varianceProcessors.0._moment * varianceProcessors.1._moment) }
+
+
+            @usableFromInline
+            internal private(set) var varianceProcessors = (Variance<Value>.Processor(), Variance<Value>.Processor())
+
+            @usableFromInline
+            internal private(set) var covarianceProcessor = Covariance<Value>.Processor()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
-
+            /// Creates an instance that has processed given *points*.
+            @inlinable
             public init<S>(_ points: S) where S : Sequence, S.Element == Point {
                 varianceProcessors.0.process(points.lazy.map { $0.0 })
                 varianceProcessors.1.process(points.lazy.map { $0.1 })
@@ -1355,7 +1566,8 @@ extension KvStatistics {
             }
 
 
-
+            /// Creates an instance that has processed pairs of values from given sequences.
+            @inlinable
             public init<S0, S1>(_ s0: S0, _ s1: S1) where S0 : Sequence, S0.Element == Value, S1 : Sequence, S1.Element == Value {
                 varianceProcessors.0.process(s0)
                 varianceProcessors.1.process(s1)
@@ -1364,19 +1576,14 @@ extension KvStatistics {
 
 
 
-            private var varianceProcessors = (Variance<Value>.Processor(), Variance<Value>.Processor())
-            private var covarianceProcessor = Covariance<Value>.Processor()
-
-
-
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Point) {
                 varianceProcessors.0.process(value.0)
                 varianceProcessors.1.process(value.1)
                 covarianceProcessor.process(value)
             }
-
 
 
             @inlinable
@@ -1385,7 +1592,7 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func reset() {
                 varianceProcessors.0.reset()
                 varianceProcessors.1.reset()
@@ -1396,6 +1603,7 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsProcessor
 
+            @inlinable
             public mutating func rollback(_ value: Point) {
                 varianceProcessors.0.rollback(value.0)
                 varianceProcessors.1.rollback(value.1)
@@ -1403,7 +1611,7 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func replace(_ old: Point, with new: Point) {
                 varianceProcessors.0.replace(old.0, with: new.0)
                 varianceProcessors.1.replace(old.1, with: new.1)
@@ -1411,12 +1619,10 @@ extension KvStatistics {
             }
 
 
-
             @inlinable
             public mutating func rollback<S>(_ values: S) where S : Sequence, S.Element == Point {
                 values.forEach { rollback($0) }
             }
-
 
 
             @inlinable
@@ -1446,30 +1652,52 @@ extension KvStatistics {
         /// Online evaluator of minimum and maximum values on a sequence.
         public struct Stream : KvStatisticsStream {
 
-            public private(set) var minimum: Value = 0
-            public private(set) var maximum: Value = 0
+            @inlinable
+            public var minimum: Value { _minimum }
 
-            public private(set) var count: Int = 0
+            @inlinable
+            public var maximum: Value { _maximum }
+
+            @inlinable
+            public var count: Int { _count }
+
+
+            @usableFromInline
+            internal private(set) var _minimum: Value = 0
+
+            @usableFromInline
+            internal private(set) var _maximum: Value = 0
+
+            @usableFromInline
+            internal private(set) var _count: Int = 0
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
+
+
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(with values: S) where S : Sequence, S.Element == Value { process(values) }
 
 
 
             // MARK: Auxiliaries
 
-            mutating private func updateBounds(with value: Value) {
-                if count > 0 {
-                    if value > maximum {
-                        maximum = value
-                    } else if value < minimum {
-                        minimum = value
+            @usableFromInline
+            mutating internal func updateBounds(with value: Value) {
+                if _count > 0 {
+                    if value > _maximum {
+                        _maximum = value
+                    } else if value < _minimum {
+                        _minimum = value
                     }
 
                 } else {
-                    minimum = value
-                    maximum = value
+                    _minimum = value
+                    _maximum = value
                 }
             }
 
@@ -1477,12 +1705,12 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
                 updateBounds(with: value)
 
-                count += 1
+                _count += 1
             }
-
 
 
             @inlinable
@@ -1491,19 +1719,19 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func process<C>(_ values: C) where C : Collection, C.Element == Value {
                 values.forEach { updateBounds(with: $0) }
 
-                count += values.count
+                _count += values.count
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                minimum = 0
-                maximum = 0
-                count = 0
+                _minimum = 0
+                _maximum = 0
+                _count = 0
             }
 
         }
@@ -1526,25 +1754,43 @@ extension KvStatistics {
         /// Online evaluator of minimum, maximum and average values on a sequence.
         public struct Stream : KvStatisticsStream, CustomStringConvertible {
 
-            public var minimum: Value { return minMaxStream.minimum }
-            public var maximum: Value { return minMaxStream.maximum }
-            public var average: Value { return avgProcessor.average }
+            @inlinable
+            public var minimum: Value { minMaxStream._minimum }
 
-            public var count: Int { return avgProcessor.count }
+            @inlinable
+            public var maximum: Value { minMaxStream._maximum }
+
+            @inlinable
+            public var average: Value { avgProcessor._average }
+
+
+            @inlinable
+            public var count: Int { avgProcessor._count }
+
+
+            @usableFromInline
+            internal private(set) var minMaxStream = KvStatistics.MinMax<Value>.Stream()
+
+            @usableFromInline
+            internal private(set) var avgProcessor = KvStatistics.Average<Value>.Processor()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
-
-            private var minMaxStream = KvStatistics.MinMax<Value>.Stream()
-            private var avgProcessor = KvStatistics.Average<Value>.Processor()
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(_ values: S) where S : Sequence, S.Element == Value { process(values) }
 
 
 
             // MARK: Auxiliaries
 
+            /// - Returns: The average value as if given *value* had been processed.
+            @inlinable
             public func nextAverage(for value: Value) -> Value {
                 avgProcessor.nextAverage(for: value)
             }
@@ -1553,27 +1799,28 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Value) {
                 minMaxStream.process(value)
                 avgProcessor.process(value)
             }
 
 
-
+            @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Value {
                 minMaxStream.process(values)
                 avgProcessor.process(values)
             }
 
 
-
+            @inlinable
             public mutating func process<C>(_ values: C) where C : Collection, C.Element == Value {
                 minMaxStream.process(values)
                 avgProcessor.process(values)
             }
 
 
-
+            @inlinable
             public mutating func reset() {
                 minMaxStream.reset()
                 avgProcessor.reset()
@@ -1583,6 +1830,7 @@ extension KvStatistics {
 
             // MARK: : CustomStringConvertible
 
+            @inlinable
             public var description: String { "(min: \(minimum), max: \(maximum), avg: \(average), count: \(count))" }
 
         }
@@ -1598,7 +1846,6 @@ extension KvStatistics {
 public protocol KvStatisticsLinearRegressionStream : KvStatisticsStream {
 
     associatedtype Result : KvLinearMappingProtocol
-
 
 
     var k: Result.Value { get }
@@ -1620,6 +1867,7 @@ public protocol KvStatisticsLinearRegressionProcessor : KvStatisticsLinearRegres
 
 extension KvStatistics {
 
+    /// Linear regression (2-dimensional). See: [Wikipedia](https://en.wikipedia.org/wiki/Linear_regression ).
     public class LinearRegression<Value : BinaryFloatingPoint> {
 
         public typealias Scalar = Value
@@ -1634,41 +1882,55 @@ extension KvStatistics {
         /// Linear regression online algorithm.
         public struct Processor : KvStatisticsLinearRegressionProcessor {
 
+            @inlinable
             public var k: Value {
-                let moment = varianceProcessor.moment
-                return moment >= .ulpOfOne ? covarianceProcessor.comoment / moment : 0
+                let moment = varianceProcessor._moment
+                return moment >= Value.ulpOfOne ? (covarianceProcessor._comoment / moment) : (0.0 as Value)
             }
-            public var b: Value { return covarianceProcessor.average.1 - k * covarianceProcessor.average.0 }
 
-            public var line: Line { .init(k: k, x₀: covarianceProcessor.average.0, y₀: covarianceProcessor.average.1) }
+            @inlinable
+            public var b: Value { covarianceProcessor._average.1 - k * covarianceProcessor._average.0 }
+
+            @inlinable
+            public var line: Line { .init(k: k, x₀: covarianceProcessor._average.0, y₀: covarianceProcessor._average.1) }
+
+
+            @usableFromInline
+            internal private(set) var varianceProcessor = Variance<Value>.Processor()
+
+            @usableFromInline
+            internal private(set) var covarianceProcessor = Covariance<Value>.Processor()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init() { }
 
 
-
-            private var varianceProcessor = Variance<Value>.Processor()
-            private var covarianceProcessor = Covariance<Value>.Processor()
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(with values: S) where S : Sequence, S.Element == Point { process(values) }
 
 
 
             // MARK: Auxiliaries
 
+            @inlinable
             public mutating func process(x: Value, y: Value) {
                 varianceProcessor.process(x)
                 covarianceProcessor.process(x, y)
             }
 
 
-
+            @inlinable
             public mutating func rollback(x: Value, y: Value) {
                 varianceProcessor.rollback(x)
                 covarianceProcessor.rollback(x, y)
             }
 
 
-
+            @inlinable
             public mutating func replace(x oldX: Value, y oldY: Value, withX newX: Value, y newY: Value) {
                 varianceProcessor.replace(oldX, with: newX)
                 covarianceProcessor.replace(oldX, oldY, with: newX, newY)
@@ -1682,14 +1944,13 @@ extension KvStatistics {
             public mutating func process(_ value: Point) { process(x: value.x, y: value.y) }
 
 
-
             @inlinable
             public mutating func process<S>(_ values: S) where S : Sequence, S.Element == Point {
                 values.forEach { process(x: $0.x, y: $0.y) }
             }
 
 
-
+            @inlinable
             public mutating func reset() {
                 varianceProcessor.reset()
                 covarianceProcessor.reset()
@@ -1705,19 +1966,16 @@ extension KvStatistics {
             }
 
 
-
             @inlinable
             public mutating func rollback<S>(_ values: S) where S : Sequence, S.Element == Point {
                 values.forEach { rollback(x: $0.x, y: $0.y) }
             }
 
 
-
             @inlinable
             public mutating func replace(_ oldValue: Point, with newValue: Point) {
                 replace(x: oldValue.x, y: oldValue.y, withX: newValue.x, y: newValue.y)
             }
-
 
 
             @inlinable
@@ -1736,30 +1994,51 @@ extension KvStatistics {
         /// Moving linear regression online algorithm.
         public struct MovingStream : KvStatisticsLinearRegressionStream {
 
+            @inlinable
             public var k: Value { linearRegressionProcessor.k }
+
+            @inlinable
             public var b: Value { linearRegressionProcessor.b }
 
+            @inlinable
             public var line: Line { linearRegressionProcessor.line }
 
 
-            public private(set) var buffer: KvCircularBuffer<Point>
+            @inlinable
+            public var buffer: KvCircularBuffer<Point> { _buffer }
 
 
             @inlinable
-            public var count: Int { buffer.count }
+            public var count: Int { _buffer.count }
 
             @inlinable
-            public var capacity: Int { buffer.capacity }
+            public var capacity: Int { _buffer.capacity }
+
+
+            @usableFromInline
+            internal private(set) var _buffer: KvCircularBuffer<Point>
+
+
+            @usableFromInline
+            internal private(set) var linearRegressionProcessor: Processor = .init()
 
 
 
+            /// Creates an instance in initial state.
+            @inlinable
             public init(capacity: Int) {
-                buffer = .init(capacity: capacity)
+                _buffer = .init(capacity: capacity)
             }
 
 
-
-            private var linearRegressionProcessor: Processor = .init()
+            /// Creates an instance that has processed given *values*.
+            @inlinable
+            public init<S>(capacity: Int, with values: S)
+            where S : Sequence, S.Element == Point
+            {
+                self.init(capacity: capacity)
+                process(values)
+            }
 
 
 
@@ -1772,14 +2051,14 @@ extension KvStatistics {
 
             // MARK: : KvStatisticsStream
 
+            @inlinable
             public mutating func process(_ value: Point) {
-                if let oldValue = buffer.append(value) {
+                if let oldValue = _buffer.append(value) {
                     linearRegressionProcessor.replace(x: oldValue.x, y: oldValue.y, withX: value.x, y: value.y)
                 } else {
                     linearRegressionProcessor.process(x: value.x, y: value.y)
                 }
             }
-
 
 
             @inlinable
@@ -1788,9 +2067,9 @@ extension KvStatistics {
             }
 
 
-
+            @inlinable
             public mutating func reset() {
-                buffer.removeAll()
+                _buffer.removeAll()
                 linearRegressionProcessor.reset()
             }
 
@@ -1799,14 +2078,19 @@ extension KvStatistics {
 
 
         /// An offline implementation for arbitrary sequences of x and y values.
-        public static func line<S₁, S₂>(x xs: S₁, y ys: S₂) -> Line where S₁: Sequence, S₁.Element == Value, S₂: Sequence, S₂.Element == Value {
+        @inlinable
+        public static func line<S₁, S₂>(x xs: S₁, y ys: S₂) -> Line
+        where S₁: Sequence, S₁.Element == Value, S₂: Sequence, S₂.Element == Value
+        {
             .init(.init(x: xs, y: ys), Variance<Value>.Moment(xs).value)
         }
 
 
-
         /// An offline implementation for arbitrary sequence of y values where x values are index offsets in y value sequence.
-        public static func line<S>(_ values: S) -> Line where S: Sequence, S.Element == Value {
+        @inlinable
+        public static func line<S>(_ values: S) -> Line
+        where S: Sequence, S.Element == Value
+        {
             let comoment = Covariance<Value>.Comoment(y: values)
             let moment = Variance<Value>.Uniform.moment(n: Int(comoment.count))
 
@@ -1823,10 +2107,11 @@ extension KvStatistics {
 
 extension KvStatistics {
 
-    /// Local Maximums
+    /// Local maximums.
     public class LocalMaximum<Value : Comparable> {
 
         public typealias Value = Value
+
 
 
         /// Note generic argument is desinated to help process deferred invocations of *callback*. Use *Void* if note is unused.
@@ -1841,16 +2126,35 @@ extension KvStatistics {
             public let threshold: Threshold
 
 
-            /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+            @usableFromInline
+            internal let callback: Callback
+
+            @usableFromInline
+            internal private(set) var state: State = .initial
+
+
+
+            /// Creates an instance in initial state.
+            ///
+            /// - Parameter threshold: A value after a `local_maximum` value have to be less then `threshold`×`local_maximum`.
+            @inlinable
             public init(threshold: Threshold, callback: @escaping Callback) {
                 self.threshold = threshold
                 self.callback = callback
             }
 
 
-            private let callback: Callback
+            /// Creates an instance that has processed given *values*.
+            ///
+            /// - Parameter threshold: A value after a `local_maximum` value have to be less then `threshold`×`local_maximum`.
+            @inlinable
+            public init<S>(threshold: Threshold, with values: S, callback: @escaping Callback)
+            where S : Sequence, S.Element == SourceValue
+            {
+                self.init(threshold: threshold, callback: callback)
+                process(values)
+            }
 
-            private var state: State = .initial
 
 
             // MARK: .Threshold
@@ -1875,6 +2179,7 @@ extension KvStatistics {
             }
 
 
+
             // MARK: .SourceValue
 
             public struct SourceValue {
@@ -1896,13 +2201,17 @@ extension KvStatistics {
             }
 
 
+
             // MARK: .State
 
-            private enum State {
+            /// It's internal to be used in @usableFromInline code.
+            @usableFromInline
+            internal enum State {
                 case initial
                 case minimum(Value)
                 case candidate(SourceValue)
             }
+
 
 
             // MARK: Operations
@@ -1921,6 +2230,7 @@ extension KvStatistics {
             }
 
             /// - Note: Call *reset()* to commit deferred results.
+            @inlinable
             public mutating func process(_ next: SourceValue) {
                 switch state {
                 case .candidate(let candidate):
@@ -1957,6 +2267,7 @@ extension KvStatistics {
             public mutating func processAndReset(_ value: Value, note: Note) { processAndReset(SourceValue(value, note: note)) }
 
 
+            @inlinable
             public mutating func reset() {
                 switch state {
                 case .candidate(let candidate):
@@ -2022,6 +2333,7 @@ extension KvStatistics.LocalMaximum.Stream.Threshold where Value : AdditiveArith
 
     // MARK: .absolute
 
+    @inlinable
     public static func absolute(_ delta: Value) -> Self {
         .init { maximum, other in
             other < maximum - delta
@@ -2053,6 +2365,7 @@ extension KvStatistics.LocalMaximum where Value : Numeric {
     /// Invokes callback for each local maximum in *values* sequence.
     ///
     /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+    @inlinable
     public static func run<Values>(with values: Values, threshold: Value, callback: (Value, inout Bool) -> Void)
     where Values : Sequence, Values.Element == Value
     {
@@ -2096,6 +2409,7 @@ extension KvStatistics.LocalMaximum where Value : Numeric {
     /// Invokes callback for each local maximum in *values* sequence transformed with *map* block.
     ///
     /// - Parameter threshold: A value after a local maximum have to be less then *threshold*×the_maximum.
+    @inlinable
     public static func run<Values>(with values: Values, threshold: Value, map: (Values.Element) -> Value, callback: (Values.Element, Value, inout Bool) -> Void)
     where Values : Sequence
     {

@@ -164,7 +164,7 @@ extension KvShiftedLinearMapping : KvLinearMappingProtocol {
 
 
     public init(x₁: Value, y₁: Value, x₂: Value, y₂: Value) {
-        precondition(abs(x₂ - x₁) >= .ulpOfOne, "Invalid arguments: x₁ and x₂ must not be equal")
+        precondition(abs((x₂ - x₁) as Value) >= Value.ulpOfOne, "Invalid arguments: x₁ and x₂ must not be equal")
 
         k = ((y₂ - y₁) as Value) / ((x₂ - x₁) as Value)
         y₀ = (y₁ + y₂) / (2.0 as Value)

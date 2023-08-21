@@ -80,7 +80,7 @@ final class KvKitTests: XCTestCase {
 
                 let operation = (1...n).reduce(into: BlockOperation(), { (operation, i) in
                     operation.addExecutionBlock {
-                        KvThreadKit.locking(mutationLock) {
+                        mutationLock.withLock {
                             sum += 2 * i - 1
                         }
                     }
