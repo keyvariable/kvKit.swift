@@ -29,9 +29,13 @@ import simd
 
 /// A lightweight container for numerical comparison tolerance.
 ///
-/// Use ``KvNumericToleranceMagnitude`` to combine magnitudes and calculate tolerance once.
+/// Use ``KvNumericToleranceArgument`` to combine magnitudes and calculate tolerance once.
 ///
 /// E.g. `KvNumericTolerance<Double>(100.0)` defines a tolerance near 100.0 with double precision.
+/// Consider ``near(_:)`` fabric. For example, if it's known that magnitudes of  *a* and *b* are less then 10, following code can be used:
+///
+///     KvIs(a, equalTo: b, eps: .near(100.0))
+///     
 public struct KvNumericTolerance<T : BinaryFloatingPoint> {
 
     public typealias Argument = KvNumericToleranceArgument<T>
@@ -99,7 +103,7 @@ extension KvNumericTolerance : ExpressibleByFloatLiteral where T : ExpressibleBy
 
 
 
-// MARK: .KvNumericToleranceMagnitude
+// MARK: .KvNumericToleranceArgument
 
 /// A lightweight container for magnitude of numerical comparison tolerance.
 public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
