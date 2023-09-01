@@ -1,6 +1,6 @@
 //===----------------------------------------------------------------------===//
 //
-//  Copyright (c) 2021 Svyatoslav Popov (info@keyvar.com).
+//  Copyright (c) 2023 Svyatoslav Popov (info@keyvar.com).
 //
 //  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 //  the License. You may obtain a copy of the License at
@@ -15,16 +15,29 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// LinuxMain.swift
-// kvKitTests
+//  KvNSLock.swift
+//  kvKit
 //
-// Created by Svyatoslav Popov on 15.04.2020.
+//  Created by Svyatoslav Popov on 01.09.2023.
 //
 
-import XCTest
+#if !canImport(Darwin)
 
-import kvKitTests
+import Foundation
 
-var tests = [XCTestCaseEntry]()
-tests += kvKitTests.allTests()
-XCTMain(tests)
+
+
+public extension NSLocking {
+
+    /// Locks the receiver, executed *body* and unlocks the receiver.
+    @inlinable
+    func withLock<R>(_ body: () throws -> R) rethrows -> R {
+        lock()
+        defer { unlock() }
+
+        return try body()
+    }
+
+}
+
+#endif // !canImport(Darwin)

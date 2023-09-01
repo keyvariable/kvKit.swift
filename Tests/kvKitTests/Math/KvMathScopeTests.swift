@@ -16,7 +16,7 @@
 //===----------------------------------------------------------------------===//
 //
 //  KvMathScopeTests.swift
-//  kvKit
+//  KvKitTests
 //
 //  Created by Svyatoslav Popov on 21.09.2022.
 //
@@ -36,19 +36,6 @@ class KvMathScopeTests : XCTestCase {
     typealias V2<Math : KvMathScope> = Math.Vector2
     typealias V3<Math : KvMathScope> = Math.Vector3
     typealias V4<Math : KvMathScope> = Math.Vector4
-
-
-
-    // MARK: : XCTestCase
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
 
 
 

@@ -21,11 +21,8 @@
 //  Created by Svyatoslav Popov on 18.08.2020.
 //
 
-import simd
 
-
-
-// MARK: .KvNumericTolerance
+// MARK: - KvNumericTolerance
 
 /// A lightweight container for numerical comparison tolerance.
 ///
@@ -103,7 +100,7 @@ extension KvNumericTolerance : ExpressibleByFloatLiteral where T : ExpressibleBy
 
 
 
-// MARK: .KvNumericToleranceArgument
+// MARK: - KvNumericToleranceArgument
 
 /// A lightweight container for magnitude of numerical comparison tolerance.
 public struct KvNumericToleranceArgument<T : BinaryFloatingPoint> : Hashable {
@@ -222,7 +219,7 @@ extension KvNumericToleranceArgument : ExpressibleByFloatLiteral where T : Expre
 
 
 
-// MARK: FP Comparisons
+// MARK: - FP Comparisons
 
 public typealias KvEps<T : BinaryFloatingPoint> = KvNumericTolerance<T>
 
@@ -574,7 +571,7 @@ public func KvIsNotNegative<T : BinaryFloatingPoint>(_ value: T, eps: KvEps<T> =
 
 
 
-// MARK: FP Optional Comparisons
+// MARK: - FP Optional Comparisons
 
 /// - Returns: A boolean value indicating whether *lhs* is equal to *rhs* taking into account the computational error.
 ///
@@ -609,7 +606,7 @@ public func KvIs<T : BinaryFloatingPoint>(_ lhs: T?, inequalTo rhs: T?) -> Bool 
 
 
 
-// MARK: FP Range Comparisons
+// MARK: - FP Range Comparisons
 
 /// - Returns: A boolean value indicating whether *range* contains *value* taking into account the computational error.
 ///
@@ -935,7 +932,7 @@ public func KvIs<T : BinaryFloatingPoint>(_ lhs: PartialRangeThrough<T>, inequal
 
 
 
-// MARK: Power of 2
+// MARK: - Power of 2
 
 @inlinable
 public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : FixedWidthInteger {
@@ -950,7 +947,7 @@ public func KvIsPowerOf2<T>(_ value: T) -> Bool where T : BinaryFloatingPoint {
 
 
 
-// MARK: Legacy
+// MARK: - Legacy
 
 extension KvNumericTolerance {
 

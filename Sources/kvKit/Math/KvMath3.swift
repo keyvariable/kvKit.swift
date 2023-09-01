@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 20.04.2021.
 //
 
+#if os(macOS) || os(iOS)
+
 import simd
 
 
@@ -1990,3 +1992,5 @@ extension KvMath3 where Scalar == Double {
     public static func front(from matrix: simd_double4x4) -> Vector { basisZ(from: matrix) }
 
 }
+
+#endif // os(macOS) || os(iOS)

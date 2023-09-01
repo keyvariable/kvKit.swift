@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 15.09.2018.
 //
 
+#if canImport(Darwin)
+
 import Foundation
 
 
@@ -71,3 +73,5 @@ extension KvBonjour {
     }
 
 }
+
+#endif // canImport(Darwin)

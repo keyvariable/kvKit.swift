@@ -21,6 +21,7 @@
 //  Created by Svyatoslav Popov on 19.09.2022.
 //
 
+import Foundation   // Linux
 import simd
 
 
@@ -673,7 +674,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func abs(_ v: Matrix4x4) -> Matrix4x4 { .init(abs(v[0]), abs(v[1]), abs(v[2]), abs(v[3])) }
 
 
-    @inlinable public static func acos(_ x: Scalar) -> Scalar { simd.acos(x) }
+    @inlinable public static func acos(_ x: Scalar) -> Scalar { __Kv_acos(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func acos(_ v: Vector2) -> Vector2 { simd.acos(v) }
@@ -685,7 +686,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func acos(_ v: Vector4) -> Vector4 { simd.acos(v) }
 
 
-    @inlinable public static func asin(_ x: Scalar) -> Scalar { simd.asin(x) }
+    @inlinable public static func asin(_ x: Scalar) -> Scalar { __Kv_asin(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func asin(_ v: Vector2) -> Vector2 { simd.asin(v) }
@@ -697,7 +698,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func asin(_ v: Vector4) -> Vector4 { simd.asin(v) }
 
 
-    @inlinable public static func atan(_ x: Scalar) -> Scalar { simd.atan(x) }
+    @inlinable public static func atan(_ x: Scalar) -> Scalar { __Kv_atan(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func atan(_ v: Vector2) -> Vector2 { simd.atan(v) }
@@ -709,7 +710,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func atan(_ v: Vector4) -> Vector4 { simd.atan(v) }
 
 
-    @inlinable public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { simd.atan2(x, y) }
+    @inlinable public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { __Kv_atan2(x, y) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func atan2(_ x: Vector2, _ y: Vector2) -> Vector2 { simd.atan2(x, y) }
@@ -721,7 +722,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func atan2(_ x: Vector4, _ y: Vector4) -> Vector4 { simd.atan2(x, y) }
 
 
-    @inlinable public static func cos(_ x: Scalar) -> Scalar { simd.cos(x) }
+    @inlinable public static func cos(_ x: Scalar) -> Scalar { __Kv_cos(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func cos(_ v: Vector2) -> Vector2 { simd.cos(v) }
@@ -733,7 +734,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func cos(_ v: Vector4) -> Vector4 { simd.cos(v) }
 
 
-    @inlinable public static func cospi(_ x: Scalar) -> Scalar { __cospif(x) }
+    @inlinable public static func cospi(_ x: Scalar) -> Scalar { __Kv_cospi(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func cospi(_ v: Vector2) -> Vector2 { simd.cospi(v) }
@@ -764,11 +765,11 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func distance²(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd_distance_squared(lhs, rhs) }
 
 
-    @inlinable public static func dot(_ lhs: Vector2, _ rhs: Vector2) -> Scalar { simd.dot(lhs, rhs) }
+    @inlinable public static func dot(_ lhs: Vector2, _ rhs: Vector2) -> Scalar { simd_dot(lhs, rhs) }
 
-    @inlinable public static func dot(_ lhs: Vector3, _ rhs: Vector3) -> Scalar { simd.dot(lhs, rhs) }
+    @inlinable public static func dot(_ lhs: Vector3, _ rhs: Vector3) -> Scalar { simd_dot(lhs, rhs) }
 
-    @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd.dot(lhs, rhs) }
+    @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd_dot(lhs, rhs) }
 
 
     /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
@@ -1395,7 +1396,7 @@ public struct KvMathFloatScope : KvMathScope {
     }
 
 
-    @inlinable public static func sin(_ x: Scalar) -> Scalar { simd.sin(x) }
+    @inlinable public static func sin(_ x: Scalar) -> Scalar { __Kv_sin(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func sin(_ v: Vector2) -> Vector2 { simd.sin(v) }
@@ -1408,10 +1409,10 @@ public struct KvMathFloatScope : KvMathScope {
 
 
     /// - Returns: Both sine and cosine of given angle.
-    @inlinable public static func sincos(_ angle: Scalar) -> (sin: Scalar, cos: Scalar) { (sin(angle), cos(angle)) }
+    @inlinable public static func sincos(_ angle: Scalar) -> (sin: Scalar, cos: Scalar) { __Kv_sincos(angle) }
 
 
-    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { sin(x * Scalar.pi) }
+    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { __Kv_sinpi(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func sinpi(_ v: Vector2) -> Vector2 { simd.sinpi(v) }
@@ -1459,7 +1460,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func slerp_longest(_ lhs: Quaternion, _ rhs: Quaternion, t: Scalar) -> Quaternion { simd_slerp_longest(lhs, rhs, t) }
 
 
-    @inlinable public static func tan(_ x: Scalar) -> Scalar { simd.tan(x) }
+    @inlinable public static func tan(_ x: Scalar) -> Scalar { __Kv_tan(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tan(_ v: Vector2) -> Vector2 { simd.tan(v) }
@@ -1471,7 +1472,7 @@ public struct KvMathFloatScope : KvMathScope {
     @inlinable public static func tan(_ v: Vector4) -> Vector4 { simd.tan(v) }
 
 
-    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { tan(x * Scalar.pi) }
+    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { __Kv_tanpi(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tanpi(_ v: Vector2) -> Vector2 { simd.tanpi(v) }
@@ -1523,7 +1524,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func abs(_ v: Matrix4x4) -> Matrix4x4 { .init(abs(v[0]), abs(v[1]), abs(v[2]), abs(v[3])) }
 
 
-    @inlinable public static func acos(_ x: Scalar) -> Scalar { simd.acos(x) }
+    @inlinable public static func acos(_ x: Scalar) -> Scalar { __Kv_acos(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func acos(_ v: Vector2) -> Vector2 { simd.acos(v) }
@@ -1535,7 +1536,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func acos(_ v: Vector4) -> Vector4 { simd.acos(v) }
 
 
-    @inlinable public static func asin(_ x: Scalar) -> Scalar { simd.asin(x) }
+    @inlinable public static func asin(_ x: Scalar) -> Scalar { __Kv_asin(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func asin(_ v: Vector2) -> Vector2 { simd.asin(v) }
@@ -1547,7 +1548,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func asin(_ v: Vector4) -> Vector4 { simd.asin(v) }
 
 
-    @inlinable public static func atan(_ x: Scalar) -> Scalar { simd.atan(x) }
+    @inlinable public static func atan(_ x: Scalar) -> Scalar { __Kv_atan(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func atan(_ v: Vector2) -> Vector2 { simd.atan(v) }
@@ -1559,7 +1560,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func atan(_ v: Vector4) -> Vector4 { simd.atan(v) }
 
 
-    @inlinable public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { simd.atan2(x, y) }
+    @inlinable public static func atan2(_ x: Scalar, _ y: Scalar) -> Scalar { __Kv_atan2(x, y) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func atan2(_ x: Vector2, _ y: Vector2) -> Vector2 { simd.atan2(x, y) }
@@ -1571,7 +1572,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func atan2(_ x: Vector4, _ y: Vector4) -> Vector4 { simd.atan2(x, y) }
 
 
-    @inlinable public static func cos(_ x: Scalar) -> Scalar { simd.cos(x) }
+    @inlinable public static func cos(_ x: Scalar) -> Scalar { __Kv_cos(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func cos(_ v: Vector2) -> Vector2 { simd.cos(v) }
@@ -1583,7 +1584,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func cos(_ v: Vector4) -> Vector4 { simd.cos(v) }
 
 
-    @inlinable public static func cospi(_ x: Scalar) -> Scalar { __cospi(x) }
+    @inlinable public static func cospi(_ x: Scalar) -> Scalar { __Kv_cospi(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func cospi(_ v: Vector2) -> Vector2 { simd.cospi(v) }
@@ -1614,11 +1615,11 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func distance²(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd_distance_squared(lhs, rhs) }
 
 
-    @inlinable public static func dot(_ lhs: Vector2, _ rhs: Vector2) -> Scalar { simd.dot(lhs, rhs) }
+    @inlinable public static func dot(_ lhs: Vector2, _ rhs: Vector2) -> Scalar { simd_dot(lhs, rhs) }
 
-    @inlinable public static func dot(_ lhs: Vector3, _ rhs: Vector3) -> Scalar { simd.dot(lhs, rhs) }
+    @inlinable public static func dot(_ lhs: Vector3, _ rhs: Vector3) -> Scalar { simd_dot(lhs, rhs) }
 
-    @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd.dot(lhs, rhs) }
+    @inlinable public static func dot(_ lhs: Vector4, _ rhs: Vector4) -> Scalar { simd_dot(lhs, rhs) }
 
 
     /// - Returns: Tolerance argument for numerical comparisons depending on a vector value.
@@ -2245,7 +2246,7 @@ public struct KvMathDoubleScope : KvMathScope {
     }
 
 
-    @inlinable public static func sin(_ x: Scalar) -> Scalar { simd.sin(x) }
+    @inlinable public static func sin(_ x: Scalar) -> Scalar { __Kv_sin(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func sin(_ v: Vector2) -> Vector2 { simd.sin(v) }
@@ -2258,10 +2259,10 @@ public struct KvMathDoubleScope : KvMathScope {
 
 
     /// - Returns: Both sine and cosine of given angle.
-    @inlinable public static func sincos(_ angle: Scalar) -> (sin: Scalar, cos: Scalar) { (sin(angle), cos(angle)) }
+    @inlinable public static func sincos(_ angle: Scalar) -> (sin: Scalar, cos: Scalar) { __Kv_sincos(angle) }
 
 
-    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { sin(x * Scalar.pi) }
+    @inlinable public static func sinpi(_ x: Scalar) -> Scalar { __Kv_sinpi(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func sinpi(_ v: Vector2) -> Vector2 { simd.sinpi(v) }
@@ -2309,7 +2310,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func slerp_longest(_ lhs: Quaternion, _ rhs: Quaternion, t: Scalar) -> Quaternion { simd_slerp_longest(lhs, rhs, t) }
 
 
-    @inlinable public static func tan(_ x: Scalar) -> Scalar { simd.tan(x) }
+    @inlinable public static func tan(_ x: Scalar) -> Scalar { __Kv_tan(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tan(_ v: Vector2) -> Vector2 { simd.tan(v) }
@@ -2321,7 +2322,7 @@ public struct KvMathDoubleScope : KvMathScope {
     @inlinable public static func tan(_ v: Vector4) -> Vector4 { simd.tan(v) }
 
 
-    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { tan(x * Scalar.pi) }
+    @inlinable public static func tanpi(_ x: Scalar) -> Scalar { __Kv_tanpi(x) }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tanpi(_ v: Vector2) -> Vector2 { simd.tanpi(v) }
@@ -2332,6 +2333,180 @@ public struct KvMathDoubleScope : KvMathScope {
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @inlinable public static func tanpi(_ v: Vector4) -> Vector4 { simd.tanpi(v) }
 
+}
+
+
+
+// MARK: Auxiliaries
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_acos(_ x: Float) -> Float { acosf(x) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_acos(_ x: Double) -> Double { acos(x) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_asin(_ x: Float) -> Float { asinf(x) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_asin(_ x: Double) -> Double { asin(x) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_atan(_ x: Float) -> Float { atanf(x) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_atan(_ x: Double) -> Double { atan(x) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_atan2(_ x: Float, _ y: Float) -> Float { atan2f(x, y) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_atan2(_ x: Double, _ y: Double) -> Double { atan2(x, y) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_cos(_ x: Float) -> Float { cosf(x) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_cos(_ x: Double) -> Double { cos(x) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_cospi(_ x: Float) -> Float {
+#if canImport(Darwin)
+    __cospif(x)
+#else // !canImport(Darwin)
+    cosf(x * Float.pi)
+#endif // !canImport(Darwin)
+}
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_cospi(_ x: Double) -> Double {
+#if canImport(Darwin)
+    __cospi(x)
+#else // !canImport(Darwin)
+    cos(x * Double.pi)
+#endif // !canImport(Darwin)
+}
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_sin(_ x: Float) -> Float { sinf(x) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_sin(_ x: Double) -> Double { sin(x) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_sincos(_ x: Float) -> (sin: Float, cos: Float) {
+#if canImport(Darwin)
+    let sincos = __sincosf_stret(x)
+    return (sin: sincos.__sinval, cos: sincos.__cosval)
+#else // !canImport(Darwin)
+    return (sin: sinf(x), cos: cosf(x))
+#endif // !canImport(Darwin)
+}
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_sincos(_ x: Double) -> (sin: Double, cos: Double) {
+#if canImport(Darwin)
+    let sincos = __sincos_stret(x)
+    return (sin: sincos.__sinval, cos: sincos.__cosval)
+#else // !canImport(Darwin)
+    return (sin: sin(x), cos: cos(x))
+#endif // !canImport(Darwin)
+}
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_sinpi(_ x: Float) -> Float {
+#if canImport(Darwin)
+    __sinpif(x)
+#else // !canImport(Darwin)
+    sinf(x * Float.pi)
+#endif // !canImport(Darwin)
+}
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_sinpi(_ x: Double) -> Double {
+#if canImport(Darwin)
+    __sinpi(x)
+#else // !canImport(Darwin)
+    sin(x * Double.pi)
+#endif // !canImport(Darwin)
+}
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_tan(_ x: Float) -> Float { tan(x) }
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_tan(_ x: Double) -> Double { tan(x) }
+
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_tanpi(_ x: Float) -> Float {
+#if canImport(Darwin)
+    __tanpif(x)
+#else // !canImport(Darwin)
+    tanf(x * Float.pi)
+#endif // !canImport(Darwin)
+}
+
+/// - Note: It's a cross-platform alias. It's used in methods having the same name and provides implicit module inference.
+@inline(__always)
+@usableFromInline
+internal func __Kv_tanpi(_ x: Double) -> Double {
+#if canImport(Darwin)
+    __tanpi(x)
+#else // !canImport(Darwin)
+    tan(x * Double.pi)
+#endif // !canImport(Darwin)
 }
 
 

@@ -16,13 +16,12 @@
 //===----------------------------------------------------------------------===//
 //
 //  KvByteOrderKit.swift
-//  kKit
+//  kvKit
 //
 //  Created by Svyatoslav Popov on 27.02.2021.
 //
 
-import CoreGraphics
-import Foundation
+import CoreFoundation
 
 
 
@@ -86,6 +85,8 @@ extension KvByteOrderKit {
 
 
 
+#if canImport(CoreGraphics)
+
     public static func swapBytesIfNeeded(to destination: UnsafeMutableBufferPointer<CGFloat>, from source: UnsafeBufferPointer<CGFloat>) {
         guard needsSwapBytes else { return }
 
@@ -98,6 +99,8 @@ extension KvByteOrderKit {
     public static func swapBytesIfNeeded(_ pointer: UnsafeMutableBufferPointer<CGFloat>) {
         swapBytesIfNeeded(to: pointer, from: .init(pointer))
     }
+
+#endif // canImport(CoreGraphics)
 
 
 
@@ -144,12 +147,16 @@ extension KvByteOrderKit {
 
 
 
+#if canImport(CoreGraphics)
+
     public static func swapBytes(to destination: UnsafeMutableBufferPointer<CGFloat>, from source: UnsafeBufferPointer<CGFloat>) { _swapBytes(to: destination, from: source) }
 
 
 
     @inlinable
     public static func swapBytes(_ pointer: UnsafeMutableBufferPointer<CGFloat>) { swapBytes(to: pointer, from: .init(pointer)) }
+
+#endif // canImport(CoreGraphics)
 
 
 
@@ -273,11 +280,15 @@ extension KvByteOrderKit {
     public static func toCanonical(_ pointer: UnsafeMutableBufferPointer<Double>) { swapBytesIfNeeded(pointer) }
 
 
+#if canImport(CoreGraphics)
+
     @inlinable
     public static func toCanonical(to destination: UnsafeMutableBufferPointer<CGFloat>, from source: UnsafeBufferPointer<CGFloat>) { swapBytesIfNeeded(to: destination, from: source) }
 
     @inlinable
     public static func toCanonical(_ pointer: UnsafeMutableBufferPointer<CGFloat>) { swapBytesIfNeeded(pointer) }
+
+#endif // canImport(CoreGraphics)
 
 
     @inlinable
@@ -309,11 +320,15 @@ extension KvByteOrderKit {
     public static func toHost(_ pointer: UnsafeMutableBufferPointer<Double>) { swapBytesIfNeeded(pointer) }
 
 
+#if canImport(CoreGraphics)
+
     @inlinable
     public static func toHost(to destination: UnsafeMutableBufferPointer<CGFloat>, from source: UnsafeBufferPointer<CGFloat>) { swapBytesIfNeeded(to: destination, from: source) }
 
     @inlinable
     public static func toHost(_ pointer: UnsafeMutableBufferPointer<CGFloat>) { swapBytesIfNeeded(pointer) }
+
+#endif // canImport(CoreGraphics)
 
 
     @inlinable
@@ -345,4 +360,8 @@ extension Float : KvFixedWidthFloatingPoint { }
 
 extension Double : KvFixedWidthFloatingPoint { }
 
+#if canImport(CoreGraphics)
+
 extension CGFloat : KvFixedWidthFloatingPoint { }
+
+#endif // canImport(CoreGraphics)

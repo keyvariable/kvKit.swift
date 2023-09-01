@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 25.09.2021.
 //
 
+#if os(macOS) || os(iOS)
+
 import simd
 
 
@@ -337,3 +339,5 @@ extension KvMath4 where Scalar == Double {
 @inlinable public func KvIs(_ lhs: simd_double4x4, inequalTo rhs: simd_double4x4) -> Bool {
     KvIsNonzero(KvMath4.max(KvMath4.abs(lhs - rhs)))
 }
+
+#endif // os(macOS) || os(iOS)

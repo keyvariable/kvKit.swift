@@ -29,11 +29,6 @@ import XCTest
 
 final class KvStatisticsTests : XCTestCase {
 
-    static var allTests = [
-        ("LocalMaximum", testLocalMaximum),
-    ]
-
-
     // MARK: LocalMaximum
 
     func testLocalMaximum() {

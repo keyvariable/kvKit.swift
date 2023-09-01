@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 22.11.2021.
 //
 
+#if canImport(SwiftUI)
+
 import XCTest
 
 @testable import kvKit
@@ -30,11 +32,6 @@ import SwiftUI
 
 
 final class KvRoundedRectangleTests : XCTestCase {
-
-    static var allTests = [
-        ("ZeroRectangle", testZeroRectangle)
-    ]
-
 
     func testZeroRectangle() {
         guard #available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *) else { return }
@@ -63,3 +60,5 @@ final class KvRoundedRectangleTests : XCTestCase {
     }
 
 }
+
+#endif // canImport(SwiftUI)

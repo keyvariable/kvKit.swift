@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 21.04.2022.
 //
 
+#if canImport(CoreImage)
+
 #if os(iOS)
 import UIKit
 #endif // os(iOS)
@@ -108,3 +110,5 @@ extension KvCIImageKit {
     }
     
 }
+
+#endif // canImport(CoreImage)
