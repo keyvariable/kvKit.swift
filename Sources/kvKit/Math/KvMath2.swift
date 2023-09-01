@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 04.08.2021.
 //
 
+#if os(macOS) || os(iOS)
+
 import simd
 
 
@@ -972,3 +974,5 @@ where Scalar : KvMathScalar2
 {
     KvIs(lhs.min, inequalTo: rhs.min) || KvIs(lhs.max, inequalTo: rhs.max)
 }
+
+#endif // os(macOS) || os(iOS)

@@ -15,18 +15,38 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  XCTestManifests.swift
-//  kvKitTests
+//  KvStringKitTests.swift
+//  KvKitTests
 //
-//  Created by Svyatoslav Popov on 15.04.2020.
+//  Created by Svyatoslav Popov on 01.09.2023.
 //
 
 import XCTest
 
-#if !canImport(ObjectiveC)
-public func allTests() -> [XCTestCaseEntry] {
-    return [
-        testCase(kvKitTests.allTests),
-    ]
+@testable import kvKit
+
+
+
+final class KvStringKitTests : XCTestCase {
+
+    // MARK: - testNormalizingWhitespace()
+
+    func testNormalizingWhitespace() {
+        XCTAssertEqual(
+            KvStringKit.normalizingWhitespace(for: "  Dianne's \nhorse.\n\n Dianne's\tMBPro  16''\n\n"),
+            "Dianne's horse.\nDianne's\tMBPro 16''"
+        )
+    }
+
+
+
+    // MARK: testCapitalizingSentences()
+
+    func testCapitalizingSentences() {
+        XCTAssertEqual(
+            KvStringKit.capitalizingSentences(in: "dianne's horse.\nIs it Dianne's MBPro 16''!?yes\n\n"),
+            "Dianne's horse.\nIs it Dianne's MBPro 16''!?Yes\n\n"
+        )
+    }
+
 }
-#endif

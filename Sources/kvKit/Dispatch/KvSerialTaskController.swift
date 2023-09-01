@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 05.08.2021.
 //
 
+#if canImport(Combine)
+
 import Combine
 import Foundation
 
@@ -182,3 +184,5 @@ extension KvSerialTaskController {
     }
 
 }
+
+#endif // canImport(Combine)

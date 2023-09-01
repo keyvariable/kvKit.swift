@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 21.09.2020.
 //
 
+#if canImport(Darwin)
+
 import Foundation
 
 
@@ -149,3 +151,5 @@ fileprivate class KvUserDefaultObservationToken : NSObject {
     }
 
 }
+
+#endif // canImport(Darwin)

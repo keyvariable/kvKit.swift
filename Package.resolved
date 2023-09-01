@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "kvSIMD.swift",
+        "repositoryURL": "https://github.com/keyvariable/kvSIMD.swift.git",
+        "state": {
+          "branch": null,
+          "revision": "ae96f63ed309c30e9dd2459cb1a22b994e61546f",
+          "version": "1.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

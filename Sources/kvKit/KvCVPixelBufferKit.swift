@@ -21,9 +21,12 @@
 //  Created by Svyatoslav Popov on 11.05.2021.
 //
 
+#if canImport(CoreImage)
+
 import CoreFoundation
 import CoreImage
 import Foundation
+
 import simd
 
 
@@ -328,3 +331,5 @@ extension KvCVPixelBufferKit {
     }
 
 }
+
+#endif // canImport(CoreImage)

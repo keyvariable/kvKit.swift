@@ -2,7 +2,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  Copyright (c) 2021 Svyatoslav Popov.
+//  Copyright (c) 2021 Svyatoslav Popov (info@keyvar.com).
 //
 //  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 //  the License. You may obtain a copy of the License at
@@ -20,11 +20,8 @@
 import PackageDescription
 
 
-let targets: [Target] = [
-    .target(name: "kvKit", dependencies: [ ]),
-    .target(name: "kvTestKit", dependencies: [ "kvKit" ]),
-    .testTarget(name: "kvKitTests", dependencies: [ "kvKit", "kvTestKit" ]),
-]
+let swiftSettings: [SwiftSetting]? = nil
+
 
 let package = Package(
     name: "kvKit.swift",
@@ -36,5 +33,11 @@ let package = Package(
         .library(name: "kvTestKit", targets: [ "kvTestKit" ]),
     ],
 
-    targets: targets
+    dependencies: [ .package(url: "https://github.com/keyvariable/kvSIMD.swift.git", from: "1.0.0") ],
+
+    targets: [
+        .target(name: "kvKit", dependencies: [ .product(name: "kvSIMD", package: "kvSIMD.swift") ], swiftSettings: swiftSettings),
+        .target(name: "kvTestKit", dependencies: [ "kvKit" ], swiftSettings: swiftSettings),
+        .testTarget(name: "kvKitTests", dependencies: [ "kvKit", "kvTestKit" ], swiftSettings: swiftSettings),
+    ]
 )

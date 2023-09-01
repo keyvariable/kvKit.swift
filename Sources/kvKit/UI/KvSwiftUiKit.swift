@@ -23,8 +23,6 @@
 
 #if canImport(SwiftUI)
 
-
-
 import SwiftUI
 
 
@@ -198,7 +196,5 @@ extension KvSwiftUiKit {
 }
 
 #endif // os(macOS)
-
-
 
 #endif // canImport(SwiftUI)

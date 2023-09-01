@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 21.04.2022.
 //
 
+#if canImport(Metal)
+
 import Metal
 import simd
 
@@ -451,3 +453,5 @@ extension KvMetalKit {
     }
 
 }
+
+#endif // canImport(Metal)

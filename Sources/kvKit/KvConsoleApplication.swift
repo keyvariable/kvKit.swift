@@ -28,6 +28,8 @@ import Foundation
 
 // MARK: - KvConsoleApplicationDelegate
 
+// TODO: Delete in 6.0.0
+@available(*, deprecated, message: "Use async main function")
 public protocol KvConsoleApplicationDelegate {
 
     /// It's invoked just before the main run loop is started.
@@ -51,6 +53,8 @@ public protocol KvConsoleApplicationDelegate {
 /// Usage. Invoke *main(with:)* passing the delegate. Ivoke *setNeedsStop()* to stop running application.
 ///
 /// - Note: The application holds a strong reference to the delegate while *main(with:)* is being executed.
+// TODO: Delete in 6.0.0
+@available(*, deprecated, message: "Use async main function")
 public final class KvConsoleApplication {
 
     public private(set) static var shared: KvConsoleApplication! {
@@ -83,14 +87,10 @@ public final class KvConsoleApplication {
 
     private var needsStop: Bool = false {
         didSet {
-            switch (needsStop, oldValue) {
-            case (true, false):
-                KvDispatchQueueKit.mainAsyncIfNeeded {
-                    CFRunLoopStop(RunLoop.main.getCFRunLoop())
-                }
+            guard needsStop, !oldValue else { return }
 
-            default:
-                break
+            KvDispatchQueueKit.mainAsyncIfNeeded {
+                CFRunLoopStop(RunLoop.main.getCFRunLoop())
             }
         }
     }
@@ -101,6 +101,8 @@ public final class KvConsoleApplication {
 
 // MARK: Execution
 
+// TODO: Delete in 6.0.0
+@available(*, deprecated, message: "Use async main function")
 extension KvConsoleApplication {
 
     public static func main(with delegate: KvConsoleApplicationDelegate) {

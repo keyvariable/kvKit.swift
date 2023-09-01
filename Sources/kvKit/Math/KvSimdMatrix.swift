@@ -727,9 +727,9 @@ extension simd_float2x2 : KvSimd2x2 {
 
     @inlinable
     public init(angle: Scalar) {
-        let sincos = __sincosf_stret(angle)
-        self.init(Column( sincos.__cosval, sincos.__sinval),
-                  Column(-sincos.__sinval, sincos.__cosval))
+        let (sin, cos) = __Kv_sincos(angle)
+        self.init(Column( cos, sin),
+                  Column(-sin, cos))
     }
 
 }
@@ -746,9 +746,9 @@ extension simd_double2x2 : KvSimd2x2 {
 
     @inlinable
     public init(angle: Scalar) {
-        let sincos = __sincos_stret(angle)
-        self.init(Column( sincos.__cosval, sincos.__sinval),
-                  Column(-sincos.__sinval, sincos.__cosval))
+        let (sin, cos) = __Kv_sincos(angle)
+        self.init(Column( cos, sin),
+                  Column(-sin, cos))
     }
 
 }

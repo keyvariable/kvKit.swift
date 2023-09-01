@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 11.01.2021.
 //
 
+#if canImport(Darwin)
+
 import Foundation
 
 
@@ -106,3 +108,5 @@ extension KvBonjour.Server : NetServiceDelegate {
     }
 
 }
+
+#endif // canImport(Darwin)

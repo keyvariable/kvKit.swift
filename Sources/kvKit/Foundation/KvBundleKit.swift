@@ -21,11 +21,13 @@
 //  Created by Svyatoslav Popov on 02.02.2021.
 //
 
+#if canImport(AppKit)
+import AppKit
+#endif // canImport(AppKit)
+import Foundation
 #if canImport(UIKit)
 import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif // AppKit
+#endif // canImport(UIKit)
 
 
 

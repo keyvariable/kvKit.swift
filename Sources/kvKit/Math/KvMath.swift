@@ -22,7 +22,6 @@
 //
 
 import Foundation
-import simd
 
 
 
@@ -33,10 +32,10 @@ public func clamp<T>(_ x: T, _ min: T, _ max: T) -> T where T : Comparable {
 }
 
 @inlinable
-public func clamp(_ x: Float, min: Float, max: Float) -> Float { simd_clamp(x, min, max) }
+public func clamp(_ x: Float, min: Float, max: Float) -> Float { x <= min ? min : (x <= max ? x : max) }
 
 @inlinable
-public func clamp(_ x: Double, min: Double, max: Double) -> Double { simd_clamp(x, min, max) }
+public func clamp(_ x: Double, min: Double, max: Double) -> Double { x <= min ? min : (x <= max ? x : max) }
 
 
 /// - Returns: The closest value to *x* from given range.
@@ -48,13 +47,13 @@ public func clamp<T>(_ x: T, to range: ClosedRange<T>) -> T where T : Comparable
 /// - Returns: The closest value to *x* from given range.
 @inlinable
 public func clamp(_ x: Float, to range: ClosedRange<Float>) -> Float {
-    simd_clamp(x, range.lowerBound, range.upperBound)
+    x <= range.lowerBound ? range.lowerBound : (x <= range.upperBound ? x : range.upperBound)
 }
 
 /// - Returns: The closest value to *x* from given range.
 @inlinable
 public func clamp(_ x: Double, to range: ClosedRange<Double>) -> Double {
-    simd_clamp(x, range.lowerBound, range.upperBound)
+    x <= range.lowerBound ? range.lowerBound : (x <= range.upperBound ? x : range.upperBound)
 }
 
 
@@ -171,9 +170,9 @@ public func mix<T>(_ x: T, _ y: T, t: T) -> T where T : Numeric {
     x * ((1 as T) - t) as T + y * t
 }
 
-@inlinable public func mix(_ x: Float, _ y: Float, t: Float) -> Float { simd_mix(x, y, t) }
+@inlinable public func mix(_ x: Float, _ y: Float, t: Float) -> Float { x * (1.0 - t) + y * t }
 
-@inlinable public func mix(_ x: Double, _ y: Double, t: Double) -> Double { simd_mix(x, y, t) }
+@inlinable public func mix(_ x: Double, _ y: Double, t: Double) -> Double { x * (1.0 - t) + y * t }
 
 
 /// - Returns: `1 / sqrt(x)`.

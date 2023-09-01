@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 12.08.2021.
 //
 
+#if canImport(SwiftUI)
+
 import SwiftUI
 
 
@@ -338,3 +340,5 @@ extension KvRoundedRectangle {
     }
 
 }
+
+#endif // canImport(SwiftUI)

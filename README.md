@@ -1,10 +1,5 @@
 # kvKit.swift
 
-![Swift 5.2](https://img.shields.io/badge/swift-5.2-green.svg)
-![Linux](https://img.shields.io/badge/os-linux-green.svg)
-![macOS](https://img.shields.io/badge/os-macOS-green.svg)
-![iOS](https://img.shields.io/badge/os-iOS-green.svg)
-
 A collection of general purpose auxiliaries on Swift. For example:
 
 - Specific collections.
@@ -18,32 +13,24 @@ A collection of general purpose auxiliaries on Swift. For example:
 
 ## Supported Platforms
 
-This package contains both crossplatform code and platform specific code.
+This package contains both cross-platform code and platform specific code.
 
 
 ## Getting Started
 
-### Swift Tools 5.2+
-
 #### Package Dependencies:
 
 ```swift
-dependencies: [
-    .package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.1.0"),
-]
+.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.1.0")
 ```
-
 #### Target Dependencies:
-
 ```swift
-dependencies: [
-    .product(name: "kvKit", package: "kvKit.swift"),
-]
+.product(name: "kvKit", package: "kvKit.swift")
 ```
-
-### Xcode
-
-Documentation: [Adding Package Dependencies to Your App](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+#### Import:
+```swift
+import kvKit
+```
 
 
 ## Authors
