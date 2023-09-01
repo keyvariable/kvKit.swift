@@ -21,7 +21,7 @@ This package contains both cross-platform code and platform specific code.
 #### Package Dependencies:
 
 ```swift
-.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.1.0")
+.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.2.0")
 ```
 #### Target Dependencies:
 ```swift
