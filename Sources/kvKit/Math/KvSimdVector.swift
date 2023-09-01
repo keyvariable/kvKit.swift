@@ -354,6 +354,14 @@ extension KvSimd2 {
 }
 
 
+extension KvSimd2 where Scalar : SignedNumeric {
+
+    /// A vector orthogonal to the receiver.
+    var anyOrthogonal: Self { .init(-y, x) }
+
+}
+
+
 
 // MARK: - KvSimd2I
 
@@ -530,6 +538,17 @@ public protocol KvSimd3F : KvSimd3, KvSimdVectorF where Scalar : BinaryFloatingP
     init<Other>(_ other: SIMD3<Other>) where Other : BinaryFloatingPoint, Other : SIMDScalar
 
     init<Other>(_ other: SIMD3<Other>) where Other : FixedWidthInteger, Other : SIMDScalar
+
+}
+
+
+extension KvSimd3F {
+
+    /// A vector orthogonal to the receiver.
+    @inlinable
+    public var anyOrthogonal: Self {
+        return .init(Scalar(signOf: x, magnitudeOf: z), Scalar(signOf: y, magnitudeOf: z), -Scalar(signOf: z, magnitudeOf: abs(x) + abs(y)))
+    }
 
 }
 
