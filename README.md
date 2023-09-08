@@ -14,6 +14,7 @@ A collection of general purpose auxiliaries on Swift. For example:
 ## Supported Platforms
 
 This package contains both cross-platform code and platform specific code.
+It's checked on macOS, Linux (Ubuntu 22.04) and Windows (10 x64).
 
 
 ## Getting Started
@@ -21,7 +22,7 @@ This package contains both cross-platform code and platform specific code.
 #### Package Dependencies:
 
 ```swift
-.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.2.0")
+.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.3.0")
 ```
 #### Target Dependencies:
 ```swift
