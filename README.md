@@ -14,7 +14,7 @@ A collection of general purpose auxiliaries on Swift. For example:
 ## Supported Platforms
 
 This package contains both cross-platform code and platform specific code.
-It's checked on macOS, Linux (Ubuntu 22.04) and Windows (10 x64).
+Package is built and the unit-tests are passed on macOS, Linux (Ubuntu 22.04) and Windows (10 x64).
 
 
 ## Getting Started
