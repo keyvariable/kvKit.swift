@@ -71,11 +71,11 @@ public class KvDispatchSource {
 
 extension KvDispatchSource {
 
-    #if os(Linux)
-    public typealias DispatchSourceHandler = () -> Void
-    #else
+#if canImport(Darwin)
     public typealias DispatchSourceHandler = DispatchSourceProtocol.DispatchSourceHandler
-    #endif
+#else // !canImport(Darwin)
+    // - NOTE: There is no need to define DispatchSourceHandler due to it's defined globally in open-source Foundation.
+#endif // !canImport(Darwin)
 
 
 

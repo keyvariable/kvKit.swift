@@ -33,7 +33,7 @@ let package = Package(
         .library(name: "kvTestKit", targets: [ "kvTestKit" ]),
     ],
 
-    dependencies: [ .package(url: "https://github.com/keyvariable/kvSIMD.swift.git", from: "1.0.0") ],
+    dependencies: [ .package(url: "https://github.com/keyvariable/kvSIMD.swift.git", from: "1.0.2") ],
 
     targets: [
         .target(name: "kvKit", dependencies: [ .product(name: "kvSIMD", package: "kvSIMD.swift") ], swiftSettings: swiftSettings),

@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 27.02.2021.
 //
 
+#if canImport(CoreFoundation)   // Windows: CFByteOrderGetCurrent() and CFByteOrderLittleEndian are not available.
+
 import CoreFoundation
 
 
@@ -365,3 +367,5 @@ extension Double : KvFixedWidthFloatingPoint { }
 extension CGFloat : KvFixedWidthFloatingPoint { }
 
 #endif // canImport(CoreGraphics)
+
+#endif // canImport(CoreFoundation)

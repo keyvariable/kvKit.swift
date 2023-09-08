@@ -52,13 +52,13 @@ extension KvStringKit {
     public static func capitalizingSentences(in string: String) -> String {
         var result = string
 
-        #if !os(Linux)
+#if canImport(Darwin)
         string.enumerateSubstrings(in: string.startIndex ..< string.endIndex, options: [ .bySentences, .reverse, .substringNotRequired ]) { (_, range, _, _) in
             result.replaceSubrange(range.lowerBound ..< result.index(after: range.lowerBound),
                                    with: string[range.lowerBound ..< string.index(after: range.lowerBound)].uppercased())
         }
 
-        #else // os(Linux)
+#else // !canImport(Darwin)
 
         enum State { case waitingForLetter, waitingForSeparator }
 
@@ -88,7 +88,7 @@ extension KvStringKit {
                 range = characterRange.upperBound ..< range.upperBound
             }
         }
-        #endif // os(Linux)
+#endif // !canImport(Darwin)
 
         return result
     }
