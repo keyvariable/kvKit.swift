@@ -21,6 +21,8 @@
 //  Created by Svyatoslav Popov on 22.04.2020.
 //
 
+#if canImport(CoreFoundation)   // Windows: CFRunLoopStop() is not available.
+
 import CoreFoundation
 import Foundation
 
@@ -144,3 +146,4 @@ extension KvConsoleApplication {
 
 }
 
+#endif // canImport(CoreFoundation)

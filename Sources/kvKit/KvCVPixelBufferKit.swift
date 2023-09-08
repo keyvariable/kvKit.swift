@@ -23,7 +23,6 @@
 
 #if canImport(CoreImage)
 
-import CoreFoundation
 import CoreImage
 import Foundation
 
