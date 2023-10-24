@@ -27,27 +27,39 @@ import Foundation
 
 public struct KvError {
 
-    public let message: String
+    @inlinable
+    public var message: String { messageBlock() }
 
     #if DEBUG
-    public let file: StaticString
-    public let line: UInt
+    @inlinable
+    public var file: StaticString { location().file }
+    @inlinable
+    public var line: UInt { location().line }
     #endif // DEBUG
 
 
 
+    @usableFromInline
+    let messageBlock: () -> String
+
+#if DEBUG
+    @usableFromInline
+    let location: () -> (file: StaticString, line: UInt)
+#endif // DEBUG
+
+
+
     #if DEBUG
     @inlinable
-    public init(_ message: String, _ file: StaticString = #fileID, _ line: UInt = #line) {
-        self.message = message
-        self.file = file
-        self.line = line
+    public init(_ message: @autoclosure @escaping () -> String, _ file: StaticString = #fileID, _ line: UInt = #line) {
+        self.messageBlock = message
+        self.location = { (file: file, line: line) }
     }
 
     #else // !DEBUG
     @inlinable
-    public init(_ message: String) {
-        self.message = message
+    public init(_ message: @autoclosure @escaping () -> String) {
+        self.messageBlock = message
     }
     #endif // !DEBUG
 
@@ -55,14 +67,14 @@ public struct KvError {
 
     #if DEBUG
     @inlinable
-    public static func inconsistency(_ message: String, _ file: StaticString = #fileID, _ line: UInt = #line) -> KvError {
-        .init("Internal inconsistency: \(message)", file, line)
+    public static func inconsistency(_ message: @autoclosure @escaping () -> String, _ file: StaticString = #fileID, _ line: UInt = #line) -> KvError {
+        .init("Internal inconsistency: \(message())", file, line)
     }
 
     #else // !DEBUG
     @inlinable
-    public static func inconsistency(_ message: String) -> KvError {
-        .init("Internal inconsistency: \(message)")
+    public static func inconsistency(_ message: @autoclosure @escaping () -> String) -> KvError {
+        .init("Internal inconsistency: \(message())")
     }
     #endif // !DEBUG
 
