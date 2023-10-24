@@ -129,7 +129,7 @@ public class KvDebug {
 
 
 #if DEBUG
-    /// Analog of standard ``Swift/assert``()  providing ability to continue execution.
+    /// Analog of standard `assert`  providing ability to continue execution.
     ///
     /// - Note: Use *Swift Error Breakpoint* to pause execution.
     ///
@@ -142,7 +142,7 @@ public class KvDebug {
     }
 
 #else // !DEBUG
-    /// Analog of standard ``Swift/assert``() providing ability to continue execution.
+    /// Analog of standard `assert` providing ability to continue execution.
     ///
     /// - Note: Use *Swift Error Breakpoint* to pause execution.
     ///

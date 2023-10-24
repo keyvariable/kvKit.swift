@@ -303,7 +303,7 @@ extension KvMetalKit {
 
         /// Calculates 1D-grid for given *pipelineState*.
         ///
-        /// See ``init(_:texture1D:)``, ``threadgroupSize(_:width)``.
+        /// See ``init(_:texture1D:)``, ``threadgroupSize(_:width:)``.
         @inlinable
         public init(_ pipelineState: MTLComputePipelineState, width: Int) {
             self.init(pipelineState,
@@ -314,7 +314,7 @@ extension KvMetalKit {
 
         /// Calculates 1D-grid for given *pipelineState* of the same size as given *texture1D*.
         ///
-        /// See ``init(_:width:)``, ``threadgroupSize(_:width)``.
+        /// See ``init(_:width:)``, ``threadgroupSize(_:width:)``.
         @inlinable
         public init(_ pipelineState: MTLComputePipelineState, texture1D: MTLTexture) {
             self.init(pipelineState, width: texture1D.width)
