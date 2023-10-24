@@ -187,7 +187,7 @@ public struct KvRoundedRectangle : InsettableShape {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension KvRoundedRectangle {
 
-    public struct Radii : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral, ExpressibleByArrayLiteral, Equatable {
+    public struct Radii : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral, ExpressibleByArrayLiteral, Equatable, Sendable {
 
         public var topLeft: CGFloat
         public var topRight: CGFloat
@@ -308,7 +308,7 @@ extension KvRoundedRectangle {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension KvRoundedRectangle {
 
-    public struct Segments : OptionSet {
+    public struct Segments : OptionSet, Sendable {
 
         public static let topLeft = Self(rawValue: 1 << 0)
         public static let top = Self(rawValue: 1 << 1)
