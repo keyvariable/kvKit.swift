@@ -22,7 +22,7 @@ Package is built and the unit-tests are passed on macOS, Linux (Ubuntu 22.04) an
 #### Package Dependencies:
 
 ```swift
-.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.3.0")
+.package(url: "https://github.com/keyvariable/kvKit.swift.git", from: "4.4.0")
 ```
 #### Target Dependencies:
 ```swift
