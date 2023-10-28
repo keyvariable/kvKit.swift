@@ -32,17 +32,12 @@ final class KvBase16Tests: XCTestCase {
     // MARK: - testEncodeData
 
     func testEncodeData() {
-        let data = Data(UInt8.max ... UInt8.max)
+        let data = Data(UInt8.min ... UInt8.max)
 
-        XCTAssertEqual(KvBase16.encode_modern(data, options: [ ]),
-                       data.lazy.map({ String(format: "%02x", $0) }).joined())
-        XCTAssertEqual(KvBase16.encode_modern(data, options: .uppercase),
-                       data.lazy.map({ String(format: "%02X", $0) }).joined())
-
-        XCTAssertEqual(KvBase16.encode_universal(data, options: [ ]),
-                       data.lazy.map({ String(format: "%02x", $0) }).joined())
-        XCTAssertEqual(KvBase16.encode_universal(data, options: .uppercase),
-                       data.lazy.map({ String(format: "%02X", $0) }).joined())
+        XCTAssertEqual(KvBase16.encode(data, options: [ ]),
+                       data.lazy.map({ String(format: "%02x", $0) }).joined(separator: "").data(using: .utf8)!)
+        XCTAssertEqual(KvBase16.encode(data, options: .uppercase),
+                       data.lazy.map({ String(format: "%02X", $0) }).joined(separator: "").data(using: .utf8)!)
     }
 
 
@@ -50,26 +45,51 @@ final class KvBase16Tests: XCTestCase {
     // MARK: - testEncodeBuffer
 
     func testEncodeBuffer() {
-        Data(UInt8.max ... UInt8.max).withUnsafeBytes { buffer in
-            XCTAssertEqual(KvBase16.encode_modern(buffer, options: [ ]),
-                           buffer.lazy.map({ String(format: "%02x", $0) }).joined())
-            XCTAssertEqual(KvBase16.encode_modern(buffer, options: .uppercase),
-                           buffer.lazy.map({ String(format: "%02X", $0) }).joined())
+        Data(UInt8.min ... UInt8.max).withUnsafeBytes { buffer in
+            XCTAssertEqual(KvBase16.encode(buffer, options: [ ]),
+                           buffer.lazy.map({ String(format: "%02x", $0) }).joined(separator: "").data(using: .utf8)!)
+            XCTAssertEqual(KvBase16.encode(buffer, options: .uppercase),
+                           buffer.lazy.map({ String(format: "%02X", $0) }).joined(separator: "").data(using: .utf8)!)
+        }
 
-            XCTAssertEqual(KvBase16.encode_universal(buffer, options: [ ]),
-                           buffer.lazy.map({ String(format: "%02x", $0) }).joined())
-            XCTAssertEqual(KvBase16.encode_universal(buffer, options: .uppercase),
-                           buffer.lazy.map({ String(format: "%02X", $0) }).joined())
+    }
+
+
+    // MARK: - testEncodeAsString
+
+    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+    func testEncodeAsString() {
+        let data = Data(UInt8.min ... UInt8.max)
+
+        XCTAssertEqual(KvBase16.encodeAsString(data, options: [ ]),
+                       data.lazy.map({ String(format: "%02x", $0) }).joined(separator: ""))
+        XCTAssertEqual(KvBase16.encodeAsString(data, options: .uppercase),
+                       data.lazy.map({ String(format: "%02X", $0) }).joined(separator: ""))
+    }
+
+
+
+    // MARK: - testDecodeData
+
+    func testDecodeData() {
+        let data = Data(UInt8.min ... UInt8.max)
+        do {
+            let encodedData = data.lazy.map({ String(format: "%02x", $0) }).joined(separator: "").data(using: .utf8)!
+            XCTAssertEqual(KvBase16.decode(encodedData), data)
+        }
+        do {
+            let encodedData = data.lazy.map({ String(format: "%02X", $0) }).joined(separator: "").data(using: .utf8)!
+            XCTAssertEqual(KvBase16.decode(encodedData), data)
         }
 
     }
 
 
 
-    // MARK: - testDecode
+    // MARK: - testDecodeString
 
-    func testDecode() {
-        let data = Data(UInt8.max ... UInt8.max)
+    func testDecodeString() {
+        let data = Data(UInt8.min ... UInt8.max)
         do {
             let string: String = data.lazy.map({ String(format: "%02x", $0) }).joined()
             XCTAssertEqual(KvBase16.decode(string), data)
