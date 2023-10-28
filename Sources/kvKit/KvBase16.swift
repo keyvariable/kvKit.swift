@@ -112,9 +112,23 @@ public struct KvBase16 {
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
     /// - Returns: Hexadecimal representation of given *data* with given *options*.
-    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
     @inlinable
     public static func encodeAsString<D>(_ data: D, options: Options = [ ]) -> String
+    where D : DataProtocol
+    {
+        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+            return encodeAsString_modern(data, options: options)
+        } else {
+            return encodeAsString_universal(data, options: options)
+        }
+
+    }
+
+    // TODO: Add `borrowing` for `data` when Swift >= 5.9.
+    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+    @inline(__always)
+    @usableFromInline
+    static func encodeAsString_modern<D>(_ data: D, options: Options = [ ]) -> String
     where D : DataProtocol
     {
         let lut = LUT.for(options)
@@ -139,6 +153,34 @@ public struct KvBase16 {
             return capacity
         })
     }
+
+    // TODO: Add `borrowing` for `data` when Swift >= 5.9.
+    @inline(__always)
+    @usableFromInline
+    static func encodeAsString_universal<D>(_ data: D, options: Options = [ ]) -> String
+    where D : DataProtocol
+    {
+        let lut = LUT.for(options)
+        let capacity = 2 * data.count
+
+        var result = String()
+        result.reserveCapacity(capacity)
+
+        data.regions.forEach { region in
+            region.withUnsafeBytes {
+                var src = $0.baseAddress!
+                stride(from: 0, to: $0.count, by: 1).forEach { _ in
+                    let values = lut[numericCast(src.load(as: UInt8.self))]
+                    src = src.successor()
+                    result.append(Character(.init(values.0)))
+                    result.append(Character(.init(values.1)))
+                }
+            }
+        }
+
+        return result
+    }
+
 
 
 

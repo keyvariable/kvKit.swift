@@ -57,13 +57,19 @@ final class KvBase16Tests: XCTestCase {
 
     // MARK: - testEncodeAsString
 
-    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
     func testEncodeAsString() {
         let data = Data(UInt8.min ... UInt8.max)
 
-        XCTAssertEqual(KvBase16.encodeAsString(data, options: [ ]),
+        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+            XCTAssertEqual(KvBase16.encodeAsString_modern(data, options: [ ]),
+                           data.lazy.map({ String(format: "%02x", $0) }).joined(separator: ""))
+            XCTAssertEqual(KvBase16.encodeAsString_modern(data, options: .uppercase),
+                           data.lazy.map({ String(format: "%02X", $0) }).joined(separator: ""))
+        }
+
+        XCTAssertEqual(KvBase16.encodeAsString_universal(data, options: [ ]),
                        data.lazy.map({ String(format: "%02x", $0) }).joined(separator: ""))
-        XCTAssertEqual(KvBase16.encodeAsString(data, options: .uppercase),
+        XCTAssertEqual(KvBase16.encodeAsString_universal(data, options: .uppercase),
                        data.lazy.map({ String(format: "%02X", $0) }).joined(separator: ""))
     }
 
