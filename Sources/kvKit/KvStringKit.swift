@@ -26,7 +26,7 @@ import Foundation
 
 
 /// Collection of string auxiliaries.
-public class KvStringKit { }
+public struct KvStringKit { private init() { } }
 
 
 
