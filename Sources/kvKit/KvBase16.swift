@@ -53,85 +53,68 @@ public struct KvBase16 {
     // MARK: Encoding
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
-    /// - Returns: Hexadecimal representation of given *data* with given *ooptions*.
+    /// - Returns: Hexadecimal representation of given *data* with given *options*.
     @inlinable
-    public static func encode(_ data: Data, options: Options = [ ]) -> String {
-        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
-            return encode_modern(data, options: options)
-        } else {
-            return encode_universal(data, options: options)
-        }
-    }
-
-    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
-    @inline(__always)
-    @usableFromInline
-    static func encode_modern(_ data: Data, options: Options) -> String {
+    public static func encode(_ data: Data, options: Options = [ ]) -> Data {
         let lut = LUT.for(options)
+
         let capacity = 2 * data.count
+        let destBufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: capacity)
 
-        return String(unsafeUninitializedCapacity: capacity, initializingUTF8With: { buffer in
-            var ptr1 = buffer.baseAddress!
-            var ptr2 = ptr1.successor()
-
-            data.regions.forEach { region in
-                region.withUnsafeBytes {
-                    var src = $0.baseAddress!
-                    stride(from: 0, to: $0.count, by: 1).forEach { _ in
-                        (ptr1.pointee, ptr2.pointee) = lut[numericCast(src.load(as: UInt8.self))]
-                        src = src.successor()
-                        ptr1 += 2
-                        ptr2 += 2
-                    }
-                }
-            }
-
-            return capacity
-        })
-    }
-
-    @inline(__always)
-    @usableFromInline
-    static func encode_universal(_ data: Data, options: Options) -> String {
-        let lut = LUT.for(options)
-        let capacity = 2 * data.count
-
-        var result = String()
-        result.reserveCapacity(capacity)
+        var dest1 = destBufferPointer
+        var dest2 = dest1.successor()
 
         data.regions.forEach { region in
             region.withUnsafeBytes {
                 var src = $0.baseAddress!
                 stride(from: 0, to: $0.count, by: 1).forEach { _ in
-                    let values = lut[numericCast(src.load(as: UInt8.self))]
+                    (dest1.pointee, dest2.pointee) = lut[numericCast(src.load(as: UInt8.self))]
                     src = src.successor()
-                    result.append(Character(.init(values.0)))
-                    result.append(Character(.init(values.1)))
+                    dest1 += 2
+                    dest2 += 2
                 }
             }
         }
 
-        return result
+        return Data(bytesNoCopy: destBufferPointer, count: capacity, deallocator: .free)
     }
 
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
-    /// - Returns: Hexadecimal representation of given *data* with given *ooptions*.
+    /// - Returns: Hexadecimal representation of given *data* with given *options*.
     @inlinable
-    public static func encode<D>(_ data: D, options: Options = [ ]) -> String
+    public static func encode<D>(_ data: D, options: Options = [ ]) -> Data
     where D : DataProtocol
     {
-        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
-            return encode_modern(data, options: options)
-        } else {
-            return encode_universal(data, options: options)
+        let lut = LUT.for(options)
+
+        let capacity = 2 * data.count
+        let destBufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: capacity)
+
+        var dest1 = destBufferPointer
+        var dest2 = dest1.successor()
+
+        data.regions.forEach { region in
+            region.withUnsafeBytes {
+                var src = $0.baseAddress!
+                stride(from: 0, to: $0.count, by: 1).forEach { _ in
+                    (dest1.pointee, dest2.pointee) = lut[numericCast(src.load(as: UInt8.self))]
+                    src = src.successor()
+                    dest1 += 2
+                    dest2 += 2
+                }
+            }
         }
+
+        return Data(bytesNoCopy: destBufferPointer, count: capacity, deallocator: .free)
     }
 
+
+    // TODO: Add `borrowing` for `data` when Swift >= 5.9.
+    /// - Returns: Hexadecimal representation of given *data* with given *options*.
     @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
-    @inline(__always)
-    @usableFromInline
-    static func encode_modern<D>(_ data: D, options: Options = [ ]) -> String
+    @inlinable
+    public static func encodeAsString<D>(_ data: D, options: Options = [ ]) -> String
     where D : DataProtocol
     {
         let lut = LUT.for(options)
@@ -155,32 +138,6 @@ public struct KvBase16 {
 
             return capacity
         })
-    }
-
-    @inline(__always)
-    @usableFromInline
-    static func encode_universal<D>(_ data: D, options: Options = [ ]) -> String
-    where D : DataProtocol
-    {
-        let lut = LUT.for(options)
-        let capacity = 2 * data.count
-
-        var result = String()
-        result.reserveCapacity(capacity)
-
-        data.regions.forEach { region in
-            region.withUnsafeBytes {
-                var src = $0.baseAddress!
-                stride(from: 0, to: $0.count, by: 1).forEach { _ in
-                    let values = lut[numericCast(src.load(as: UInt8.self))]
-                    src = src.successor()
-                    result.append(Character(.init(values.0)))
-                    result.append(Character(.init(values.1)))
-                }
-            }
-        }
-
-        return result
     }
 
 
@@ -188,7 +145,53 @@ public struct KvBase16 {
     // MARK: Decoding
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
-    /// - Returns: Data object represented by given hexadecimal string.
+    /// - Returns: Data object represented by given hexadecimal representation.
+    @inlinable
+    public static func decode<D>(_ data: D) -> Data?
+    where D : DataProtocol
+    {
+        guard (data.count & 1) == 0 else { return nil }
+
+        let count = data.count >> 1
+        let destBufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: count)
+
+        var dest = destBufferPointer
+        var higherHalfFlag = true
+
+        for region in data.regions {
+            let isSucceeded = region.withUnsafeBytes { buffer -> Bool in
+                var src = buffer.baseAddress!
+
+                for _ in stride(from: 0, to: buffer.count, by: 1) {
+                    guard let halfByte = hexValue(ascii: src.load(as: UInt8.self))
+                    else { return false } // Any non-ASCII-7 UTF-8 character will fail here due to higher bit.
+
+                    switch higherHalfFlag {
+                    case true:
+                        //higherHalfFlag = false
+                        dest.pointee = halfByte << 4
+                    case false:
+                        //higherHalfFlag = true
+                        dest.pointee |= halfByte
+                        dest = dest.successor()
+                    }
+
+                    higherHalfFlag.toggle()
+                    src = src.successor()
+                }
+
+                return true
+            }
+
+            guard isSucceeded else { return nil }
+        }
+
+        return .init(bytesNoCopy: destBufferPointer, count: count, deallocator: .free)
+    }
+
+
+    // TODO: Add `borrowing` for `data` when Swift >= 5.9.
+    /// - Returns: Data object represented by given hexadecimal representation.
     @inlinable
     public static func decode<S>(_ string: S) -> Data?
     where S : StringProtocol
@@ -197,10 +200,10 @@ public struct KvBase16 {
 
         guard (digits.count & 1) == 0 else { return nil }
 
-        let count = digits.count >> 1
-        let pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: count)
+        let capacity = digits.count >> 1
+        let destBufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: capacity)
 
-        var dest = pointer
+        var dest = destBufferPointer
         var higherHalfFlag = true
 
         digits.withContiguousStorageIfAvailable { buffer -> Void? in
@@ -241,7 +244,7 @@ public struct KvBase16 {
             }
         }()
 
-        return .init(bytesNoCopy: pointer, count: count, deallocator: .free)
+        return .init(bytesNoCopy: destBufferPointer, count: capacity, deallocator: .free)
     }
 
 
