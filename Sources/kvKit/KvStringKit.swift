@@ -30,7 +30,7 @@ public class KvStringKit { }
 
 
 
-// MARK: Normalizarion
+// MARK: Normalization
 
 extension KvStringKit {
 
@@ -259,8 +259,9 @@ extension KvStringKit {
     }
 
 
-
     /// - Returns: A string with hexadecimal representation of given data.
+    ///
+    /// - Important: This mehod is designated to UI. Use fast ``KvBase16`` to encode or decode bytes.
     @inlinable
     public static func base16<Bytes>(with bytes: Bytes, separator: String = " ", limit: Int = .max) -> String
     where Bytes : Sequence, Bytes.Element == UInt8
