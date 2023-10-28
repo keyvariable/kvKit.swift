@@ -258,6 +258,13 @@ extension KvStringKit {
         }
     }
 
+}
+
+
+
+// MARK: BaseX Encoding Auxiliaries
+
+extension KvStringKit {
 
     /// - Returns: A string with hexadecimal representation of given data.
     ///
@@ -270,6 +277,17 @@ extension KvStringKit {
             .prefix(limit)
             .map({ String(format: "%02X", $0) })
             .joined(separator: separator)
+    }
+
+
+    /// Convenient wrapper combining `withUnsafeBytes(of:_:)` and `Data.base64EncodedString(options:)`.
+    @inlinable
+    public static func base64<T>(withBytesOf x: T, options: Data.Base64EncodingOptions = [ ]) -> String {
+        withUnsafeBytes(of: x) { buffer in
+            let dataWrapper = Data(bytesNoCopy: .init(mutating: buffer.baseAddress!), count: buffer.count, deallocator: .none)
+
+            return dataWrapper.base64EncodedString(options: options)
+        }
     }
 
 }
