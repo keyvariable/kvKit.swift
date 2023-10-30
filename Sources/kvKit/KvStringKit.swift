@@ -102,11 +102,13 @@ extension KvStringKit {
 extension KvStringKit {
 
     /// Non-breaking space.
-    public static let nbsp = "\u{00a0}"
+    @inlinable
+    public static var nbsp: String { "\u{00a0}" }
 
 
     /// Punctuation characters separating sentences.
-    public static let sentenceSeparators = CharacterSet([ ".", "!", "?", "…" ])
+    @inlinable
+    public static var sentenceSeparators: CharacterSet { [ ".", "!", "?", "…" ] }
 
 }
 
@@ -411,6 +413,7 @@ extension KvStringKit {
 extension KvStringKit {
 
     /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleName* key from the info dictionary of given *bundle*.
+    @inlinable
     public static func withApplicationName(_ bundle: Bundle = .main) -> String {
         with(KvBundleKit.applicationName(bundle))
     }
@@ -418,6 +421,7 @@ extension KvStringKit {
 
 
     /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleShortVersionString* key from the info dictionary of given *bundle*.
+    @inlinable
     public static func withShortVersion(_ bundle: Bundle = .main) -> String? {
         with(KvBundleKit.shortVersion(bundle))
     }
@@ -425,6 +429,7 @@ extension KvStringKit {
 
 
     /// - Returns: Result of *KvStringKit.with(_:)* with value for *CFBundleVersion* key from the info dictionary of given *bundle*.
+    @inlinable
     public static func withBundleVersion(_ bundle: Bundle = .main) -> String? {
         with(KvBundleKit.bundleVersion(bundle))
     }
@@ -593,19 +598,25 @@ extension KvStringKit {
 
     public struct Accumulator {
 
-        public private(set) var string: String?
+        @inlinable
+        public var string: String? { _string }
 
         public var separator: String?
 
 
+        @usableFromInline
+        var _string: String?
 
+
+
+        @inlinable
         public init(initialValue: String? = nil, separator: String? = nil) {
-            self.string = initialValue
+            self._string = initialValue
             self.separator = separator
         }
 
 
-
+        @inlinable
         public init<Elements>(_ elements: Elements, separator: String? = nil)
         where Elements : Sequence, Elements.Element : StringProtocol
         {
@@ -618,40 +629,41 @@ extension KvStringKit {
 
         // MARK: Mutation
 
+        @inlinable
         public mutating func append(_ element: String) {
             guard !element.isEmpty else { return }
 
-            switch string?.isEmpty ?? true {
+            switch _string?.isEmpty ?? true {
             case true:
-                string = element
+                _string = element
 
             case false:
                 if let separator = separator {
-                    string!.append(separator)
+                    _string!.append(separator)
                 }
-                string!.append(element)
+                _string!.append(element)
             }
         }
 
 
-
+        @inlinable
         public mutating func append<S>(_ element: S) where S : StringProtocol {
             guard !element.isEmpty else { return }
 
-            switch string?.isEmpty ?? true {
+            switch _string?.isEmpty ?? true {
             case true:
-                string = .init(element)
+                _string = .init(element)
 
             case false:
                 if let separator = separator {
-                    string!.append(separator)
+                    _string!.append(separator)
                 }
-                string!.append(contentsOf: element)
+                _string!.append(contentsOf: element)
             }
         }
 
 
-
+        @inlinable
         public mutating func append<Elements>(_ elements: Elements) where Elements : Sequence, Elements.Element : StringProtocol {
             switch separator {
             case .some(let separator):
