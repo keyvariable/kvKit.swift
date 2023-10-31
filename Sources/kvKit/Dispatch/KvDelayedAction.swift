@@ -21,11 +21,11 @@
 //  Created by Svyatoslav Popov on 26.02.2020.
 //
 
+#if canImport(Darwin)
+
 #if canImport(Combine)
-
-
-
 import Combine
+#endif //canImport(Combine)
 import Foundation
 
 
@@ -317,6 +317,4 @@ extension KvDelayedAction {
 
 }
 
-
-
-#endif // canImport(Combine)
+#endif // canImport(Darwin)

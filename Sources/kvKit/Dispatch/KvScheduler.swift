@@ -21,11 +21,8 @@
 //  Created by Svyatoslav Popov on 10.04.2019.
 //
 
-#if canImport(Combine)
+#if canImport(Darwin)
 
-
-
-import Combine
 import Foundation
 
 
@@ -206,6 +203,4 @@ extension KvScheduler {
 
 }
 
-
-
-#endif // canInport(Combine)
+#endif // canImport(Darwin)

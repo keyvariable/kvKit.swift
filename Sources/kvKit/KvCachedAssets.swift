@@ -22,11 +22,12 @@
 //
 
 #if canImport(Combine)
-
-
-
 import Combine
+#endif // canImport(Combine)
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 
 
@@ -216,7 +217,3 @@ extension KvCachedAssets {
     }
 
 }
-
-
-
-#endif // canImport(Combine)

@@ -21,9 +21,7 @@
 //  Created by Svyatoslav Popov on 13.03.2018.
 //
 
-#if canImport(Combine)
-
-
+#if canImport(Darwin)
 
 import Foundation
 
@@ -138,6 +136,4 @@ extension KvDelayedActionController {
 
 }
 
-
-
-#endif // canImport(Combine)
+#endif // canImport(Darwin)
