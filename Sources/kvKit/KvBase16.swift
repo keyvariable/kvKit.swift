@@ -54,6 +54,8 @@ public struct KvBase16 {
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
     /// - Returns: Hexadecimal representation of given *data* with given *options*.
+    ///
+    /// - SeeAlso: ``encodeAsString(_:options:)``.
     @inlinable
     public static func encode(_ data: Data, options: Options = [ ]) -> Data {
         let lut = LUT.for(options)
@@ -82,6 +84,8 @@ public struct KvBase16 {
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
     /// - Returns: Hexadecimal representation of given *data* with given *options*.
+    ///
+    /// - SeeAlso: ``encodeAsString(_:options:)``.
     @inlinable
     public static func encode<D>(_ data: D, options: Options = [ ]) -> Data
     where D : DataProtocol
@@ -112,6 +116,8 @@ public struct KvBase16 {
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
     /// - Returns: Hexadecimal representation of given *data* with given *options*.
+    ///
+    /// - SeeAlso: ``encode(_:options:)-1z8sh``.
     @inlinable
     public static func encodeAsString<D>(_ data: D, options: Options = [ ]) -> String
     where D : DataProtocol
@@ -121,7 +127,6 @@ public struct KvBase16 {
         } else {
             return encodeAsString_universal(data, options: options)
         }
-
     }
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
@@ -188,6 +193,8 @@ public struct KvBase16 {
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
     /// - Returns: Data object represented by given hexadecimal representation.
+    ///
+    /// - SeeAlso: ``decode(_:)-1dyd8``.
     @inlinable
     public static func decode<D>(_ data: D) -> Data?
     where D : DataProtocol
@@ -234,6 +241,8 @@ public struct KvBase16 {
 
     // TODO: Add `borrowing` for `data` when Swift >= 5.9.
     /// - Returns: Data object represented by given hexadecimal representation.
+    ///
+    /// - SeeAlso: ``decode(_:)-17g1h``.
     @inlinable
     public static func decode<S>(_ string: S) -> Data?
     where S : StringProtocol
@@ -313,7 +322,7 @@ public struct KvBase16 {
     // MARK: .LUT
 
     @usableFromInline
-    struct LUT {
+    struct LUT { private init() { }
 
         @usableFromInline
         typealias Values = ContiguousArray<(UInt8, UInt8)>
@@ -358,9 +367,6 @@ public struct KvBase16 {
             (0x45, 0x30), (0x45, 0x31), (0x45, 0x32), (0x45, 0x33), (0x45, 0x34), (0x45, 0x35), (0x45, 0x36), (0x45, 0x37), (0x45, 0x38), (0x45, 0x39), (0x45, 0x41), (0x45, 0x42), (0x45, 0x43), (0x45, 0x44), (0x45, 0x45), (0x45, 0x46),
             (0x46, 0x30), (0x46, 0x31), (0x46, 0x32), (0x46, 0x33), (0x46, 0x34), (0x46, 0x35), (0x46, 0x36), (0x46, 0x37), (0x46, 0x38), (0x46, 0x39), (0x46, 0x41), (0x46, 0x42), (0x46, 0x43), (0x46, 0x44), (0x46, 0x45), (0x46, 0x46),
         ]
-
-
-        private init() { }
 
 
         @inline(__always)
