@@ -27,7 +27,7 @@ import XCTest
 
 
 
-final class KvBase16Tests: XCTestCase {
+final class KvBase16Tests : XCTestCase {
 
     // MARK: - testEncodeData
 

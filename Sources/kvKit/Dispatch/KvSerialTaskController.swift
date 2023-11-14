@@ -28,7 +28,6 @@ import Foundation
 
 
 
-// TODO: #warning("Move to kvKit")
 /// Provides asynchronous and serial invocation of given task throttling requests until task being invoked finishes.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public class KvSerialTaskController<Input, Output> : NSLocking  {
