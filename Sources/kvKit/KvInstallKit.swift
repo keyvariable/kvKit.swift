@@ -215,7 +215,7 @@ public struct KvInstallKit { private init() { }
             }
 
             // Move replacement to temporary path.
-            try shell.run("mv", with: [ "\(replacementURL.path)", temporaryURL.path ]).orThrow()
+            try shell.run("mv", with: [ replacementURL.path, temporaryURL.path ]).orThrow()
 
             // Permissions
             do {
@@ -223,7 +223,7 @@ public struct KvInstallKit { private init() { }
                 try shell.run("chmod", with: [ "-fR", "u=rX,go-rwx", temporaryURL.path ]).orThrow()
             }
 
-            try replaceItem(at: originalURL, withItemAt: temporaryURL)
+            try KvFileKit.replaceItem(at: originalURL, withItemAt: temporaryURL)
         }
 
     }
@@ -248,36 +248,25 @@ public struct KvInstallKit { private init() { }
 
         // MARK: Operations
 
+        /// - Parameter after: Optional value for `After` key in `[Unit]` section.
         /// - Parameter user: User to launch the process from.
-        public func install(launchCommand: String, after: String? = nil, user: String? = nil, shell: KvShell = .init()) throws {
+        /// - Parameter wantedBy: Optional value for `WantedBy` key in `[Install]` section.
+        public func install(launchCommand: String, after: String? = nil, user: String? = nil, wantedBy: String? = nil, shell: KvShell = .init()) throws {
             let servicePath = "/usr/lib/systemd/system/\(name).service"
 
-            var serviceUnit =
-            """
-            [Unit]
-            Description=\(name)
-            """
+            var serviceUnit = "[Unit]\nDescription=\(name)\n"
             if let after {
                 serviceUnit += "After=\(after)\n"
             }
-            serviceUnit +=
-            """
-
-            [Service]
-            Type=exec
-            ExecStart=\(launchCommand)
-            """
+            serviceUnit += "\n[Service]\nType=exec\nExecStart=\(launchCommand)\n"
             if let user {
                 serviceUnit += "User=\(user)\n"
             }
-            serviceUnit +=
-            """
-            Restart=on-failure
-            RestartSec=1s
-
-            [Install]
-            WantedBy=multi-user.target
-            """
+            serviceUnit += "Restart=on-failure\nRestartSec=1s\n"
+            serviceUnit += "\n[Install]\n"
+            if let wantedBy {
+                serviceUnit += "WantedBy=\(wantedBy)\n"
+            }
 
             do { try serviceUnit.write(toFile: servicePath, atomically: true, encoding: .utf8) }
             catch { throw ServiceError.writeUnitFile(path: servicePath, error: error) }
