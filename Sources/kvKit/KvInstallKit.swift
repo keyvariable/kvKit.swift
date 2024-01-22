@@ -200,30 +200,50 @@ public struct KvInstallKit { private init() { }
         }
 
 
-        /// Replaces file item at given URL, changes ower to the user and sets minimum access rights to copies files.
+        /// Replaces file item at given URL, changes ower to the user and sets minimum access rights to copied files.
         ///
         /// - Note: The replacing procedure uses backups.
         public func replaceItem(at originalURL: URL, withItemAt replacementURL: URL, shell: KvShell = .init()) throws {
-            let fileManager = FileManager.default
+            let temporaryURL = try LeastPrivilegedUser.temporaryURL(toReplaceItemAt: originalURL)
+
+            try shell.run("mv", with: [ replacementURL.path, temporaryURL.path ]).orThrow()
+
+            try ownAndSetMinimumPermissions(toItemAt: temporaryURL, shell: shell)
+            try KvFileKit.replaceItem(at: originalURL, withItemAt: temporaryURL)
+        }
+
+
+        /// Replaces file item at given path with contents given *bundle*, changes ower to the user and sets minimum access rights to copied files.
+        ///
+        /// - Note: The replacing procedure uses backups.
+        public func replaceItem(at originalURL: URL, withBundle bundle: Bundle, shell: KvShell = .init()) throws {
+            let temporaryURL = try LeastPrivilegedUser.temporaryURL(toReplaceItemAt: originalURL)
+
+            try KvInstallKit.copyBundle(to: temporaryURL, shell: shell)
+
+            try ownAndSetMinimumPermissions(toItemAt: temporaryURL, shell: shell)
+            try KvFileKit.replaceItem(at: originalURL, withItemAt: temporaryURL)
+        }
+
+
+        /// Appends .new extension and removes file item at resulting path if exists.
+        private static func temporaryURL(toReplaceItemAt originalURL: URL) throws -> URL {
             let temporaryURL = originalURL
                 .appendingPathExtension("new")
 
             // Removal of existing temporary item.
-            if fileManager.fileExists(atPath: temporaryURL.path) {
-                do { try fileManager.removeItem(at: temporaryURL) }
+            if FileManager.default.fileExists(atPath: temporaryURL.path) {
+                do { try FileManager.default.removeItem(at: temporaryURL) }
                 catch { throw InstallError.unableToRemoveTemporaryItem(temporaryURL, error) }
             }
 
-            // Move replacement to temporary path.
-            try shell.run("mv", with: [ replacementURL.path, temporaryURL.path ]).orThrow()
+            return temporaryURL
+        }
 
-            // Permissions
-            do {
-                try shell.run("chown", with: [ "-fR", login, temporaryURL.path ]).orThrow()
-                try shell.run("chmod", with: [ "-fR", "u=rX,go-rwx", temporaryURL.path ]).orThrow()
-            }
 
-            try KvFileKit.replaceItem(at: originalURL, withItemAt: temporaryURL)
+        private func ownAndSetMinimumPermissions(toItemAt url: URL, shell: KvShell = .init()) throws {
+            try shell.run("chown", with: [ "-fR", login, url.path ]).orThrow()
+            try shell.run("chmod", with: [ "-fR", "u=rX,go-rwx", url.path ]).orThrow()
         }
 
     }
