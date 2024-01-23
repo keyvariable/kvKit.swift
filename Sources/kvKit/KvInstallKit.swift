@@ -46,9 +46,11 @@ public struct KvInstallKit { private init() { }
 
     // MARK: Working with Bundles
 
-    /// Copies the application bundle and the shared libraries to *destinationURL*.
-    public static func copyBundle(to destinationURL: URL, shell: KvShell = .init()) throws {
-        let sourceRootURL = Bundle.main.bundleURL
+    /// Copies given *bundle* and the shared libraries to *destinationURL*.
+    ///
+    /// - Parameter bundle: If `nil` then `.main` bundle is copied.
+    public static func copyBundle(_ bundle: Bundle? = nil, to destinationURL: URL, shell: KvShell = .init()) throws {
+        let sourceRootURL = (bundle ?? .main).bundleURL
         let temporaryRootURL = destinationURL
             .appendingPathExtension("new")
 
@@ -213,13 +215,15 @@ public struct KvInstallKit { private init() { }
         }
 
 
-        /// Replaces file item at given path with contents given *bundle*, changes ower to the user and sets minimum access rights to copied files.
+        /// Replaces file item at given path with contents of given *bundle*, changes ower to the user and sets minimum access rights to copied files.
+        ///
+        /// - Parameter bundle: If `nil` then `.main` bundle is copied.
         ///
         /// - Note: The replacing procedure uses backups.
-        public func replaceItem(at originalURL: URL, withBundle bundle: Bundle, shell: KvShell = .init()) throws {
+        public func replaceBundleItem(at originalURL: URL, with bundle: Bundle? = nil, shell: KvShell = .init()) throws {
             let temporaryURL = try LeastPrivilegedUser.temporaryURL(toReplaceItemAt: originalURL)
 
-            try KvInstallKit.copyBundle(to: temporaryURL, shell: shell)
+            try KvInstallKit.copyBundle(bundle, to: temporaryURL, shell: shell)
 
             try ownAndSetMinimumPermissions(toItemAt: temporaryURL, shell: shell)
             try KvFileKit.replaceItem(at: originalURL, withItemAt: temporaryURL)
