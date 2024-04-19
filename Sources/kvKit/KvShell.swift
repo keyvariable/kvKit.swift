@@ -108,17 +108,9 @@ public class KvShell {
 
 
     private static func run(executable: String, with arguments: [String]? = nil, outputPipe: Pipe?) -> ShellResult {
-        guard let executableURL = URL(string: executable) else { return .failure(ShellError.executableURL(executable)) }
-
         let process = Process()
 
-#if os(Linux)
-        // - NOTE: It's a walkaround. Currently missing launchPath causes fatalError in Linux.
-        process.launchPath = executable
-#else // !os(Linux)
-        process.executableURL = executableURL
-#endif // os(Linux)
-
+        process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
         process.standardOutput = outputPipe
 
@@ -231,8 +223,6 @@ public class KvShell {
 
     public enum ShellError : LocalizedError {
         case bashCommandNotFound(String, Error)
-        /// Usable to convert executable path to an URL.
-        case executableURL(String)
         case statusCode(Int32)
     }
 
