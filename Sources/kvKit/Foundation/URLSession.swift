@@ -22,8 +22,9 @@
 //
 
 // Non-Apple systems
-#if canImport(Darwin) && canImport(FoundationNetworking)
+#if !canImport(Darwin) && canImport(FoundationNetworking)
 
+import Foundation
 import FoundationNetworking
 
 
@@ -85,4 +86,4 @@ extension URLSession {
 
 }
 
-#endif // canImport(Darwin) && canImport(FoundationNetworking)
+#endif // !canImport(Darwin) && canImport(FoundationNetworking)
